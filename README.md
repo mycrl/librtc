@@ -1,5 +1,6 @@
 # Batrachiatc
 
+Google WebRTC native export c abi.
 
 ## Build
 
