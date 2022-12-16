@@ -36,20 +36,20 @@ mkdir third_party
 cd third_party
 mkdir webrtc
 cd webrtc
-fetch --nohooks --nohistory webrtc
+fetch --nohooks webrtc
 cd src
 ```
 
 Switch to the M99 branch (only Windows):
 
 ```bash
-git checkout branch-heads 4844
+git checkout branch-heads/4844
 ```
 
 If it is linux/mac, please use the M105 branch, because M99 does not support the M1 chip version of macos:
 
 ```bash
-git checkout branch-heads 5195
+git checkout branch-heads/5195
 ```
 
 Sync webrtc toolchain and many dependencies.
