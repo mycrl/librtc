@@ -67,29 +67,14 @@ gclient sync
 Compile the Debug target of the webrtc static library:
 
 ```bash
-gn gen out/Debug --args="is_debug=true \
-    is_component_build=false \
-    use_lld=false \
-    treat_warnings_as_errors=false \
-    use_rtti=true \
-    rtc_include_tests=false \
-    rtc_build_examples=false \
-    enable_iterator_debugging=true \
-    use_custom_libcxx=false"
+gn gen out/Debug --args="is_debug=true is_component_build=false use_lld=false treat_warnings_as_errors=false use_rtti=true rtc_include_tests=false rtc_build_examples=false enable_iterator_debugging=true use_custom_libcxx=false"
 ninja -C out/Debug
 ```
 
 Compile the Release target of the webrtc static library:
 
 ```bash
-gn gen out/Release --args="is_debug=false \
-    is_component_build=false \
-    use_lld=false \
-    treat_warnings_as_errors=false \
-    use_rtti=true \
-    rtc_include_tests=false \
-    rtc_build_examples=false \
-    use_custom_libcxx=false"
+gn gen out/Release --args="is_debug=false is_component_build=false use_lld=false treat_warnings_as_errors=false use_rtti=true rtc_include_tests=false rtc_build_examples=false use_custom_libcxx=false"
 ninja -C out/Release
 ```
 
