@@ -98,7 +98,7 @@ elseif(APPLE)
         WEBRTC_MAC
         WEBRTC_IOS
         WEBRTC_POSIX)
-elseif(UNIX)
+elseif(UNIX AND NOT APPLE)
     add_compile_definitions(
         WEBRTC_POSIX)
 endif()

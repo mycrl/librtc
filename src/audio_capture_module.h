@@ -102,6 +102,20 @@ public:
     int32_t EnableBuiltInAEC(bool enable);
     int32_t EnableBuiltInAGC(bool enable);
     int32_t EnableBuiltInNS(bool enable);
+
+// Only supported on iOS.
+#ifdef WEBRTC_IOS
+    int GetPlayoutAudioParameters(AudioParameters* params) const
+    {
+        return 0;
+    }
+
+    int GetRecordAudioParameters(AudioParameters* params) const
+    {
+        return 0;
+    }
+#endif  // WEBRTC_IOS
+
 private:
     bool Initialize();
     
