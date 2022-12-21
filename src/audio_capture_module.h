@@ -15,6 +15,12 @@ public:
     int32_t ActiveAudioLayer(AudioLayer* audioLayer) const;
     int32_t RegisterAudioCallback(webrtc::AudioTransport* audio_callback);
     
+    // Only supported on iOS.
+#ifdef WEBRTC_IOS
+    int GetPlayoutAudioParameters(AudioParameters* params) const;
+    int GetRecordAudioParameters(AudioParameters* params) const;
+#endif  // WEBRTC_IOS
+    
     // Main initialization and termination
     int32_t Init();
     int32_t Terminate();
@@ -102,20 +108,6 @@ public:
     int32_t EnableBuiltInAEC(bool enable);
     int32_t EnableBuiltInAGC(bool enable);
     int32_t EnableBuiltInNS(bool enable);
-
-// Only supported on iOS.
-#ifdef WEBRTC_IOS
-    int GetPlayoutAudioParameters(AudioParameters* params) const
-    {
-        return 0;
-    }
-
-    int GetRecordAudioParameters(AudioParameters* params) const
-    {
-        return 0;
-    }
-#endif  // WEBRTC_IOS
-
 private:
     bool Initialize();
     

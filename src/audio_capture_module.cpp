@@ -358,3 +358,16 @@ bool AudioCaptureModule::Initialize()
     _last_process_time_ms = rtc::TimeMillis();
     return true;
 }
+
+// Only supported on iOS.
+#ifdef WEBRTC_IOS
+int AudioCaptureModule::GetPlayoutAudioParameters(AudioParameters* params) const
+{
+    return 0;
+}
+
+int AudioCaptureModule::GetRecordAudioParameters(AudioParameters* params) const
+{
+    return 0;
+}
+#endif  // WEBRTC_IOS
