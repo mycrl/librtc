@@ -1,7 +1,7 @@
 ﻿#include "data_channel.h"
 #include "base.h"
 
-void free_data_channel(RTCDataChannel* channel)
+void rtc_free_data_channel(RTCDataChannel* channel)
 {
     free_incomplete_ptr(channel->label);
     free_incomplete_ptr(channel);
@@ -118,25 +118,24 @@ RTCDataChannel* create_data_channel(rtc::scoped_refptr<webrtc::DataChannelInterf
     return channel;
 }
 
-void data_channel_send(RTCDataChannel* channel, uint8_t* buf, int size)
+void rtc_send_data_channel_msg(RTCDataChannel* channel, uint8_t* buf, int size)
 {
     channel->channel->Send(buf, size);
 }
 
-void data_channel_on_message(RTCDataChannel* channel,  
+void rtc_set_data_channel_msg_h(RTCDataChannel* channel,
     void(*handler)(void* ctx, uint8_t* buf, uint64_t size),
     void* ctx)
 {
     channel->channel->OnDataMessage(ctx, handler);
 }
 
-DataState data_channel_get_state(RTCDataChannel* channel)
-{
-    return channel->channel->state;
-}
-
-void data_channel_stop_on_message(
-    RTCDataChannel* channel)
+void rtc_remove_data_channel_msg_h(RTCDataChannel* channel)
 {
     channel->channel->RemoveOnMessage();
+}
+
+DataState rtc_get_data_channel_state(RTCDataChannel* channel)
+{
+    return channel->channel->state;
 }

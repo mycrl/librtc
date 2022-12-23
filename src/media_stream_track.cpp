@@ -3,14 +3,73 @@
 #include "api/video/i420_buffer.h"
 #include "media_stream_track.h"
 
-void free_media_track(MediaStreamTrack* track)
+void rtc_free_media_stream_track(MediaStreamTrack* track)
 {
-    if (track->remote)
+    free_incomplete_ptr(track->label);
+    free_incomplete_ptr(track);
+}
+
+MediaStreamTrack* from(webrtc::VideoTrackInterface* itrack)
+{
+    MediaStreamTrack* track = (MediaStreamTrack*)malloc(sizeof(MediaStreamTrack));
+    if (!track)
     {
-        free_incomplete_ptr(track->label);
+        return NULL;
     }
 
-    free_incomplete_ptr(track);
+    track->video_sink = IVideoTrackSink::Create(itrack);
+    if (!track->video_sink)
+    {
+        rtc_free_media_stream_track(track);
+        return NULL;
+    }
+
+    auto id = itrack->id();
+    track->label = (char*)malloc(sizeof(char) * id.size() + 1);
+    if (!track->label)
+    {
+        rtc_free_media_stream_track(track);
+        return NULL;
+    }
+
+    strcpy(track->label, id.c_str());
+
+    track->kind = MediaStreamTrackKindVideo;
+    track->remote = true;
+
+    return track;
+}
+
+MediaStreamTrack* from(webrtc::AudioTrackInterface* itrack)
+{
+    MediaStreamTrack* track = (MediaStreamTrack*)malloc(sizeof(MediaStreamTrack));
+    if (!track)
+    {
+        rtc_free_media_stream_track(track);
+        return NULL;
+    }
+
+    track->audio_sink = IAudioTrackSink::Create(itrack);
+    if (!track->audio_sink)
+    {
+        rtc_free_media_stream_track(track);
+        return NULL;
+    }
+
+    auto id = itrack->id();
+    track->label = (char*)malloc(sizeof(char) * id.size() + 1);
+    if (!track->label)
+    {
+        rtc_free_media_stream_track(track);
+        return NULL;
+    }
+
+    strcpy(track->label, id.c_str());
+
+    track->kind = MediaStreamTrackKindAudio;
+    track->remote = true;
+
+    return track;
 }
 
 /*
@@ -234,7 +293,7 @@ void IAudioTrackSink::RemoveOnFrame()
 extern
 */
 
-void media_stream_video_track_add_frame(MediaStreamTrack* track, IVideoFrame* frame)
+void rtc_add_video_track_frame(MediaStreamTrack* track, IVideoFrame* frame)
 {
     if (!track->video_source) {
         return;
@@ -243,7 +302,7 @@ void media_stream_video_track_add_frame(MediaStreamTrack* track, IVideoFrame* fr
     track->video_source->AddFrame(from_c(frame));
 }
 
-void media_stream_video_track_on_frame(
+void rtc_set_video_track_frame_h(
     MediaStreamTrack* track,
     void(handler)(void* ctx, IVideoFrame* frame),
     void* ctx)
@@ -255,91 +314,40 @@ void media_stream_video_track_on_frame(
     track->video_sink->SetOnFrame(ctx, handler);
 }
 
-MediaStreamTrack* create_media_stream_video_track(char* label)
+MediaStreamTrack* rtc_create_video_track(char* label)
 {
     MediaStreamTrack* track = (MediaStreamTrack*)malloc(sizeof(MediaStreamTrack));
     if (!track)
     {
+        rtc_free_media_stream_track(track);
         return NULL;
     }
 
     track->video_source = IVideoTrackSource::Create();
     if (!track->video_source)
     {
+        rtc_free_media_stream_track(track);
         return NULL;
+    }
+
+    track->label = (char*)malloc(sizeof(char) * (strlen(label) + 1));
+    if (!track->label)
+    {
+        rtc_free_media_stream_track(track);
+        return NULL;
+    }
+    else
+    {
+        strcpy(track->label, label);
     }
 
     track->kind = MediaStreamTrackKindVideo;
     track->remote = false;
-    track->label = label;
 
     return track;
 }
 
-MediaStreamTrack* media_stream_video_track_from(webrtc::VideoTrackInterface* itrack)
-{
-    MediaStreamTrack* track = (MediaStreamTrack*)malloc(sizeof(MediaStreamTrack));
-    if (!track)
-    { 
-        return NULL;
-    }
-
-    track->video_sink = IVideoTrackSink::Create(itrack);
-    if (!track->video_sink)
-    {
-        free_media_track(track);
-        return NULL;
-    }
-
-    auto id = itrack->id();
-    track->label = (char*)malloc(sizeof(char) * id.size() + 1);
-    if (!track->label)
-    {
-        free_media_track(track);
-        return NULL;
-    }
-
-    strcpy(track->label, id.c_str());
-
-    track->kind = MediaStreamTrackKindVideo;
-    track->remote = true;
-
-    return track;
-}
-
-MediaStreamTrack* media_stream_audio_track_from(webrtc::AudioTrackInterface* itrack)
-{
-    MediaStreamTrack* track = (MediaStreamTrack*)malloc(sizeof(MediaStreamTrack));
-    if (!track)
-    {
-        free_media_track(track);
-        return NULL;
-    }
-
-    track->audio_sink = IAudioTrackSink::Create(itrack);
-    if (!track->audio_sink)
-    {
-        free_media_track(track);
-        return NULL;
-    }
-
-    auto id = itrack->id();
-    track->label = (char*)malloc(sizeof(char) * id.size() + 1);
-    if (!track->label)
-    {
-        free_media_track(track);
-        return NULL;
-    }
-
-    strcpy(track->label, id.c_str());
-
-    track->kind = MediaStreamTrackKindAudio;
-    track->remote = true;
-
-    return track;
-}
-
-void media_stream_audio_track_on_frame(
+void rtc_set_audio_track_frame_h(
     MediaStreamTrack* track,
     void(handler)(void* ctx, IAudioFrame* frame),
     void* ctx)
@@ -347,7 +355,7 @@ void media_stream_audio_track_on_frame(
     track->audio_sink->SetOnFrame(ctx, handler);
 }
 
-void media_stream_track_stop_on_frame(MediaStreamTrack* track)
+void rtc_remove_media_stream_track_frame_h(MediaStreamTrack* track)
 {
     if (track->video_sink)
     {

@@ -84,16 +84,14 @@ typedef struct {
     bool remote;
 } RTCDataChannel;
 
-extern "C" EXPORT void data_channel_on_message(RTCDataChannel* channel,
+extern "C" EXPORT void rtc_set_data_channel_msg_h(RTCDataChannel* channel,
     void(*handler)(void* ctx, uint8_t* buf, uint64_t size),
     void* ctx);
 
-extern "C" EXPORT void data_channel_stop_on_message(
-    RTCDataChannel* channel);
-
-extern "C" EXPORT void data_channel_send(RTCDataChannel * channel, uint8_t * buf, int size);
-extern "C" EXPORT DataState data_channel_get_state(RTCDataChannel * channel);
-extern "C" EXPORT void free_data_channel(RTCDataChannel * channel);
+extern "C" EXPORT void rtc_remove_data_channel_msg_h(RTCDataChannel* channel);
+extern "C" EXPORT void rtc_send_data_channel_msg(RTCDataChannel * channel, uint8_t * buf, int size);
+extern "C" EXPORT DataState rtc_get_data_channel_state(RTCDataChannel * channel);
+extern "C" EXPORT void rtc_free_data_channel(RTCDataChannel * channel);
     
 webrtc::DataChannelInit* from_c(DataChannelOptions* options);
 RTCDataChannel* create_data_channel(rtc::scoped_refptr<webrtc::DataChannelInterface> channel);

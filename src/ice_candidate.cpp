@@ -35,6 +35,10 @@ RTCIceCandidate* into_c(webrtc::IceCandidateInterface* candidate)
         free_ice_candidate(c_candidate);
 		return NULL;
 	}
+	else
+	{
+		strcpy(c_candidate->sdp_mid, candidate->sdp_mid().c_str());
+	}
 
 	std::string _candidate;
 	candidate->ToString(&_candidate);
@@ -44,9 +48,11 @@ RTCIceCandidate* into_c(webrtc::IceCandidateInterface* candidate)
         free_ice_candidate(c_candidate);
 		return NULL;
 	}
+	else
+	{
+		strcpy(c_candidate->candidate, _candidate.c_str());
+	}
 
 	c_candidate->sdp_mline_index = candidate->sdp_mline_index();
-	strcpy(c_candidate->sdp_mid, candidate->sdp_mid().c_str());
-	strcpy(c_candidate->candidate, _candidate.c_str());
 	return c_candidate;
 }

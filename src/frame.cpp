@@ -1,13 +1,13 @@
 #include "api/video/i420_buffer.h"
 #include "frame.h"
 
-void free_video_frame(IVideoFrame* frame)
+void rtc_free_video_frame(IVideoFrame* frame)
 {
     free_incomplete_ptr((uint8_t*)frame->buf);
     free_incomplete_ptr(frame);
 }
 
-void free_audio_frame(IAudioFrame* frames)
+void rtc_free_audio_frame(IAudioFrame* frames)
 {
     free_incomplete_ptr(frames);
 }
@@ -41,7 +41,7 @@ IVideoFrame* into_c(webrtc::VideoFrame* frame)
     i420_frame->buf = (const uint8_t*)malloc(sizeof(uint8_t) * buf_size);
     if (!i420_frame->buf)
     {
-        free_video_frame(i420_frame);
+        rtc_free_video_frame(i420_frame);
         return NULL;
     }
 
@@ -86,16 +86,4 @@ IAudioFrame* into_c(const uint8_t* buf,
     frames->sample_rate = sample_rate;
     frames->bits_per_sample = bits_per_sample;
     return frames;
-}
-
-int i420_to_rgba(IVideoFrame* src, uint8_t* dst)
-{
-    size_t size_y = src->stride_y * src->height;
-    size_t size_u = src->stride_u * (src->height / 2);
-    return libyuv::I420ToARGB(
-        src->buf, src->stride_y,
-        src->buf + size_y, src->stride_u,
-        src->buf + size_y + size_u, src->stride_v,
-        dst, src->width * 4,
-        src->width, src->height);
 }

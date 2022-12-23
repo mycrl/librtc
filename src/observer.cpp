@@ -239,14 +239,12 @@ void Observer::OnTrack(rtc::scoped_refptr<webrtc::RtpTransceiverInterface> trans
     webrtc::MediaStreamTrackInterface* track = transceiver->receiver()->track().get();
     if (track->kind() == webrtc::MediaStreamTrackInterface::kVideoKind)
     {
-        auto sink = media_stream_video_track_from(static_cast<webrtc::VideoTrackInterface*>(track));
-        _events->on_track(_ctx, sink);
+        _events->on_track(_ctx, from(static_cast<webrtc::VideoTrackInterface*>(track)));
     }
     else
     if (track->kind() == webrtc::MediaStreamTrackInterface::kAudioKind) 
     {
-        auto sink = media_stream_audio_track_from(static_cast<webrtc::AudioTrackInterface*>(track));
-        _events->on_track(_ctx, sink);
+        _events->on_track(_ctx, from(static_cast<webrtc::AudioTrackInterface*>(track)));
     }
 }
 

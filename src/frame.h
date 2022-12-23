@@ -3,7 +3,6 @@
 #pragma once
 
 #include "api/video/video_frame.h"
-#include "libyuv.h"
 #include "base.h"
 
 typedef struct
@@ -31,9 +30,8 @@ typedef struct
     bool remote;
 } IAudioFrame;
 
-extern "C" EXPORT void free_video_frame(IVideoFrame* frame);
-extern "C" EXPORT void free_audio_frame(IAudioFrame* frame);
-extern "C" EXPORT int i420_to_rgba(IVideoFrame* src, uint8_t* dst);
+extern "C" EXPORT void rtc_free_video_frame(IVideoFrame* frame);
+extern "C" EXPORT void rtc_free_audio_frame(IAudioFrame* frame);
 
 IAudioFrame* into_c(const uint8_t* buf, int b, int r, size_t c, size_t f);
 IVideoFrame* into_c(webrtc::VideoFrame* frame);

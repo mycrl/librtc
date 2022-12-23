@@ -28,7 +28,7 @@ typedef struct {
 Returns a newly-created RTCPeerConnection, which represents a
 connection between the local device and a remote peer.
 */
-extern "C" EXPORT RTCPeerConnection* create_rtc_peer_connection(
+extern "C" EXPORT RTCPeerConnection* rtc_create_peer_connection(
     RTCPeerConnectionConfigure* config,
     Events* events,
     void* ctx);
@@ -144,7 +144,7 @@ extern "C" EXPORT void rtc_set_remote_description(RTCPeerConnection* peer,
 The RTCPeerConnection method addTrack() adds a new media track to the set of
 tracks which will be transmitted to the other peer.
 */
-extern "C" EXPORT void rtc_add_track(RTCPeerConnection * rtc,
+extern "C" EXPORT void rtc_add_media_stream_track(RTCPeerConnection * rtc,
     MediaStreamTrack * track,
     char* stream_id);
 

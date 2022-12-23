@@ -16,12 +16,14 @@ typedef struct
 {
 	char* name;
 	Parameter** pars;
+    size_t capacity;
 	size_t len;
 } Codec;
 
 typedef struct
 {
 	Codec** codes;
+    size_t capacity;
 	size_t len;
 } Codecs;
 
@@ -50,8 +52,5 @@ private:
 	std::vector<webrtc::SdpVideoFormat> _formats;
 	std::map<std::string, IVideoEncoder> _codecs;;
 };
-
-webrtc::SdpVideoFormat from_c(EncoderFormat* c_format);
-std::vector<webrtc::SdpVideoFormat> from_c(EncoderFormats* c_formats);
 
 #endif  // BATRACHIATC_VIDEO_ENCODER_H_

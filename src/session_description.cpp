@@ -57,9 +57,11 @@ RTCSessionDescription* into_c(webrtc::SessionDescriptionInterface* desc)
 		free_session_description(c_desc);
 		return NULL;
 	}
+	else
+	{
+		strcpy((char*)c_desc->sdp, sdp.c_str());
+	}
 
-	strcpy((char*)c_desc->sdp, sdp.c_str());
 	c_desc->type = (RTCSessionDescriptionType)(desc->GetType());
-
 	return c_desc;
 }

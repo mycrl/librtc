@@ -19,7 +19,7 @@ void rtc_close(RTCPeerConnection* peer)
     delete peer;
 }
 
-RTCPeerConnection* create_rtc_peer_connection(RTCPeerConnectionConfigure* c_config, 
+RTCPeerConnection* rtc_create_peer_connection(RTCPeerConnectionConfigure* c_config,
     Events* events,
     void* ctx)
 {
@@ -93,7 +93,7 @@ void rtc_set_remote_description(RTCPeerConnection* rtc,
     rtc->pc->SetRemoteDescription(observer, from_c(c_desc).release());
 }
 
-void rtc_add_track(RTCPeerConnection* rtc, MediaStreamTrack* track, char* stream_id)
+void rtc_add_media_stream_track(RTCPeerConnection* rtc, MediaStreamTrack* track, char* stream_id)
 {
     if (track->kind == MediaStreamTrackKind::MediaStreamTrackKindVideo)
     {
