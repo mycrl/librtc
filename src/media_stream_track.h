@@ -168,11 +168,6 @@ typedef struct {
     disassociated from its source, the label is not changed.
     */
     char* label;
-    /*
-    Returns a Boolean with a value of true if the track is sourced by a
-    RTCPeerConnection, false otherwise.
-    */
-    bool remote;
 
     /* --------------- video --------------- */
     IVideoTrackSource* video_source;

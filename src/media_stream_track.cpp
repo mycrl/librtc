@@ -35,8 +35,6 @@ MediaStreamTrack* from(webrtc::VideoTrackInterface* itrack)
     strcpy(track->label, id.c_str());
 
     track->kind = MediaStreamTrackKindVideo;
-    track->remote = true;
-
     return track;
 }
 
@@ -67,8 +65,6 @@ MediaStreamTrack* from(webrtc::AudioTrackInterface* itrack)
     strcpy(track->label, id.c_str());
 
     track->kind = MediaStreamTrackKindAudio;
-    track->remote = true;
-
     return track;
 }
 
@@ -342,8 +338,6 @@ MediaStreamTrack* rtc_create_video_track(char* label)
     }
 
     track->kind = MediaStreamTrackKindVideo;
-    track->remote = false;
-
     return track;
 }
 
