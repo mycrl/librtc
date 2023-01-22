@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.16)
-project(batrachiatc)
+project(libwebrtc)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
@@ -9,7 +9,7 @@ if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE "Debug")
 endif()
 
-add_library(batrachiatc STATIC
+add_library(libwebrtc STATIC
     src/base.h
     src/base.cpp
     src/frame.h
@@ -41,10 +41,10 @@ include_directories(
 # windows msvc runtime
 if(MSVC)
     if(CMAKE_BUILD_TYPE STREQUAL "Release")
-        set_property(TARGET batrachiatc PROPERTY
+        set_property(TARGET libwebrtc PROPERTY
             MSVC_RUNTIME_LIBRARY MultiThreaded)
     else()
-        set_property(TARGET batrachiatc PROPERTY
+        set_property(TARGET libwebrtc PROPERTY
             MSVC_RUNTIME_LIBRARY MultiThreadedDebug)
     endif()
 endif()
