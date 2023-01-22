@@ -1,4 +1,4 @@
-# batrachiatc
+# libwebrtc
 
 Google WebRTC native export c abi.
 
@@ -22,16 +22,16 @@ $env:DEPOT_TOOLS_WIN_TOOLCHAIN=0
 
 #### Get google webrtc native source code
 
-Clone the batrachia repository:
+Clone the libwebrtc repository:
 
 ```bash
-git clone https://github.com/mycrl/batrachiatc
+git clone https://github.com/mycrl/libwebrtc
 ```
 
 Create a third party directory, enter it, and run fetch webrtc:
 
 ```bash
-cd batrachiatc
+cd libwebrtc
 mkdir third_party
 cd third_party
 mkdir webrtc
@@ -78,17 +78,17 @@ gn gen out/Release --args="is_debug=false is_component_build=false use_lld=false
 ninja -C out/Release
 ```
 
-#### Build batrachiatc library
+#### Build libwebrtc library
 
 Go back to the root directory of batrachia:
 
 ```bash
-cd batrachiatc
+cd libwebrtc
 mkdir out
 cd out
 ```
 
-generate the batrachiatc static library project:
+generate the libwebrtc static library project:
 
 ```bash
 cmake .. -DCMAKE_BUILD_TYPE=Debug # debug
