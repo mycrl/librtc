@@ -1,6 +1,6 @@
 # libwebrtc
 
-Google WebRTC native export c abi.
+Google WebRTC native export c-style abi.
 
 ### Build
 
