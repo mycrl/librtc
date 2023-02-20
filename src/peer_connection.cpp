@@ -1,4 +1,4 @@
-﻿#include "api/audio_codecs/builtin_audio_decoder_factory.h"
+#include "api/audio_codecs/builtin_audio_decoder_factory.h"
 #include "api/audio_codecs/builtin_audio_encoder_factory.h"
 #include "api/video_codecs/builtin_video_decoder_factory.h"
 #include "api/video_codecs/builtin_video_encoder_factory.h"
@@ -20,35 +20,35 @@ void rtc_close(RTCPeerConnection* peer)
 }
 
 RTCPeerConnection* rtc_create_peer_connection(RTCPeerConnectionConfigure* c_config,
-    Events* events,
-    void* ctx)
+                                              Events* events,
+                                              void* ctx)
 {
     RTCPeerConnection* rtc = new RTCPeerConnection();
     if (!rtc)
     {
         return NULL;
     }
-
+    
     rtc->pc_factory = webrtc::CreatePeerConnectionFactory(
-        nullptr,
-        nullptr,
-        nullptr,
-        nullptr,
-        webrtc::CreateBuiltinAudioEncoderFactory(),
-        webrtc::CreateBuiltinAudioDecoderFactory(),
-        webrtc::CreateBuiltinVideoEncoderFactory(),
-        webrtc::CreateBuiltinVideoDecoderFactory(),
-        nullptr,
-        nullptr);
+                                                          nullptr,
+                                                          nullptr,
+                                                          nullptr,
+                                                          nullptr,
+                                                          webrtc::CreateBuiltinAudioEncoderFactory(),
+                                                          webrtc::CreateBuiltinAudioDecoderFactory(),
+                                                          webrtc::CreateBuiltinVideoEncoderFactory(),
+                                                          webrtc::CreateBuiltinVideoDecoderFactory(),
+                                                          nullptr,
+                                                          nullptr);
     if (!rtc->pc_factory)
     {
         return NULL;
     }
-
+    
     webrtc::PeerConnectionDependencies pc_dependencies(Observer::Create(events, ctx));
     auto error_or_pc = rtc->pc_factory->CreatePeerConnectionOrError(
-        from_c(c_config), 
-        std::move(pc_dependencies));
+                                                                    from_c(c_config), 
+                                                                    std::move(pc_dependencies));
     if (error_or_pc.ok()) {
         rtc->pc = std::move(error_or_pc.value());
     }
@@ -56,7 +56,7 @@ RTCPeerConnection* rtc_create_peer_connection(RTCPeerConnectionConfigure* c_conf
     {
         return NULL;
     }
-
+    
     return rtc;
 }
 
@@ -78,18 +78,18 @@ void rtc_create_offer(RTCPeerConnection* rtc, CreateDescCallback callback, void*
 }
 
 void rtc_set_local_description(RTCPeerConnection* rtc, 
-    RTCSessionDescription* c_desc, 
-    SetDescCallback callback, 
-    void* ctx)
+                               RTCSessionDescription* c_desc, 
+                               SetDescCallback callback, 
+                               void* ctx)
 {
     auto observer = SetDescObserver::Create(callback, ctx);
     rtc->pc->SetLocalDescription(observer, from_c(c_desc).release());
 }
 
 void rtc_set_remote_description(RTCPeerConnection* rtc,
-    RTCSessionDescription* c_desc,
-    SetDescCallback callback,
-    void* ctx)
+                                RTCSessionDescription* c_desc,
+                                SetDescCallback callback,
+                                void* ctx)
 {
     auto observer = SetDescObserver::Create(callback, ctx);
     rtc->pc->SetRemoteDescription(observer, from_c(c_desc).release());
@@ -105,8 +105,8 @@ void rtc_add_media_stream_track(RTCPeerConnection* rtc, MediaStreamTrack* track,
 }
 
 RTCDataChannel* rtc_create_data_channel(RTCPeerConnection* rtc,
-    char* label,
-    DataChannelOptions* options)
+                                        char* label,
+                                        DataChannelOptions* options)
 {
     auto init = from_c(options);
     auto data_channel = rtc->pc->CreateDataChannel(std::string(label), init);

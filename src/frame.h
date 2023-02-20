@@ -9,7 +9,7 @@ typedef struct
 {
     const uint8_t* buf;
     size_t len;
-
+    
     uint32_t width;
     uint32_t height;
     uint32_t stride_y;
@@ -22,11 +22,11 @@ typedef struct
 {
     const uint8_t* buf;
     size_t len;
-
+    
     int bits_per_sample;
     int sample_rate;
-    int channels;
-    int frames;
+    size_t channels;
+    size_t frames;
     bool remote;
 } IAudioFrame;
 

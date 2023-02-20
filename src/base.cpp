@@ -3,8 +3,8 @@
 
 void free_incomplete_ptr(void* ptr)
 {
-	if (ptr)
-	{
-		free(ptr);
-	}
+    if (ptr)
+    {
+        free(ptr);
+    }
 }

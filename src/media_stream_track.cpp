@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 #include "api/video/i420_buffer.h"
 #include "media_stream_track.h"
@@ -16,14 +16,14 @@ MediaStreamTrack* from(webrtc::VideoTrackInterface* itrack)
     {
         return NULL;
     }
-
+    
     track->video_sink = IVideoTrackSink::Create(itrack);
     if (!track->video_sink)
     {
         rtc_free_media_stream_track(track);
         return NULL;
     }
-
+    
     auto id = itrack->id();
     track->label = (char*)malloc(sizeof(char) * id.size() + 1);
     if (!track->label)
@@ -31,9 +31,9 @@ MediaStreamTrack* from(webrtc::VideoTrackInterface* itrack)
         rtc_free_media_stream_track(track);
         return NULL;
     }
-
+    
     strcpy(track->label, id.c_str());
-
+    
     track->kind = MediaStreamTrackKindVideo;
     return track;
 }
@@ -46,14 +46,14 @@ MediaStreamTrack* from(webrtc::AudioTrackInterface* itrack)
         rtc_free_media_stream_track(track);
         return NULL;
     }
-
+    
     track->audio_sink = IAudioTrackSink::Create(itrack);
     if (!track->audio_sink)
     {
         rtc_free_media_stream_track(track);
         return NULL;
     }
-
+    
     auto id = itrack->id();
     track->label = (char*)malloc(sizeof(char) * id.size() + 1);
     if (!track->label)
@@ -61,25 +61,25 @@ MediaStreamTrack* from(webrtc::AudioTrackInterface* itrack)
         rtc_free_media_stream_track(track);
         return NULL;
     }
-
+    
     strcpy(track->label, id.c_str());
-
+    
     track->kind = MediaStreamTrackKindAudio;
     return track;
 }
 
 /*
-IVideoSource
-*/
+ IVideoSource
+ */
 void IVideoSource::AddOrUpdateSink(
-    rtc::VideoSinkInterface<webrtc::VideoFrame>* sink, 
-    const rtc::VideoSinkWants& wants)
+                                   rtc::VideoSinkInterface<webrtc::VideoFrame>* sink,
+                                   const rtc::VideoSinkWants& wants)
 {
     _broadcaster.AddOrUpdateSink(sink, wants);
 }
 
 void IVideoSource::RemoveSink(
-    rtc::VideoSinkInterface<webrtc::VideoFrame>* sink)
+                              rtc::VideoSinkInterface<webrtc::VideoFrame>* sink)
 {
     _broadcaster.RemoveSink(sink);
 }
@@ -92,7 +92,7 @@ void IVideoSource::AddFrame(const webrtc::VideoFrame& original_frame)
     {
         return;
     }
-
+    
     if (ret.resize)
     {
         _broadcaster.OnFrame(_ScaleFrame(frame, ret));
@@ -104,7 +104,7 @@ void IVideoSource::AddFrame(const webrtc::VideoFrame& original_frame)
 }
 
 webrtc::VideoFrame IVideoSource::_MaybePreprocess(
-    const webrtc::VideoFrame& frame)
+                                                  const webrtc::VideoFrame& frame)
 {
     webrtc::MutexLock lock(&_lock);
     if (_preprocessor != nullptr)
@@ -118,8 +118,8 @@ webrtc::VideoFrame IVideoSource::_MaybePreprocess(
 }
 
 webrtc::VideoFrame IVideoSource::_ScaleFrame(
-    const webrtc::VideoFrame& original_frame, 
-    AdaptFrameResult& ret)
+                                             const webrtc::VideoFrame& original_frame,
+                                             AdaptFrameResult& ret)
 {
     auto scaled_buffer = webrtc::I420Buffer::Create(ret.width, ret.height);
     scaled_buffer->ScaleFrom(*original_frame.video_frame_buffer()->ToI420());
@@ -133,40 +133,40 @@ webrtc::VideoFrame IVideoSource::_ScaleFrame(
     {
         return new_frame_builder.build();
     }
-
+    
     auto rect = original_frame.update_rect().ScaleWithFrame(
-        original_frame.width(),
-        original_frame.height(),
-        0,
-        0,
-        original_frame.width(),
-        original_frame.height(),
-        ret.width,
-        ret.height);
+                                                            original_frame.width(),
+                                                            original_frame.height(),
+                                                            0,
+                                                            0,
+                                                            original_frame.width(),
+                                                            original_frame.height(),
+                                                            ret.width,
+                                                            ret.height);
     new_frame_builder.set_update_rect(rect);
     return new_frame_builder.build();
 }
 
 AdaptFrameResult IVideoSource::_AdaptFrameResolution(
-    const webrtc::VideoFrame& frame)
+                                                     const webrtc::VideoFrame& frame)
 {
     AdaptFrameResult ret;
     ret.drop = _video_adapter.AdaptFrameResolution(
-        frame.width(),
-        frame.height(),
-        frame.timestamp_us() * 1000,
-        &ret.cropped_width,
-        &ret.cropped_height,
-        &ret.width,
-        &ret.height);
-    ret.resize = ret.height != frame.height() || 
-        ret.width != frame.width();
+                                                   frame.width(),
+                                                   frame.height(),
+                                                   frame.timestamp_us() * 1000,
+                                                   &ret.cropped_width,
+                                                   &ret.cropped_height,
+                                                   &ret.width,
+                                                   &ret.height);
+    ret.resize = ret.height != frame.height() ||
+    ret.width != frame.width();
     return ret;
 }
 
 /*
-IVideoTrackSource
-*/
+ IVideoTrackSource
+ */
 
 IVideoTrackSource* IVideoTrackSource::Create()
 {
@@ -186,8 +186,8 @@ rtc::VideoSourceInterface<webrtc::VideoFrame>* IVideoTrackSource::source()
 }
 
 /*
-IVideoTrackSink
-*/
+ IVideoTrackSink
+ */
 
 IVideoTrackSink::IVideoTrackSink(webrtc::VideoTrackInterface* track)
 {
@@ -209,18 +209,18 @@ void IVideoTrackSink::OnFrame(const webrtc::VideoFrame& frame)
     {
         return;
     }
-
+    
     auto i420_frame = into_c((webrtc::VideoFrame*)&frame);
     if (!i420_frame)
     {
         return;
     }
-
+    
     _handler(_ctx, i420_frame);
 }
 
 void IVideoTrackSink::SetOnFrame(void* ctx, 
-    void(*handler)(void* ctx, IVideoFrame* frame))
+                                 void(*handler)(void* ctx, IVideoFrame* frame))
 {
     _track->AddOrUpdateSink(this, _wants);
     _handler = handler;
@@ -235,8 +235,8 @@ void IVideoTrackSink::RemoveOnFrame()
 }
 
 /*
-IAudioTrackSink
-*/
+ IAudioTrackSink
+ */
 
 IAudioTrackSink::IAudioTrackSink(webrtc::AudioTrackInterface* track)
 {
@@ -252,26 +252,26 @@ IAudioTrackSink* IAudioTrackSink::Create(webrtc::AudioTrackInterface* track)
 }
 
 void IAudioTrackSink::OnData(const void* audio_data,
-    int bits_per_sample,
-    int sample_rate,
-    size_t number_of_channels,
-    size_t number_of_frames)
+                             int bits_per_sample,
+                             int sample_rate,
+                             size_t number_of_channels,
+                             size_t number_of_frames)
 {
     if (!_handler || !audio_data)
     {
         return;
     }
-
+    
     auto frames = into_c((const uint8_t*)audio_data,
-        bits_per_sample,
-        sample_rate,
-        number_of_channels,
-        number_of_frames);
+                         bits_per_sample,
+                         sample_rate,
+                         number_of_channels,
+                         number_of_frames);
     _handler(_ctx, frames);
 }
 
 void IAudioTrackSink::SetOnFrame(void* ctx, 
-    void(*handler)(void* ctx, IAudioFrame* frame))
+                                 void(*handler)(void* ctx, IAudioFrame* frame))
 {
     _track->AddSink(this);
     _handler = handler;
@@ -286,27 +286,57 @@ void IAudioTrackSink::RemoveOnFrame()
 }
 
 /*
-extern
-*/
+ IAudioTrackSource
+ */
+
+void IAudioTrackSource::AddSink(webrtc::AudioTrackSinkInterface* sink)
+{
+    _sinks.push_back(sink);
+}
+
+void IAudioTrackSource::RemoveSink(webrtc::AudioTrackSinkInterface* sink)
+{
+    auto it = std::find(_sinks.begin(), _sinks.end(), sink);
+    if (it != _sinks.end())
+    {
+        _sinks.erase(it);
+    }
+}
+
+void IAudioTrackSource::AddData(const uint16_t* buf, size_t size, size_t frames_size)
+{
+    for (auto sink: _sinks)
+    {
+        sink->OnData(buf,
+                     bits_per_sample,
+                     sample_rate,
+                     number_of_channels,
+                     frames_size);
+    }
+}
+
+/*
+ extern
+ */
 
 void rtc_add_video_track_frame(MediaStreamTrack* track, IVideoFrame* frame)
 {
     if (!track->video_source) {
         return;
     }
-
+    
     track->video_source->AddFrame(from_c(frame));
 }
 
 void rtc_set_video_track_frame_h(
-    MediaStreamTrack* track,
-    void(handler)(void* ctx, IVideoFrame* frame),
-    void* ctx)
+                                 MediaStreamTrack* track,
+                                 void(handler)(void* ctx, IVideoFrame* frame),
+                                 void* ctx)
 {
     if (!track->video_sink) {
         return;
     }
-
+    
     track->video_sink->SetOnFrame(ctx, handler);
 }
 
@@ -318,14 +348,14 @@ MediaStreamTrack* rtc_create_video_track(char* label)
         rtc_free_media_stream_track(track);
         return NULL;
     }
-
+    
     track->video_source = IVideoTrackSource::Create();
     if (!track->video_source)
     {
         rtc_free_media_stream_track(track);
         return NULL;
     }
-
+    
     track->label = (char*)malloc(sizeof(char) * (strlen(label) + 1));
     if (!track->label)
     {
@@ -336,15 +366,15 @@ MediaStreamTrack* rtc_create_video_track(char* label)
     {
         strcpy(track->label, label);
     }
-
+    
     track->kind = MediaStreamTrackKindVideo;
     return track;
 }
 
 void rtc_set_audio_track_frame_h(
-    MediaStreamTrack* track,
-    void(handler)(void* ctx, IAudioFrame* frame),
-    void* ctx)
+                                 MediaStreamTrack* track,
+                                 void(handler)(void* ctx, IAudioFrame* frame),
+                                 void* ctx)
 {
     track->audio_sink->SetOnFrame(ctx, handler);
 }
@@ -355,7 +385,7 @@ void rtc_remove_media_stream_track_frame_h(MediaStreamTrack* track)
     {
         track->video_sink->RemoveOnFrame();
     }
-
+    
     if (track->audio_sink)
     {
         track->audio_sink->RemoveOnFrame();

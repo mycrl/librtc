@@ -1,4 +1,4 @@
-﻿#ifndef BATRACHIATC_DATA_CHANNEL_H_
+#ifndef BATRACHIATC_DATA_CHANNEL_H_
 #define BATRACHIATC_DATA_CHANNEL_H_
 #pragma once
 
@@ -50,8 +50,8 @@ typedef struct {
 } DataChannelOptions;
 
 class IDataChannel
-    : public webrtc::DataChannelObserver
-    , public rtc::RefCountInterface
+: public webrtc::DataChannelObserver
+, public rtc::RefCountInterface
 {
 public:
     IDataChannel(rtc::scoped_refptr<webrtc::DataChannelInterface> data_channel);
@@ -61,7 +61,7 @@ public:
     void OnMessage(const webrtc::DataBuffer& buffer);
     void OnDataMessage(void* ctx, void(*handler)(void* _ctx, uint8_t* buf, uint64_t size));
     void RemoveOnMessage();
-
+    
     DataState state;
 private:
     rtc::scoped_refptr<webrtc::DataChannelInterface> _channel;
@@ -70,14 +70,14 @@ private:
 };
 
 /*
-RTCDataChannel
-
-The RTCDataChannel interface represents a network channel which can be used for
-bidirectional peer-to-peer transfers of arbitrary data. Every data channel is
-associated with an RTCPeerConnection, and each peer connection can have up to a
-theoretical maximum of 65,534 data
-channels (the actual limit may vary from browser to browser).
-*/
+ RTCDataChannel
+ 
+ The RTCDataChannel interface represents a network channel which can be used for
+ bidirectional peer-to-peer transfers of arbitrary data. Every data channel is
+ associated with an RTCPeerConnection, and each peer connection can have up to a
+ theoretical maximum of 65,534 data
+ channels (the actual limit may vary from browser to browser).
+ */
 typedef struct {
     char* label;
     IDataChannel* channel;
@@ -85,14 +85,14 @@ typedef struct {
 } RTCDataChannel;
 
 extern "C" EXPORT void rtc_set_data_channel_msg_h(RTCDataChannel* channel,
-    void(*handler)(void* ctx, uint8_t* buf, uint64_t size),
-    void* ctx);
+                                                  void(*handler)(void* ctx, uint8_t* buf, uint64_t size),
+                                                  void* ctx);
 
 extern "C" EXPORT void rtc_remove_data_channel_msg_h(RTCDataChannel* channel);
 extern "C" EXPORT void rtc_send_data_channel_msg(RTCDataChannel * channel, uint8_t * buf, int size);
 extern "C" EXPORT DataState rtc_get_data_channel_state(RTCDataChannel * channel);
 extern "C" EXPORT void rtc_free_data_channel(RTCDataChannel * channel);
-    
+
 webrtc::DataChannelInit* from_c(DataChannelOptions* options);
 RTCDataChannel* create_data_channel(rtc::scoped_refptr<webrtc::DataChannelInterface> channel);
 

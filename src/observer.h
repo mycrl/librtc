@@ -1,4 +1,4 @@
-﻿#ifndef BATRACHIATC_OBSERVER_H_
+#ifndef BATRACHIATC_OBSERVER_H_
 #define BATRACHIATC_OBSERVER_H_
 #pragma once
 
@@ -59,8 +59,8 @@ typedef void (*SetDescCallback)(const char* error, void* ctx);
 typedef void (*CreateDescCallback)(const char* error, RTCSessionDescription* desc, void* ctx);
 
 class Observer
-    : public webrtc::PeerConnectionObserver
-    , public rtc::RefCountInterface
+: public webrtc::PeerConnectionObserver
+, public rtc::RefCountInterface
 {
 public:
     Observer(Events* events, void* ctx);
@@ -79,7 +79,7 @@ private:
 };
 
 class CreateDescObserver
-    : public webrtc::CreateSessionDescriptionObserver
+: public webrtc::CreateSessionDescriptionObserver
 {
 public:
     CreateDescObserver(CreateDescCallback callback, void* ctx);
@@ -92,7 +92,7 @@ private:
 };
 
 class SetDescObserver
-    : public webrtc::SetSessionDescriptionObserver 
+: public webrtc::SetSessionDescriptionObserver 
 {
 public:
     SetDescObserver(SetDescCallback callback, void* ctx);
