@@ -19,5 +19,13 @@
 C bindings for Google Chrome WebRTC Native. Using C++ ABI in other programming languages is a very difficult thing, but most languages support interacting with stable C ABI, the meaning of this project is just that, abstract some commonly used structures and methods, and make other projects embed WebRTC Native is easier.
 
 
+## Features
+
+- Basic PeerConection session.
+- Custom video track and sink. <sup>(`YUV420 format`)</sup>
+- Audio track sink.
+- DataChannel create and sink.
+
+
 ### License
 [GPL](./LICENSE) Copyright (c) 2022 Mr.Panda.
