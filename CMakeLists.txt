@@ -1,104 +1,198 @@
 cmake_minimum_required(VERSION 3.16)
-project(libwebrtc)
+project(rtc)
 
+# Version 110 of webrtc native requires at least c++ 17 support.
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
-# default build target is Debug
-if(NOT CMAKE_BUILD_TYPE)
+# Default build target is Debug.
+if (NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE "Debug")
 endif()
 
-add_library(libwebrtc STATIC
-    src/base.h
-    src/base.cpp
-    src/frame.h
-    src/frame.cpp
-    src/media_stream_track.h
-    src/media_stream_track.cpp
-    src/observer.cpp
-    src/observer.h
-    src/peer_connection.cpp
-    src/peer_connection.h
-    src/peer_connection_config.h
-    src/peer_connection_config.cpp
-    src/session_description.h
-    src/session_description.cpp
-    src/ice_candidate.h
-    src/ice_candidate.cpp
-    src/data_channel.h
-    src/data_channel.cpp
-    src/audio_capture_module.h
-    src/audio_capture_module.cpp
-    src/video_encoder.h
-    src/video_encoder.cpp)
-    
-include_directories(
-    third_party/webrtc/src/third_party/libyuv/include
-    third_party/webrtc/src/third_party/abseil-cpp
-    third_party/webrtc/src)
+# Used to download or initialize third-party dependent libraries.
+set(THIRD_PARTY_DIR "${CMAKE_CURRENT_SOURCE_DIR}/third_party")
 
-# windows msvc runtime
+# Check whether the third-party dependent library directory is created.
+if (NOT EXISTS "${THIRD_PARTY_DIR}")
+    execute_process(COMMAND mkdir "${THIRD_PARTY_DIR}")
+endif()
+
+# WebRTC Native Module.
+
+# Clone the depot_tools repository.
+if (NOT EXISTS "${THIRD_PARTY_DIR}/depot_tools")
+    execute_process(
+        WORKING_DIRECTORY "${THIRD_PARTY_DIR}"
+        COMMAND "git clone \
+                https://chromium.googlesource.com/chromium/tools/depot_tools.git")
+endif()
+
+# On Windows operating systems, the PATH environment variable uses a 
+# semicolon ; to separate paths. On Linux and macOS operating systems, 
+# use a colon : to separate paths.
+if (MSVC)
+    set(PATH "${PATH};${THIRD_PARTY_DIR}/depot_tools")
+else()
+    set(PATH "${PATH}:${THIRD_PARTY_DIR}/depot_tools")
+endif()
+
+# Sync webrtc toolchain and many dependencies. The checkout size is large due the 
+# use of the Chromium build toolchain and many dependencies. Estimated size:
+#
+# - Linux: 6.4 GB.
+# - Linux (with Android): 16 GB (of which ~8 GB is Android SDK+NDK images).
+# - Mac (with iOS support): 5.6GB
+if (NOT EXISTS "${THIRD_PARTY_DIR}/webrtc")
+    # Get webrtc native source code and synchronize third-party dependencies.
+    execute_process(COMMAND mkdir "${THIRD_PARTY_DIR}/webrtc")
+    execute_process(
+        WORKING_DIRECTORY "${THIRD_PARTY_DIR}/webrtc"
+        COMMAND bash -c "fetch --nohooks webrtc \
+            && cd src \
+            && git checkout branch-heads/5481 \
+            && gclient sync")
+endif()
+
+# Compile the Debug/Release target of the webrtc static library.
+if (NOT EXISTS "${THIRD_PARTY_DIR}/webrtc/src/out/${CMAKE_BUILD_TYPE}")
+    if(CMAKE_BUILD_TYPE STREQUAL "Release")
+        set(W_IS_DEBUG "false")
+    else()
+        set(W_IS_DEBUG "true")
+    endif()
+
+    # Compile with native toolchain (only Windows).
+    if (MSVC)
+        set(DEPOT_TOOLS_WIN_TOOLCHAIN "0")
+    endif()
+
+    execute_process(
+        WORKING_DIRECTORY "${THIRD_PARTY_DIR}/webrtc/src"
+        COMMAND bash -c "gn gen out/${CMAKE_BUILD_TYPE} --args='is_debug=${W_IS_DEBUG} \
+                                                                is_component_build=false \
+                                                                use_lld=false \
+                                                                treat_warnings_as_errors=false \
+                                                                use_rtti=true \
+                                                                rtc_include_tests=false \
+                                                                rtc_build_examples=false \
+                                                                use_custom_libcxx=false' \
+                        && ninja -C out/${CMAKE_BUILD_TYPE}")
+
+endif()
+
+# The compilation target is a dynamic library.
+add_library(rtc SHARED
+            src/base.h
+            src/base.cpp
+            src/frame.h
+            src/frame.cpp
+            src/media_stream_track.h
+            src/media_stream_track.cpp
+            src/observer.cpp
+            src/observer.h
+            src/peer_connection.cpp
+            src/peer_connection.h
+            src/peer_connection_config.h
+            src/peer_connection_config.cpp
+            src/session_description.h
+            src/session_description.cpp
+            src/ice_candidate.h
+            src/ice_candidate.cpp
+            src/data_channel.h
+            src/data_channel.cpp)
+
+# Add third-party libraries to the search path.
+include_directories("${THIRD_PARTY_DIR}/webrtc/src/third_party/libyuv/include"
+                    "${THIRD_PARTY_DIR}/webrtc/src/third_party/abseil-cpp"
+                    "${THIRD_PARTY_DIR}/webrtc/src")
+
+# Add third-party library files.
+target_link_directories(rtc PRIVATE 
+                        "${THIRD_PARTY_DIR}/webrtc/src/out/${CMAKE_BUILD_TYPE}/obj")
+target_link_libraries(rtc webrtc)
+
+# If it is msvc, you need to set the runtime library.
 if(MSVC)
     if(CMAKE_BUILD_TYPE STREQUAL "Release")
-        set_property(TARGET libwebrtc PROPERTY
-            MSVC_RUNTIME_LIBRARY MultiThreaded)
+        set_property(TARGET rtc PROPERTY MSVC_RUNTIME_LIBRARY MultiThreaded)
     else()
-        set_property(TARGET libwebrtc PROPERTY
-            MSVC_RUNTIME_LIBRARY MultiThreadedDebug)
+        set_property(TARGET rtc PROPERTY MSVC_RUNTIME_LIBRARY MultiThreadedDebug)
     endif()
 endif()
 
-# build target header
+# Debug/Release target in build header.
 if(CMAKE_BUILD_TYPE STREQUAL "Release")
     add_compile_definitions(NDEBUG)
 else()
     add_compile_definitions(DEBUG)
 endif()
 
+# Build header.
 if(MSVC)
-    add_compile_definitions(
-        _CONSOLE
-        USE_AURA=1
-        _HAS_EXCEPTIONS=0
-        __STD_C
-        _CRT_RAND_S
-        _CRT_SECURE_NO_DEPRECATE
-        _SCL_SECURE_NO_DEPRECATE
-        _ATL_NO_OPENGL
-        _WINDOWS
-        CERT_CHAIN_PARA_HAS_EXTRA_FIELDS
-        PSAPI_VERSION=2
-        WIN32
-        _SECURE_ATL
-        WINUWP
-        __WRL_NO_DEFAULT_LIB__
-        WINAPI_FAMILY=WINAPI_FAMILY_PC_APP
-        WIN10=_WIN32_WINNT_WIN10
-        WIN32_LEAN_AND_MEAN
-        NOMINMAX
-        _UNICODE
-        UNICODE
-        NTDDI_VERSION=NTDDI_WIN10_RS2
-        _WIN32_WINNT=0x0A00
-        WINVER=0x0A00
-        NVALGRIND
-        DYNAMIC_ANNOTATIONS_ENABLED=0
-        WEBRTC_ENABLE_PROTOBUF=0
-        WEBRTC_INCLUDE_INTERNAL_AUDIO_DEVICE
-        RTC_ENABLE_VP9
-        HAVE_SCTP
-        WEBRTC_LIBRARY_IMPL
-        WEBRTC_NON_STATIC_TRACE_EVENT_HANDLERS=0
-        WEBRTC_WIN
-        ABSL_ALLOCATOR_NOTHROW=1
-        WEBRTC_VIDEO_CAPTURE_WINRT)
+    add_compile_definitions(_CONSOLE
+                            USE_AURA=1
+                            _HAS_EXCEPTIONS=0
+                            __STD_C
+                            _CRT_RAND_S
+                            _CRT_SECURE_NO_DEPRECATE
+                            _SCL_SECURE_NO_DEPRECATE
+                            _ATL_NO_OPENGL
+                            _WINDOWS
+                            CERT_CHAIN_PARA_HAS_EXTRA_FIELDS
+                            PSAPI_VERSION=2
+                            WIN32
+                            _SECURE_ATL
+                            WINUWP
+                            __WRL_NO_DEFAULT_LIB__
+                            WINAPI_FAMILY=WINAPI_FAMILY_PC_APP
+                            WIN10=_WIN32_WINNT_WIN10
+                            WIN32_LEAN_AND_MEAN
+                            NOMINMAX
+                            _UNICODE
+                            UNICODE
+                            NTDDI_VERSION=NTDDI_WIN10_RS2
+                            _WIN32_WINNT=0x0A00
+                            WINVER=0x0A00
+                            NVALGRIND
+                            DYNAMIC_ANNOTATIONS_ENABLED=0
+                            WEBRTC_ENABLE_PROTOBUF=0
+                            WEBRTC_INCLUDE_INTERNAL_AUDIO_DEVICE
+                            RTC_ENABLE_VP9
+                            HAVE_SCTP
+                            WEBRTC_LIBRARY_IMPL
+                            WEBRTC_NON_STATIC_TRACE_EVENT_HANDLERS=0
+                            WEBRTC_WIN
+                            ABSL_ALLOCATOR_NOTHROW=1
+                            WEBRTC_VIDEO_CAPTURE_WINRT)
 elseif(APPLE)
-    add_compile_definitions(
-        WEBRTC_MAC
-        WEBRTC_IOS
-        WEBRTC_POSIX)
+    add_compile_definitions(WEBRTC_MAC
+                            WEBRTC_IOS
+                            WEBRTC_POSIX)
 elseif(UNIX AND NOT APPLE)
-    add_compile_definitions(
-        WEBRTC_POSIX)
+    add_compile_definitions(WEBRTC_POSIX)
+endif()
+
+# Introduce other runtime necessary library files.
+if(MSVC)
+    target_link_libraries(rtc
+                          winmm
+                          secur32
+                          msdmo
+                          dmoguids
+                          wmcodecdspuuid)
+elseif(APPLE)
+    target_link_libraries(rtc
+                          c++
+                          "-framework Foundation"
+                          "-framework AudioToolbox"
+                          "-framework AudioUnit"
+                          "-framework CoreServices"
+                          "-framework CoreFoundation"
+                          "-framework CoreAudio"
+                          "-framework CoreGraphics")
+elseif(UNIX AND NOT APPLE)
+    target_link_libraries(rtc
+                          stdc++
+                          X11)
 endif()

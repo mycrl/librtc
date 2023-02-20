@@ -45,12 +45,14 @@ RTCPeerConnection* rtc_create_peer_connection(RTCPeerConnectionConfigure* c_conf
         return NULL;
     }
 
-    rtc->pc = rtc->pc_factory->CreatePeerConnection(
-        from_c(c_config),
-        nullptr,
-        nullptr,
-        Observer::Create(events, ctx));
-    if (!rtc->pc)
+    webrtc::PeerConnectionDependencies pc_dependencies(Observer::Create(events, ctx));
+    auto error_or_pc = rtc->pc_factory->CreatePeerConnectionOrError(
+        from_c(c_config), 
+        std::move(pc_dependencies));
+    if (error_or_pc.ok()) {
+        rtc->pc = std::move(error_or_pc.value());
+    }
+    else
     {
         return NULL;
     }

@@ -1,4 +1,4 @@
-﻿#ifndef BATRACHIATC_MEDIA_STREAM_TRACK_H_
+#ifndef BATRACHIATC_MEDIA_STREAM_TRACK_H_
 #define BATRACHIATC_MEDIA_STREAM_TRACK_H_
 #pragma once
 
@@ -7,7 +7,7 @@
 #include "api/video/video_frame_buffer.h"
 #include "media/base/video_adapter.h"
 #include "pc/video_track_source.h"
-#include "api/audio/audio_mixer.h"
+#include "api/media_stream_interface.h"
 #include "frame.h"
 #include "base.h"
 
@@ -87,8 +87,7 @@ private:
 audio source
 */
 class IAudioTrackSource
-    : public webrtc::AudioMixer::Source
-    , public rtc::RefCountInterface
+    : public webrtc::AudioSourceInterface
 {
 public:
     IAudioTrackSource()
@@ -101,21 +100,29 @@ public:
 
     }
 
-    AudioFrameInfo GetAudioFrameWithInfo(int sample_rate_hz,
-        webrtc::AudioFrame* frame)
+    void AddSink(webrtc::AudioTrackSinkInterface* sink)
     {
-
+        _sinks.push_back(sink);
     }
-
-    int Ssrc() const
+    
+    void RemoveSink(webrtc::AudioTrackSinkInterface* sink)
     {
-
+        auto it = std::find(_sinks.begin(), _sinks.end(), sink);
+        if (it != _sinks.end())
+        {
+            _sinks.erase(it);
+        }
     }
-
-    int PreferredSampleRate() const
+    
+    void AddData(const uint8_t* buf, size_t size)
     {
-
+        for (auto sink: _sinks)
+        {
+            sink->OnData(buf, <#int bits_per_sample#>, <#int sample_rate#>, <#size_t number_of_channels#>, <#size_t number_of_frames#>);
+        }
     }
+private:
+    std::vector<webrtc::AudioTrackSinkInterface*> _sinks;
 };
 
 /*
