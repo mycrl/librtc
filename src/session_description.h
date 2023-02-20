@@ -1,5 +1,12 @@
-#ifndef BATRACHIATC_SESSION_DESCRIPTION_H_
-#define BATRACHIATC_SESSION_DESCRIPTION_H_
+//
+//  session_description.h
+//  rtc
+//
+//  Created by Mr.Panda on 2023/2/21.
+//
+
+#ifndef librtc_session_description_h
+#define librtc_session_description_h
 #pragma once
 
 #include "api/peer_connection_interface.h"
@@ -50,4 +57,4 @@ std::unique_ptr<webrtc::SessionDescriptionInterface> from_c(RTCSessionDescriptio
 RTCSessionDescription* into_c(webrtc::SessionDescriptionInterface* raw);
 void free_session_description(RTCSessionDescription* raw);
 
-#endif  // BATRACHIATC_SESSION_DESCRIPTION_H_
+#endif  // librtc_session_description_h

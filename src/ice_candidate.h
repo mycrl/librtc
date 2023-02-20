@@ -1,5 +1,12 @@
-#ifndef BATRACHIATC_ICE_CANDIDATE_H_
-#define BATRACHIATC_ICE_CANDIDATE_H_
+//
+//  ice_candidate.h
+//  rtc
+//
+//  Created by Mr.Panda on 2023/2/21.
+//
+
+#ifndef librtc_ice_candidate_h
+#define librtc_ice_candidate_h
 #pragma once
 
 #include "api/peer_connection_interface.h"
@@ -48,4 +55,4 @@ const webrtc::IceCandidateInterface* from_c(RTCIceCandidate* candidate);
 RTCIceCandidate* into_c(webrtc::IceCandidateInterface* candidate);
 void free_ice_candidate(RTCIceCandidate* candidate);
 
-#endif  // BATRACHIATC_ICE_CANDIDATE_H_
+#endif  // librtc_ice_candidate_h

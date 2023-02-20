@@ -1,25 +1,34 @@
+//
+//  session_description.cpp
+//  rtc
+//
+//  Created by Mr.Panda on 2023/2/21.
+//
+
 #include "session_description.h"
 #include "base.h"
 
-/**
- * offer / answer
- */
+/* offer / answer */
 
 webrtc::SdpType from_c(RTCSessionDescriptionType type)
 {
-    switch (type) {
-        case RTCSessionDescriptionTypeAnswer:
-            return webrtc::SdpType::kAnswer;
-            break;
-        case RTCSessionDescriptionTypeOffer:
-            return webrtc::SdpType::kOffer;
-            break;
-        case RTCSessionDescriptionTypePrAnswer:
-            return webrtc::SdpType::kPrAnswer;
-            break;
-        default:
-            return webrtc::SdpType::kRollback;
-            break;
+    if (type == RTCSessionDescriptionTypeAnswer)
+    {
+        return webrtc::SdpType::kAnswer;
+    }
+    else
+    if (type == RTCSessionDescriptionTypeOffer)
+    {
+        return webrtc::SdpType::kOffer;
+    }
+    else
+    if (type == RTCSessionDescriptionTypePrAnswer)
+    {
+        return webrtc::SdpType::kPrAnswer;
+    }
+    else
+    {
+        return webrtc::SdpType::kRollback;
     }
 }
 

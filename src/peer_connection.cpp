@@ -1,3 +1,10 @@
+//
+//  peer_connection.cpp
+//  rtc
+//
+//  Created by Mr.Panda on 2023/2/21.
+//
+
 #include "api/audio_codecs/builtin_audio_decoder_factory.h"
 #include "api/audio_codecs/builtin_audio_encoder_factory.h"
 #include "api/video_codecs/builtin_video_decoder_factory.h"
@@ -109,6 +116,12 @@ RTCDataChannel* rtc_create_data_channel(RTCPeerConnection* rtc,
                                         DataChannelOptions* options)
 {
     auto init = from_c(options);
-    auto data_channel = rtc->pc->CreateDataChannel(std::string(label), init);
-    return create_data_channel(data_channel);
+    auto ret = rtc->pc->CreateDataChannelOrError(std::string(label), std::move(init));
+    if (ret.ok()) {
+        return create_data_channel(std::move(ret.value()));
+    }
+    else
+    {
+        return NULL;
+    }
 }

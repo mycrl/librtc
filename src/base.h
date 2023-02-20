@@ -1,5 +1,12 @@
-#ifndef BATRACHIATC_BASE_H_
-#define BATRACHIATC_BASE_H_
+//
+//  base.h
+//  rtc
+//
+//  Created by Mr.Panda on 2023/2/21.
+//
+
+#ifndef librtc_base_h
+#define librtc_base_h
 #pragma once
 
 #ifdef WIN32
@@ -12,4 +19,4 @@
 
 void free_incomplete_ptr(void* ptr);
 
-#endif  // BATRACHIATC_BASE_H_
+#endif  // librtc_base_h

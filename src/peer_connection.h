@@ -1,5 +1,12 @@
-#ifndef BATRACHIATC_PEER_CONNECTION_H_
-#define BATRACHIATC_PEER_CONNECTION_H_
+//
+//  peer_connection.h
+//  rtc
+//
+//  Created by Mr.Panda on 2023/2/21.
+//
+
+#ifndef librtc_peer_connection_h
+#define librtc_peer_connection_h
 #pragma once
 
 #include "api/peer_connection_interface.h"
@@ -152,4 +159,4 @@ extern "C" EXPORT RTCDataChannel* rtc_create_data_channel(RTCPeerConnection * rt
                                                           char* label,
                                                           DataChannelOptions * options);
 
-#endif  // BATRACHIATC_PEER_CONNECTION_H_
+#endif  // librtc_peer_connection_h

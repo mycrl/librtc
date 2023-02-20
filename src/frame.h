@@ -1,5 +1,12 @@
-#ifndef BATRACHIATC_FRAME_H_
-#define BATRACHIATC_FRAME_H_
+//
+//  frame.h
+//  rtc
+//
+//  Created by Mr.Panda on 2023/2/21.
+//
+
+#ifndef librtc_frame_h
+#define librtc_frame_h
 #pragma once
 
 #include "api/video/video_frame.h"
@@ -37,4 +44,4 @@ IAudioFrame* into_c(const uint8_t* buf, int b, int r, size_t c, size_t f);
 IVideoFrame* into_c(webrtc::VideoFrame* frame);
 webrtc::VideoFrame from_c(IVideoFrame* frame);
 
-#endif  // BATRACHIATC_FRAME_H_
+#endif  // librtc_frame_h

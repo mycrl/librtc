@@ -1,5 +1,12 @@
-#ifndef BATRACHIATC_PEER_CONNECTION_CONFIG_H_
-#define BATRACHIATC_PEER_CONNECTION_CONFIG_H_
+//
+//  peer_connection_config.h
+//  rtc
+//
+//  Created by Mr.Panda on 2023/2/21.
+//
+
+#ifndef librtc_peer_connection_config_h
+#define librtc_peer_connection_config_h
 #pragma once
 
 #include "api/peer_connection_interface.h"
@@ -146,4 +153,4 @@ webrtc::PeerConnectionInterface::IceServer from_c(RTCIceServer raw);
 webrtc::PeerConnectionInterface::IceServers from_c(RTCIceServer* raw, int size);
 webrtc::PeerConnectionInterface::RTCConfiguration from_c(RTCPeerConnectionConfigure* raw);
 
-#endif  // BATRACHIATC_PEER_CONNECTION_CONFIG_H_
+#endif  // librtc_peer_connection_config_h

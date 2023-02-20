@@ -89,6 +89,10 @@ add_library(rtc SHARED
             src/frame.cpp
             src/media_stream_track.h
             src/media_stream_track.cpp
+            src/video_track.h
+            src/video_track.cpp
+            src/audio_track.h
+            src/audio_track.cpp
             src/observer.cpp
             src/observer.h
             src/peer_connection.cpp

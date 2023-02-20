@@ -1,5 +1,12 @@
-#ifndef BATRACHIATC_DATA_CHANNEL_H_
-#define BATRACHIATC_DATA_CHANNEL_H_
+//
+//  data_channel.h
+//  rtc
+//
+//  Created by Mr.Panda on 2023/2/21.
+//
+
+#ifndef librtc_data_channel_h
+#define librtc_data_channel_h
 #pragma once
 
 #include "api/peer_connection_interface.h"
@@ -96,4 +103,4 @@ extern "C" EXPORT void rtc_free_data_channel(RTCDataChannel * channel);
 webrtc::DataChannelInit* from_c(DataChannelOptions* options);
 RTCDataChannel* create_data_channel(rtc::scoped_refptr<webrtc::DataChannelInterface> channel);
 
-#endif  // BATRACHIATC_DATA_CHANNEL_H_
+#endif  // librtc_data_channel_h

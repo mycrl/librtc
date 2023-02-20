@@ -1,5 +1,12 @@
-#ifndef BATRACHIATC_OBSERVER_H_
-#define BATRACHIATC_OBSERVER_H_
+//
+//  observer.h
+//  rtc
+//
+//  Created by Mr.Panda on 2023/2/21.
+//
+
+#ifndef librtc_observer_h
+#define librtc_observer_h
 #pragma once
 
 #include "api/peer_connection_interface.h"
@@ -109,4 +116,4 @@ SignalingState into_c(webrtc::PeerConnectionInterface::SignalingState state);
 IceGatheringState into_c(webrtc::PeerConnectionInterface::IceGatheringState state);
 IceConnectionState into_c(webrtc::PeerConnectionInterface::IceConnectionState state);
 
-#endif  // BATRACHIATC_OBSERVER_H_
+#endif  // librtc_observer_h

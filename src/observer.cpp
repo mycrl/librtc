@@ -1,3 +1,10 @@
+//
+//  observer.cpp
+//  rtc
+//
+//  Created by Mr.Panda on 2023/2/21.
+//
+
 #include "api/peer_connection_interface.h"
 #include "observer.h"
 
@@ -12,29 +19,29 @@ PeerConnectionState into_c(webrtc::PeerConnectionInterface::PeerConnectionState 
         return PeerConnectionStateNew;
     }
     else
-        if (state == webrtc::PeerConnectionInterface::PeerConnectionState::kConnecting)
-        {
-            return PeerConnectionStateConnecting;
-        }
-        else
-            if (state == webrtc::PeerConnectionInterface::PeerConnectionState::kConnected)
-            {
-                return PeerConnectionStateConnected;
-            }
-            else
-                if (state == webrtc::PeerConnectionInterface::PeerConnectionState::kDisconnected)
-                {
-                    return PeerConnectionStateDisconnected;
-                }
-                else
-                    if (state == webrtc::PeerConnectionInterface::PeerConnectionState::kClosed)
-                    {
-                        return PeerConnectionStateClose;
-                    }
-                    else
-                    {
-                        return PeerConnectionStateFailed;
-                    }
+    if (state == webrtc::PeerConnectionInterface::PeerConnectionState::kConnecting)
+    {
+        return PeerConnectionStateConnecting;
+    }
+    else
+    if (state == webrtc::PeerConnectionInterface::PeerConnectionState::kConnected)
+    {
+        return PeerConnectionStateConnected;
+    }
+    else
+    if (state == webrtc::PeerConnectionInterface::PeerConnectionState::kDisconnected)
+    {
+        return PeerConnectionStateDisconnected;
+    }
+    else
+    if (state == webrtc::PeerConnectionInterface::PeerConnectionState::kClosed)
+    {
+        return PeerConnectionStateClose;
+    }
+    else
+    {
+        return PeerConnectionStateFailed;
+    }
 }
 
 /*
@@ -48,29 +55,29 @@ SignalingState into_c(webrtc::PeerConnectionInterface::SignalingState state)
         return SignalingStateStable;
     }
     else
-        if (state == webrtc::PeerConnectionInterface::SignalingState::kHaveLocalOffer)
-        {
-            return SignalingStateHaveLocalOffer;
-        }
-        else
-            if (state == webrtc::PeerConnectionInterface::SignalingState::kHaveLocalPrAnswer)
-            {
-                return SignalingStateHaveLocalPrAnswer;
-            }
-            else
-                if (state == webrtc::PeerConnectionInterface::SignalingState::kHaveRemoteOffer)
-                {
-                    return SignalingStateHaveRemoteOffer;
-                }
-                else
-                    if (state == webrtc::PeerConnectionInterface::SignalingState::kHaveRemotePrAnswer)
-                    {
-                        return SignalingStateHaveRemotePrAnswer;
-                    }
-                    else
-                    {
-                        return SignalingStateClosed;
-                    }
+    if (state == webrtc::PeerConnectionInterface::SignalingState::kHaveLocalOffer)
+    {
+        return SignalingStateHaveLocalOffer;
+    }
+    else
+    if (state == webrtc::PeerConnectionInterface::SignalingState::kHaveLocalPrAnswer)
+    {
+        return SignalingStateHaveLocalPrAnswer;
+    }
+    else
+    if (state == webrtc::PeerConnectionInterface::SignalingState::kHaveRemoteOffer)
+    {
+        return SignalingStateHaveRemoteOffer;
+    }
+    else
+    if (state == webrtc::PeerConnectionInterface::SignalingState::kHaveRemotePrAnswer)
+    {
+        return SignalingStateHaveRemotePrAnswer;
+    }
+    else
+    {
+        return SignalingStateClosed;
+    }
 }
 
 /*
@@ -83,14 +90,14 @@ IceGatheringState into_c(webrtc::PeerConnectionInterface::IceGatheringState stat
         return IceGatheringStateNew;
     }
     else
-        if (state == webrtc::PeerConnectionInterface::IceGatheringState::kIceGatheringGathering)
-        {
-            return IceGatheringStateGathering;
-        }
-        else
-        {
-            return IceGatheringStateComplete;
-        }
+    if (state == webrtc::PeerConnectionInterface::IceGatheringState::kIceGatheringGathering)
+    {
+        return IceGatheringStateGathering;
+    }
+    else
+    {
+        return IceGatheringStateComplete;
+    }
 }
 
 /*
@@ -103,39 +110,39 @@ IceConnectionState into_c(webrtc::PeerConnectionInterface::IceConnectionState st
         return IceConnectionStateNew;
     }
     else
-        if (state == webrtc::PeerConnectionInterface::IceConnectionState::kIceConnectionChecking)
-        {
-            return IceConnectionStateChecking;
-        }
-        else
-            if (state == webrtc::PeerConnectionInterface::IceConnectionState::kIceConnectionConnected)
-            {
-                return IceConnectionStateConnected;
-            }
-            else
-                if (state == webrtc::PeerConnectionInterface::IceConnectionState::kIceConnectionCompleted)
-                {
-                    return IceConnectionStateCompleted;
-                }
-                else
-                    if (state == webrtc::PeerConnectionInterface::IceConnectionState::kIceConnectionFailed)
-                    {
-                        return IceConnectionStateFailed;
-                    }
-                    else
-                        if (state == webrtc::PeerConnectionInterface::IceConnectionState::kIceConnectionDisconnected)
-                        {
-                            return IceConnectionStateDisconnected;
-                        }
-                        else
-                            if (state == webrtc::PeerConnectionInterface::IceConnectionState::kIceConnectionClosed)
-                            {
-                                return IceConnectionStateClosed;
-                            }
-                            else
-                            {
-                                return IceConnectionStateMax;
-                            }
+    if (state == webrtc::PeerConnectionInterface::IceConnectionState::kIceConnectionChecking)
+    {
+        return IceConnectionStateChecking;
+    }
+    else
+    if (state == webrtc::PeerConnectionInterface::IceConnectionState::kIceConnectionConnected)
+    {
+        return IceConnectionStateConnected;
+    }
+    else
+    if (state == webrtc::PeerConnectionInterface::IceConnectionState::kIceConnectionCompleted)
+    {
+        return IceConnectionStateCompleted;
+    }
+    else
+    if (state == webrtc::PeerConnectionInterface::IceConnectionState::kIceConnectionFailed)
+    {
+        return IceConnectionStateFailed;
+    }
+    else
+    if (state == webrtc::PeerConnectionInterface::IceConnectionState::kIceConnectionDisconnected)
+    {
+        return IceConnectionStateDisconnected;
+    }
+    else
+    if (state == webrtc::PeerConnectionInterface::IceConnectionState::kIceConnectionClosed)
+    {
+        return IceConnectionStateClosed;
+    }
+    else
+    {
+        return IceConnectionStateMax;
+    }
 }
 
 Observer::Observer(Events* events, void* ctx)
@@ -242,10 +249,10 @@ void Observer::OnTrack(rtc::scoped_refptr<webrtc::RtpTransceiverInterface> trans
         _events->on_track(_ctx, from(static_cast<webrtc::VideoTrackInterface*>(track)));
     }
     else
-        if (track->kind() == webrtc::MediaStreamTrackInterface::kAudioKind) 
-        {
-            _events->on_track(_ctx, from(static_cast<webrtc::AudioTrackInterface*>(track)));
-        }
+    if (track->kind() == webrtc::MediaStreamTrackInterface::kAudioKind) 
+    {
+        _events->on_track(_ctx, from(static_cast<webrtc::AudioTrackInterface*>(track)));
+    }
 }
 
 CreateDescObserver::CreateDescObserver(CreateDescCallback callback, void* ctx)
