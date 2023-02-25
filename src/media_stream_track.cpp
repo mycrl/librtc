@@ -125,6 +125,52 @@ MediaStreamTrack* rtc_create_video_track(char* label)
     return track;
 }
 
+MediaStreamTrack* rtc_create_audio_track(char* label)
+{
+    MediaStreamTrack* track = (MediaStreamTrack*)malloc(sizeof(MediaStreamTrack));
+    if (!track)
+    {
+        rtc_free_media_stream_track(track);
+        return NULL;
+    }
+    
+    track->audio_source = IAudioTrackSource::Create();
+    if (!track->audio_source)
+    {
+        rtc_free_media_stream_track(track);
+        return NULL;
+    }
+    
+    track->label = (char*)malloc(sizeof(char) * (strlen(label) + 1));
+    if (!track->label)
+    {
+        rtc_free_media_stream_track(track);
+        return NULL;
+    }
+    else
+    {
+        strcpy(track->label, label);
+    }
+    
+    track->kind = MediaStreamTrackKindAudio;
+    return track;
+}
+
+void rtc_add_audio_track_frame(MediaStreamTrack* track, IAudioFrame* frame)
+{
+    if (!track->audio_source)
+    {
+        return;
+    }
+    
+    track->audio_source->OnData(frame->buf,
+                                frame->frames,
+                                frame->channels,
+                                frame->bits_per_sample,
+                                frame->sample_rate,
+                                frame->ms);
+}
+
 void rtc_set_audio_track_frame_h(
                                  MediaStreamTrack* track,
                                  void(handler)(void* ctx, IAudioFrame* frame),

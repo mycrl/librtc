@@ -24,17 +24,17 @@ endif()
 if (NOT EXISTS "${THIRD_PARTY_DIR}/depot_tools")
     execute_process(
         WORKING_DIRECTORY "${THIRD_PARTY_DIR}"
-        COMMAND "git clone \
-                https://chromium.googlesource.com/chromium/tools/depot_tools.git")
+        COMMAND bash -c "git clone \
+                         https://chromium.googlesource.com/chromium/tools/depot_tools.git")
 endif()
 
 # On Windows operating systems, the PATH environment variable uses a 
 # semicolon ; to separate paths. On Linux and macOS operating systems, 
 # use a colon : to separate paths.
 if (MSVC)
-    set(PATH "${PATH};${THIRD_PARTY_DIR}/depot_tools")
+        set(ENV{PATH} "$ENV{PATH};${THIRD_PARTY_DIR}/depot_tools")
 else()
-    set(PATH "${PATH}:${THIRD_PARTY_DIR}/depot_tools")
+        set(ENV{PATH} "$ENV{PATH}:${THIRD_PARTY_DIR}/depot_tools")
 endif()
 
 # Sync webrtc toolchain and many dependencies. The checkout size is large due the 
@@ -49,17 +49,17 @@ if (NOT EXISTS "${THIRD_PARTY_DIR}/webrtc")
     execute_process(
         WORKING_DIRECTORY "${THIRD_PARTY_DIR}/webrtc"
         COMMAND bash -c "fetch --nohooks webrtc \
-            && cd src \
-            && git checkout branch-heads/5481 \
-            && gclient sync")
+                         && cd src \
+                         && git checkout branch-heads/5481 \
+                         && gclient sync")
 endif()
 
 # Compile the Debug/Release target of the webrtc static library.
 if (NOT EXISTS "${THIRD_PARTY_DIR}/webrtc/src/out/${CMAKE_BUILD_TYPE}")
     if(CMAKE_BUILD_TYPE STREQUAL "Release")
-        set(W_IS_DEBUG "false")
+        set(DEBUG "false")
     else()
-        set(W_IS_DEBUG "true")
+        set(DEBUG "true")
     endif()
 
     # Compile with native toolchain (only Windows).
@@ -69,7 +69,7 @@ if (NOT EXISTS "${THIRD_PARTY_DIR}/webrtc/src/out/${CMAKE_BUILD_TYPE}")
 
     execute_process(
         WORKING_DIRECTORY "${THIRD_PARTY_DIR}/webrtc/src"
-        COMMAND bash -c "gn gen out/${CMAKE_BUILD_TYPE} --args='is_debug=${W_IS_DEBUG} \
+        COMMAND bash -c "gn gen out/${CMAKE_BUILD_TYPE} --args='is_debug=${DEBUG} \
                                                                 is_component_build=false \
                                                                 use_lld=false \
                                                                 treat_warnings_as_errors=false \
@@ -93,6 +93,8 @@ add_library(rtc SHARED
             src/video_track.cpp
             src/audio_track.h
             src/audio_track.cpp
+            src/audio_capture_module.h
+            src/audio_capture_module.cpp
             src/observer.cpp
             src/observer.h
             src/peer_connection.cpp
@@ -104,7 +106,9 @@ add_library(rtc SHARED
             src/ice_candidate.h
             src/ice_candidate.cpp
             src/data_channel.h
-            src/data_channel.cpp)
+            src/data_channel.cpp
+            src/video_encoder.h
+            src/video_encoder.cpp)
 
 # Add third-party libraries to the search path.
 include_directories("${THIRD_PARTY_DIR}/webrtc/src/third_party/libyuv/include"

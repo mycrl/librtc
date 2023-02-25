@@ -62,28 +62,58 @@ void IAudioTrackSink::RemoveOnFrame()
  IAudioTrackSource
  */
 
+IAudioTrackSource* IAudioTrackSource::Create()
+{
+    auto self = new rtc::RefCountedObject<IAudioTrackSource>();
+    self->AddRef();
+    return self;
+}
+
+void IAudioTrackSource::RegisterObserver(webrtc::ObserverInterface* observer)
+{
+    observer->OnChanged();
+    _observers.insert(observer);
+}
+
+void IAudioTrackSource::UnregisterObserver(webrtc::ObserverInterface* observer)
+{
+    _observers.erase(observer);
+}
+
 void IAudioTrackSource::AddSink(webrtc::AudioTrackSinkInterface* sink)
 {
-    _sinks.push_back(sink);
+    _sinks.insert(sink);
 }
 
 void IAudioTrackSource::RemoveSink(webrtc::AudioTrackSinkInterface* sink)
 {
-    auto it = std::find(_sinks.begin(), _sinks.end(), sink);
-    if (it != _sinks.end())
-    {
-        _sinks.erase(it);
-    }
+    _sinks.erase(sink);
 }
 
-void IAudioTrackSource::AddData(const uint16_t* buf, size_t size, size_t frames_size)
+webrtc::AudioSourceInterface::SourceState IAudioTrackSource::state() const
 {
-    for (auto sink: _sinks)
+    return SourceState::kLive;
+}
+
+bool IAudioTrackSource::remote() const
+{
+    return false;
+}
+
+void IAudioTrackSource::OnData(const int16_t* audio_data,
+                               size_t number_of_frames,
+                               size_t number_of_channels,
+                               int bits_per_sample,
+                               int sample_rate,
+                               int64_t ms)
+{
+    for (auto &sink: _sinks)
     {
-        sink->OnData(buf,
+        sink->OnData(audio_data,
                      bits_per_sample,
                      sample_rate,
                      number_of_channels,
-                     frames_size);
+                     number_of_frames,
+                     ms);
     }
 }

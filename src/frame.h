@@ -27,13 +27,12 @@ typedef struct
 
 typedef struct
 {
-    const uint8_t* buf;
-    size_t len;
-    
+    const int16_t* buf;
     int bits_per_sample;
     int sample_rate;
     size_t channels;
     size_t frames;
+    int64_t ms;
     bool remote;
 } IAudioFrame;
 

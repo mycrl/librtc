@@ -12,24 +12,32 @@
 #include "api/media_stream_interface.h"
 #include "frame.h"
 #include "base.h"
+#include <set>
 
 /*
  audio source
  */
 class IAudioTrackSource
-: public rtc::RefCountedObject<webrtc::AudioSourceInterface>
+: public webrtc::AudioSourceInterface
 {
 public:
+    static IAudioTrackSource* Create();
+    void RegisterObserver(webrtc::ObserverInterface* observer);
+    void UnregisterObserver(webrtc::ObserverInterface* observer);
     void AddSink(webrtc::AudioTrackSinkInterface* sink);
     void RemoveSink(webrtc::AudioTrackSinkInterface* sink);
-    void AddData(const uint16_t* buf, size_t size, size_t frames_size);
+    SourceState state() const;
+    bool remote() const;
     
-    size_t number_of_channels;
-    int bits_per_sample;
-    int sample_rate;
+    void OnData(const int16_t* audio_data,
+                size_t number_of_frames,
+                size_t number_of_channels,
+                int bits_per_sample,
+                int sample_rate,
+                int64_t ms);
 private:
-    std::vector<webrtc::AudioTrackSinkInterface*> _sinks;
-    std::vector<webrtc::ObserverInterface*> _observers;
+    std::set<webrtc::AudioTrackSinkInterface*> _sinks;
+    std::set<webrtc::ObserverInterface*> _observers;
 };
 
 /*

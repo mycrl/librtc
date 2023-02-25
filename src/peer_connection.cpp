@@ -11,6 +11,7 @@
 #include "api/video_codecs/builtin_video_encoder_factory.h"
 #include "api/create_peerconnection_factory.h"
 #include "rtc_base/ssl_adapter.h"
+#include "audio_capture_module.h"
 #include "peer_connection.h"
 
 void rtc_run()
@@ -40,7 +41,7 @@ RTCPeerConnection* rtc_create_peer_connection(RTCPeerConnectionConfigure* c_conf
                                                           nullptr,
                                                           nullptr,
                                                           nullptr,
-                                                          nullptr,
+                                                          AudioCaptureModule::Create(),
                                                           webrtc::CreateBuiltinAudioEncoderFactory(),
                                                           webrtc::CreateBuiltinAudioDecoderFactory(),
                                                           webrtc::CreateBuiltinVideoEncoderFactory(),
@@ -54,7 +55,7 @@ RTCPeerConnection* rtc_create_peer_connection(RTCPeerConnectionConfigure* c_conf
     
     webrtc::PeerConnectionDependencies pc_dependencies(Observer::Create(events, ctx));
     auto error_or_pc = rtc->pc_factory->CreatePeerConnectionOrError(
-                                                                    from_c(c_config), 
+                                                                    from_c(c_config),
                                                                     std::move(pc_dependencies));
     if (error_or_pc.ok()) {
         rtc->pc = std::move(error_or_pc.value());
@@ -85,12 +86,12 @@ void rtc_create_offer(RTCPeerConnection* rtc, CreateDescCallback callback, void*
 }
 
 void rtc_set_local_description(RTCPeerConnection* rtc, 
-                               RTCSessionDescription* c_desc, 
-                               SetDescCallback callback, 
+                               RTCSessionDescription* c_desc,
+                               SetDescCallback callback,
                                void* ctx)
 {
     auto observer = SetDescObserver::Create(callback, ctx);
-    rtc->pc->SetLocalDescription(observer, from_c(c_desc).release());
+    rtc->pc->SetLocalDescription(std::move(observer), from_c(c_desc).release());
 }
 
 void rtc_set_remote_description(RTCPeerConnection* rtc,
@@ -99,15 +100,22 @@ void rtc_set_remote_description(RTCPeerConnection* rtc,
                                 void* ctx)
 {
     auto observer = SetDescObserver::Create(callback, ctx);
-    rtc->pc->SetRemoteDescription(observer, from_c(c_desc).release());
+    rtc->pc->SetRemoteDescription(std::move(observer), from_c(c_desc).release());
 }
 
-void rtc_add_media_stream_track(RTCPeerConnection* rtc, MediaStreamTrack* track, char* stream_id)
+void rtc_add_media_stream_track(RTCPeerConnection* rtc,
+                                MediaStreamTrack* target,
+                                char* stream_id)
 {
-    if (track->kind == MediaStreamTrackKind::MediaStreamTrackKindVideo)
+    if (target->kind == MediaStreamTrackKind::MediaStreamTrackKindVideo)
     {
-        auto video_track = rtc->pc_factory->CreateVideoTrack(track->label, track->video_source);
-        rtc->pc->AddTrack(video_track, { stream_id });
+        auto track = rtc->pc_factory->CreateVideoTrack(target->label, target->video_source);
+        rtc->pc->AddTrack(std::move(track),{ stream_id });
+    }
+    else
+    {
+        auto track = rtc->pc_factory->CreateAudioTrack(target->label, target->audio_source);
+        rtc->pc->AddTrack(std::move(track), { stream_id });
     }
 }
 
