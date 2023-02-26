@@ -166,7 +166,7 @@ void rtc_add_audio_track_frame(MediaStreamTrack* track, IAudioFrame* frame)
     track->audio_source->OnData(frame->buf,
                                 frame->frames,
                                 frame->channels,
-                                frame->bits_per_sample,
+                                16,
                                 frame->sample_rate,
                                 frame->ms);
 }

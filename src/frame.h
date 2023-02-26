@@ -28,7 +28,8 @@ typedef struct
 typedef struct
 {
     const int16_t* buf;
-    int bits_per_sample;
+    size_t len;
+    
     int sample_rate;
     size_t channels;
     size_t frames;
