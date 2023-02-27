@@ -27,9 +27,10 @@ typedef struct
 
 typedef struct
 {
-    const int16_t* buf;
+    const void* buf;
     size_t len;
     
+    int bits_per_sample;
     int sample_rate;
     size_t channels;
     size_t frames;
@@ -40,7 +41,11 @@ typedef struct
 extern "C" EXPORT void rtc_free_video_frame(IVideoFrame* frame);
 extern "C" EXPORT void rtc_free_audio_frame(IAudioFrame* frame);
 
-IAudioFrame* into_c(const uint8_t* buf, int b, int r, size_t c, size_t f);
+IAudioFrame* into_c(const void* buf,
+                    int bits_per_sample,
+                    int sample_rate,
+                    size_t channels,
+                    size_t frames_);
 IVideoFrame* into_c(webrtc::VideoFrame* frame);
 webrtc::VideoFrame from_c(IVideoFrame* frame);
 

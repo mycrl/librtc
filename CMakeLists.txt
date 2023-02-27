@@ -81,6 +81,20 @@ if (NOT EXISTS "${THIRD_PARTY_DIR}/webrtc/src/out/${CMAKE_BUILD_TYPE}")
 
 endif()
 
+# FFmpeg
+
+# Clone the ffmpeg repository.
+if (NOT EXISTS "${THIRD_PARTY_DIR}/ffmpeg")
+    execute_process(
+        WORKING_DIRECTORY "${THIRD_PARTY_DIR}"
+        COMMAND bash -c "git clone \
+                         --depth=1 --branch release/6.0 \
+                         https://git.ffmpeg.org/ffmpeg.git")
+    execute_process(
+        WORKING_DIRECTORY "${THIRD_PARTY_DIR}/ffmpeg"
+        COMMAND bash -c "./configure")
+endif()
+
 # The compilation target is a dynamic library.
 add_library(rtc SHARED
             src/base.h
@@ -113,7 +127,8 @@ add_library(rtc SHARED
 # Add third-party libraries to the search path.
 include_directories("${THIRD_PARTY_DIR}/webrtc/src/third_party/libyuv/include"
                     "${THIRD_PARTY_DIR}/webrtc/src/third_party/abseil-cpp"
-                    "${THIRD_PARTY_DIR}/webrtc/src")
+                    "${THIRD_PARTY_DIR}/webrtc/src"
+                    "${THIRD_PARTY_DIR}/ffmpeg")
 
 # Add third-party library files.
 target_link_directories(rtc PRIVATE 

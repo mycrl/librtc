@@ -29,7 +29,7 @@ public:
     SourceState state() const;
     bool remote() const;
     
-    void OnData(const int16_t* audio_data,
+    void OnData(const void* audio_data,
                 size_t number_of_frames,
                 size_t number_of_channels,
                 int bits_per_sample,
@@ -51,7 +51,11 @@ class IAudioTrackSink
 public:
     IAudioTrackSink(webrtc::AudioTrackInterface* track);
     static IAudioTrackSink* Create(webrtc::AudioTrackInterface* track);
-    void OnData(const void* buf, int b, int s, size_t c, size_t f);
+    void OnData(const void* audio_data,
+                int bits_per_sample,
+                int sample_rate,
+                size_t number_of_channels,
+                size_t number_of_frames);
     void SetOnFrame(void* ctx, void(*handler)(void* ctx, IAudioFrame* frame));
     void RemoveOnFrame();
 private:

@@ -74,7 +74,7 @@ webrtc::VideoFrame from_c(IVideoFrame* frame)
     return webrtc::VideoFrame(i420_buf, 0, 0, webrtc::kVideoRotation_0);
 }
 
-IAudioFrame* into_c(const uint8_t* buf,
+IAudioFrame* into_c(const void* buf,
                     int bits_per_sample,
                     int sample_rate,
                     size_t channels,

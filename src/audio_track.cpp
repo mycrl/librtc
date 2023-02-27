@@ -35,7 +35,7 @@ void IAudioTrackSink::OnData(const void* audio_data,
         return;
     }
     
-    auto frames = into_c((const uint8_t*)audio_data,
+    auto frames = into_c(audio_data,
                          bits_per_sample,
                          sample_rate,
                          number_of_channels,
@@ -100,7 +100,7 @@ bool IAudioTrackSource::remote() const
     return false;
 }
 
-void IAudioTrackSource::OnData(const int16_t* audio_data,
+void IAudioTrackSource::OnData(const void* audio_data,
                                size_t number_of_frames,
                                size_t number_of_channels,
                                int bits_per_sample,
