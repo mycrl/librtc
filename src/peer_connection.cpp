@@ -13,6 +13,7 @@
 #include "rtc_base/ssl_adapter.h"
 #include "audio_capture_module.h"
 #include "peer_connection.h"
+#include "video_encoder.h"
 
 void rtc_run()
 {
@@ -44,7 +45,7 @@ RTCPeerConnection* rtc_create_peer_connection(RTCPeerConnectionConfigure* c_conf
                                                           AudioCaptureModule::Create(),
                                                           webrtc::CreateBuiltinAudioEncoderFactory(),
                                                           webrtc::CreateBuiltinAudioDecoderFactory(),
-                                                          webrtc::CreateBuiltinVideoEncoderFactory(),
+                                                          IVideoEncoderFactory::Create(),
                                                           webrtc::CreateBuiltinVideoDecoderFactory(),
                                                           nullptr,
                                                           nullptr);

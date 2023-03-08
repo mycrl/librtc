@@ -32,9 +32,9 @@ endif()
 # semicolon ; to separate paths. On Linux and macOS operating systems, 
 # use a colon : to separate paths.
 if (MSVC)
-        set(ENV{PATH} "$ENV{PATH};${THIRD_PARTY_DIR}/depot_tools")
+    set(ENV{PATH} "$ENV{PATH};${THIRD_PARTY_DIR}/depot_tools")
 else()
-        set(ENV{PATH} "$ENV{PATH}:${THIRD_PARTY_DIR}/depot_tools")
+    set(ENV{PATH} "$ENV{PATH}:${THIRD_PARTY_DIR}/depot_tools")
 endif()
 
 # Sync webrtc toolchain and many dependencies. The checkout size is large due the 
@@ -82,17 +82,14 @@ if (NOT EXISTS "${THIRD_PARTY_DIR}/webrtc/src/out/${CMAKE_BUILD_TYPE}")
 endif()
 
 # FFmpeg
-
-# Clone the ffmpeg repository.
-if (NOT EXISTS "${THIRD_PARTY_DIR}/ffmpeg")
-    execute_process(
-        WORKING_DIRECTORY "${THIRD_PARTY_DIR}"
-        COMMAND bash -c "git clone \
-                         --depth=1 --branch release/6.0 \
-                         https://git.ffmpeg.org/ffmpeg.git")
-    execute_process(
-        WORKING_DIRECTORY "${THIRD_PARTY_DIR}/ffmpeg"
-        COMMAND bash -c "./configure")
+#
+# - Apple: brew install ffmpeg
+# - Ubuntu: apt install ffmpeg
+if(APPLE)
+    execute_process(COMMAND bash -c "brew --prefix ffmpeg"
+                    OUTPUT_VARIABLE FFMPEG_PREFIX
+                    OUTPUT_STRIP_TRAILING_WHITESPACE)
+    set(FFMPEG_PREFIX ${FFMPEG_PREFIX} CACHE INTERNAL "")
 endif()
 
 # The compilation target is a dynamic library.
@@ -128,12 +125,15 @@ add_library(rtc SHARED
 include_directories("${THIRD_PARTY_DIR}/webrtc/src/third_party/libyuv/include"
                     "${THIRD_PARTY_DIR}/webrtc/src/third_party/abseil-cpp"
                     "${THIRD_PARTY_DIR}/webrtc/src"
-                    "${THIRD_PARTY_DIR}/ffmpeg")
+                    "${FFMPEG_PREFIX}/include")
 
 # Add third-party library files.
 target_link_directories(rtc PRIVATE 
-                        "${THIRD_PARTY_DIR}/webrtc/src/out/${CMAKE_BUILD_TYPE}/obj")
-target_link_libraries(rtc webrtc)
+                        "${THIRD_PARTY_DIR}/webrtc/src/out/${CMAKE_BUILD_TYPE}/obj"
+                        "${FFMPEG_PREFIX}/lib")
+target_link_libraries(rtc webrtc
+                      avcodec
+                      avutil)
 
 # If it is msvc, you need to set the runtime library.
 if(MSVC)
