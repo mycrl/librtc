@@ -76,50 +76,50 @@ if (NOT EXISTS "${THIRD_PARTY_DIR}/webrtc/src/out/${CMAKE_BUILD_TYPE}")
                                                                 use_rtti=true \
                                                                 rtc_include_tests=false \
                                                                 rtc_build_examples=false \
-                                                                use_custom_libcxx=false' \
+                                                                use_custom_libcxx=false
+                                                                rtc_use_h264=true' \
                         && ninja -C out/${CMAKE_BUILD_TYPE}")
 
 endif()
 
 # FFmpeg
-#
-# - Apple: brew install ffmpeg
-# - Ubuntu: apt install ffmpeg
 if(APPLE)
-    execute_process(COMMAND bash -c "brew --prefix ffmpeg"
+	execute_process(COMMAND bash -c "brew --prefix ffmpeg"
                     OUTPUT_VARIABLE FFMPEG_PREFIX
                     OUTPUT_STRIP_TRAILING_WHITESPACE)
-    set(FFMPEG_PREFIX ${FFMPEG_PREFIX} CACHE INTERNAL "")
+    set(FFMPEG_PREFIX ${FFMPEG_PREFIX})
 endif()
 
 # The compilation target is a dynamic library.
 add_library(rtc SHARED
-            src/base.h
-            src/base.cpp
-            src/frame.h
-            src/frame.cpp
-            src/media_stream_track.h
-            src/media_stream_track.cpp
-            src/video_track.h
-            src/video_track.cpp
-            src/audio_track.h
-            src/audio_track.cpp
-            src/audio_capture_module.h
-            src/audio_capture_module.cpp
-            src/observer.cpp
-            src/observer.h
-            src/peer_connection.cpp
-            src/peer_connection.h
-            src/peer_connection_config.h
-            src/peer_connection_config.cpp
-            src/session_description.h
-            src/session_description.cpp
-            src/ice_candidate.h
-            src/ice_candidate.cpp
-            src/data_channel.h
-            src/data_channel.cpp
-            src/video_encoder.h
-            src/video_encoder.cpp)
+	src/base.h
+	src/base.cpp
+	src/frame.h
+	src/frame.cpp
+	src/media_stream_track.h
+	src/media_stream_track.cpp
+	src/video_track.h
+	src/video_track.cpp
+	src/audio_track.h
+	src/audio_track.cpp
+	src/audio_capture_module.h
+    src/audio_capture_module.cpp
+	src/observer.cpp
+	src/observer.h
+	src/peer_connection.cpp
+	src/peer_connection.h
+	src/peer_connection_config.h
+	src/peer_connection_config.cpp
+	src/session_description.h
+	src/session_description.cpp
+	src/ice_candidate.h
+	src/ice_candidate.cpp
+	src/data_channel.h
+	src/data_channel.cpp
+	src/video/video_encoder.h
+	src/video/video_encoder.cpp
+    src/video/h264_encoder.h
+    src/video/h264_encoder.cpp)
 
 # Add third-party libraries to the search path.
 include_directories("${THIRD_PARTY_DIR}/webrtc/src/third_party/libyuv/include"
@@ -130,10 +130,10 @@ include_directories("${THIRD_PARTY_DIR}/webrtc/src/third_party/libyuv/include"
 # Add third-party library files.
 target_link_directories(rtc PRIVATE 
                         "${THIRD_PARTY_DIR}/webrtc/src/out/${CMAKE_BUILD_TYPE}/obj"
-                        "${FFMPEG_PREFIX}/lib")
-target_link_libraries(rtc webrtc
-                      avcodec
-                      avutil)
+						"${FFMPEG_PREFIX}/lib")
+target_link_libraries(rtc avcodec
+                      avutil
+                      webrtc)
 
 # If it is msvc, you need to set the runtime library.
 if(MSVC)

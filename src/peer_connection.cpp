@@ -10,10 +10,10 @@
 #include "api/video_codecs/builtin_video_decoder_factory.h"
 #include "api/video_codecs/builtin_video_encoder_factory.h"
 #include "api/create_peerconnection_factory.h"
+#include "video/video_encoder.h"
 #include "rtc_base/ssl_adapter.h"
 #include "audio_capture_module.h"
 #include "peer_connection.h"
-#include "video_encoder.h"
 
 void rtc_run()
 {
@@ -58,7 +58,8 @@ RTCPeerConnection* rtc_create_peer_connection(RTCPeerConnectionConfigure* c_conf
     auto error_or_pc = rtc->pc_factory->CreatePeerConnectionOrError(
                                                                     from_c(c_config),
                                                                     std::move(pc_dependencies));
-    if (error_or_pc.ok()) {
+    if (error_or_pc.ok()) 
+    {
         rtc->pc = std::move(error_or_pc.value());
     }
     else
@@ -126,7 +127,8 @@ RTCDataChannel* rtc_create_data_channel(RTCPeerConnection* rtc,
 {
     auto init = from_c(options);
     auto ret = rtc->pc->CreateDataChannelOrError(std::string(label), std::move(init));
-    if (ret.ok()) {
+    if (ret.ok()) 
+    {
         return create_data_channel(std::move(ret.value()));
     }
     else
