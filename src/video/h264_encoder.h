@@ -9,10 +9,12 @@
 #define h264_encoder_h
 #pragma once
 
+extern "C" {
+#include "libavcodec/avcodec.h"
+}
 #include "api/create_peerconnection_factory.h"
 #include "common_video/h264/h264_bitstream_parser.h"
 #include "common_video/h264/h264_common.h"
-#include <VideoToolbox/VideoToolbox.h>
 
 class H264EncoderLayer
 {
@@ -22,10 +24,10 @@ public:
     webrtc::H264PacketizationMode pkt_mode;
     webrtc::EncodedImage image;
     uint8_t simulcast_idx;
-//    const AVCodec* codec;
-//    AVCodecContext* ctx;
-//    AVPacket* packet;
-//    AVFrame* frame;
+    const AVCodec* codec;
+    AVCodecContext* ctx;
+    AVPacket* packet;
+    AVFrame* frame;
 };
 
 class H264Encoder
