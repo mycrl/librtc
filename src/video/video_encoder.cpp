@@ -12,12 +12,14 @@
 IVideoEncoderFactory::IVideoEncoderFactory()
 {    
     _factory = webrtc::CreateBuiltinVideoEncoderFactory();
-    for (auto format: (*_factory)->GetSupportedFormats())
+    for (auto suprs: {
+        H264Encoder::GetSupportedFormats()
+    })
     {
-       if (format.name == "H264")
-       {
+        for (auto format: suprs)
+        {
             _formats.push_back(format);
-       }
+        }
     }
 }
 

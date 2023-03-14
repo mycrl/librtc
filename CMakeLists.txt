@@ -77,7 +77,7 @@ if (NOT EXISTS "${THIRD_PARTY_DIR}/webrtc/src/out/${CMAKE_BUILD_TYPE}")
                                                                 rtc_include_tests=false \
                                                                 rtc_build_examples=false \
                                                                 use_custom_libcxx=false
-                                                                rtc_use_h264=true' \
+                                                                rtc_use_h264=false' \
                         && ninja -C out/${CMAKE_BUILD_TYPE}")
 
 endif()
