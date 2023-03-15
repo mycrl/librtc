@@ -244,7 +244,8 @@ int H264Encoder::_OnFrame(int index,
                                          width,
                                          height,
                                          1);
-    if (need_size != len) {
+    if (need_size != len) 
+    {
         return -1;
     }
     
