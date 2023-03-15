@@ -286,17 +286,6 @@ std::optional<H264EncoderLayer> H264Encoder::_OpenEncoder(const webrtc::Simulcas
         encoder.pkt_mode = webrtc::H264PacketizationMode::SingleNalUnit;
     }
     
-#ifdef CODEC_VIDEOTOOLBOX
-    encoder.codec = avcodec_find_encoder_by_name("h264_videotoolbox");
-#else
-    encoder.codec = avcodec_find_encoder_by_name("libx264");
-#endif
-    
-    if (!encoder.codec)
-    {
-        return std::nullopt;
-    }
-    
     encoder.ctx = avcodec_alloc_context3(encoder.codec);
     if (encoder.ctx == NULL)
     {
@@ -313,12 +302,31 @@ std::optional<H264EncoderLayer> H264Encoder::_OpenEncoder(const webrtc::Simulcas
     encoder.ctx->pkt_timebase = av_make_q(1, stream->maxFramerate);
     encoder.ctx->gop_size = _codec_settings->H264().keyFrameInterval;
     
-#ifdef CODEC_VIDEOTOOLBOX
-    av_opt_set_int(encoder.ctx->priv_data, "prio_speed", 1, 0);
-    av_opt_set_int(encoder.ctx->priv_data, "realtime", 0ß, 0);
-#else
-    av_opt_set(encoder.ctx->priv_data, "tune", "zerolatency", 0);
-#endif
+    for (std::string name: {"h264_videotoolbox",
+                            "libx264"})
+    {
+        encoder.codec = avcodec_find_encoder_by_name(name.c_str());
+        if (encoder.codec)
+        {
+            encoder.name = name;
+            break;
+        }
+    }
+
+    if (!encoder.codec)
+    {
+        return std::nullopt;
+    }
+    
+    if (encoder.name == "h264_videotoolbox")
+    {
+        av_opt_set_int(encoder.ctx->priv_data, "prio_speed", 1, 0);
+        av_opt_set_int(encoder.ctx->priv_data, "realtime", 0, 0);
+    }
+    else
+    {
+        av_opt_set(encoder.ctx->priv_data, "tune", "zerolatency", 0);
+    }
     
     ret = avcodec_open2(encoder.ctx, encoder.codec, NULL);
     if (ret != 0)

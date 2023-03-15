@@ -28,6 +28,7 @@ public:
         avcodec_free_context(&ctx);
     }
     
+    std::string name;
     webrtc::H264PacketizationMode pkt_mode;
     webrtc::EncodedImage image;
     uint8_t simulcast_idx;

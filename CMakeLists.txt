@@ -31,7 +31,7 @@ endif()
 # On Windows operating systems, the PATH environment variable uses a 
 # semicolon ; to separate paths. On Linux and macOS operating systems, 
 # use a colon : to separate paths.
-if (MSVC)
+if (WIN32)
     set(ENV{PATH} "$ENV{PATH};${THIRD_PARTY_DIR}/depot_tools")
 else()
     set(ENV{PATH} "$ENV{PATH}:${THIRD_PARTY_DIR}/depot_tools")
@@ -63,7 +63,7 @@ if (NOT EXISTS "${THIRD_PARTY_DIR}/webrtc/src/out/${CMAKE_BUILD_TYPE}")
     endif()
 
     # Compile with native toolchain (only Windows).
-    if (MSVC)
+    if (WIN32)
         set(DEPOT_TOOLS_WIN_TOOLCHAIN "0")
     endif()
 
@@ -88,6 +88,8 @@ if(APPLE)
                     OUTPUT_VARIABLE FFMPEG_PREFIX
                     OUTPUT_STRIP_TRAILING_WHITESPACE)
     set(FFMPEG_PREFIX ${FFMPEG_PREFIX})
+else()
+    set(FFMPEG_PREFIX $ENV{FFMPEG_PREFIX})
 endif()
 
 # The compilation target is a dynamic library.
@@ -135,12 +137,12 @@ target_link_libraries(rtc avcodec
                       avutil
                       webrtc)
 
-# If it is msvc, you need to set the runtime library.
-if(MSVC)
+# If it is WIN32, you need to set the runtime library.
+if(WIN32)
     if(CMAKE_BUILD_TYPE STREQUAL "Release")
-        set_property(TARGET rtc PROPERTY MSVC_RUNTIME_LIBRARY MultiThreaded)
+        set_property(TARGET rtc PROPERTY WIN32_RUNTIME_LIBRARY MultiThreaded)
     else()
-        set_property(TARGET rtc PROPERTY MSVC_RUNTIME_LIBRARY MultiThreadedDebug)
+        set_property(TARGET rtc PROPERTY WIN32_RUNTIME_LIBRARY MultiThreadedDebug)
     endif()
 endif()
 
@@ -152,7 +154,7 @@ else()
 endif()
 
 # Build header.
-if(MSVC)
+if(WIN32)
     add_compile_definitions(_CONSOLE
                             USE_AURA=1
                             _HAS_EXCEPTIONS=0
@@ -197,7 +199,7 @@ elseif(UNIX AND NOT APPLE)
 endif()
 
 # Introduce other runtime necessary library files.
-if(MSVC)
+if(WIN32)
     target_link_libraries(rtc
                           winmm
                           secur32
