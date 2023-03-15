@@ -54,16 +54,7 @@ std::vector<webrtc::SdpVideoFormat> ISupportedH264Codecs(bool mode /* add_scalab
 
 std::vector<webrtc::SdpVideoFormat> H264Encoder::GetSupportedFormats()
 {
-    std::vector<webrtc::SdpVideoFormat> supportedCodecs = ISupportedH264Codecs(true);
-    supportedCodecs.push_back(ICreateH264Format(webrtc::H264Profile::kProfilePredictiveHigh444,
-                                                webrtc::H264Level::kLevel3_1,
-                                                "1",
-                                                true));
-    supportedCodecs.push_back(ICreateH264Format(webrtc::H264Profile::kProfilePredictiveHigh444,
-                                                webrtc::H264Level::kLevel3_1,
-                                                "0",
-                                                true));
-    return supportedCodecs;
+    return ISupportedH264Codecs(true);
 }
 
 std::unique_ptr<H264Encoder> H264Encoder::Create(const webrtc::SdpVideoFormat& format)
@@ -285,6 +276,22 @@ std::optional<H264EncoderLayer> H264Encoder::_OpenEncoder(const webrtc::Simulcas
     {
         encoder.pkt_mode = webrtc::H264PacketizationMode::SingleNalUnit;
     }
+
+    for (std::string name: {"h264_videotoolbox",
+                            "libx264"})
+    {
+        encoder.codec = avcodec_find_encoder_by_name(name.c_str());
+        if (encoder.codec)
+        {
+            encoder.name = name;
+            break;
+        }
+    }
+
+    if (!encoder.codec)
+    {
+        return std::nullopt;
+    }
     
     encoder.ctx = avcodec_alloc_context3(encoder.codec);
     if (encoder.ctx == NULL)
@@ -301,22 +308,6 @@ std::optional<H264EncoderLayer> H264Encoder::_OpenEncoder(const webrtc::Simulcas
     encoder.ctx->time_base = av_make_q(1, stream->maxFramerate);
     encoder.ctx->pkt_timebase = av_make_q(1, stream->maxFramerate);
     encoder.ctx->gop_size = _codec_settings->H264().keyFrameInterval;
-    
-    for (std::string name: {"h264_videotoolbox",
-                            "libx264"})
-    {
-        encoder.codec = avcodec_find_encoder_by_name(name.c_str());
-        if (encoder.codec)
-        {
-            encoder.name = name;
-            break;
-        }
-    }
-
-    if (!encoder.codec)
-    {
-        return std::nullopt;
-    }
     
     if (encoder.name == "h264_videotoolbox")
     {
