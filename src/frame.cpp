@@ -10,7 +10,6 @@
 
 void rtc_free_video_frame(IVideoFrame* frame)
 {
-    free_incomplete_ptr((uint8_t*)frame->buf);
     free_incomplete_ptr(frame);
 }
 
@@ -34,30 +33,18 @@ IVideoFrame* into_c(webrtc::VideoFrame* frame)
         i420_buf = video_frame_buf->ToI420().get();
     }
     
-    i420_frame->stride_y = i420_buf->StrideY();
-    i420_frame->stride_u = i420_buf->StrideU();
-    i420_frame->stride_v = i420_buf->StrideV();
-    
-    i420_frame->width = i420_buf->width();
-    i420_frame->height = i420_buf->height();
-    
     size_t size_y = i420_frame->stride_y * i420_frame->height;
     size_t size_uv = i420_frame->stride_u * (i420_frame->height / 2);
     size_t buf_size = size_y + (size_uv * 2);
     
-    i420_frame->buf = (const uint8_t*)malloc(sizeof(uint8_t) * buf_size);
-    if (!i420_frame->buf)
-    {
-        rtc_free_video_frame(i420_frame);
-        return NULL;
-    }
-    
-    memcpy((uint8_t*)i420_frame->buf, i420_buf->DataY(), size_y);
-    memcpy((uint8_t*)i420_frame->buf + size_y, i420_buf->DataU(), size_uv);
-    memcpy((uint8_t*)i420_frame->buf + size_y + size_uv, i420_buf->DataV(), size_uv);
-    
     i420_frame->remote = true;
     i420_frame->len = buf_size;
+    i420_frame->buf = i420_buf->DataY();
+    i420_frame->width = i420_buf->width();
+    i420_frame->height = i420_buf->height();
+    i420_frame->stride_y = i420_buf->StrideY();
+    i420_frame->stride_u = i420_buf->StrideU();
+    i420_frame->stride_v = i420_buf->StrideV();
     
     return i420_frame;
 }

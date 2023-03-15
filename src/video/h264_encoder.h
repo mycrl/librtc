@@ -53,17 +53,17 @@ public:
     void SetRates(const webrtc::VideoEncoder::RateControlParameters& parameters);
     int32_t Release();
 private:
-    std::optional<H264EncoderLayer> _OpenEncoder(const webrtc::SimulcastStream* stream,
-                                                 int stream_idx);
-    int _ReadPacket(int index,
-                    webrtc::VideoFrameType frame_type,
-                    const webrtc::VideoFrame& frame);
     int _OnFrame(int index,
                  webrtc::VideoFrameType frame_type,
                  const uint8_t* frame_buf,
                  int width,
                  int height,
                  size_t len);
+    int _ReadPacket(int index,
+                    webrtc::VideoFrameType frame_type,
+                    const webrtc::VideoFrame& frame);
+    std::optional<H264EncoderLayer> _OpenEncoder(const webrtc::SimulcastStream* stream,
+                                                 int stream_idx);
     
     const webrtc::VideoCodec* _codec_settings = nullptr;
     webrtc::EncodedImageCallback* _callback = nullptr;
