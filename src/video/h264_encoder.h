@@ -13,6 +13,7 @@
 #include "common_video/h264/h264_bitstream_parser.h"
 #include "api/create_peerconnection_factory.h"
 #include "common_video/h264/h264_common.h"
+#include <optional>
 extern "C" {
 #include "libavcodec/avcodec.h"
 }

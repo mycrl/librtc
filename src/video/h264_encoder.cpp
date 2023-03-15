@@ -116,6 +116,7 @@ int32_t H264Encoder::Encode(const webrtc::VideoFrame& frame,
     int size_y = stride_y * height;
     int size_uv = stride_u * (height / 2);
     int len = size_y + (size_uv * 2);
+    const uint8_t* buf = i420_buf->DataY();
     
     for (auto frame_type: *frame_types)
     {
@@ -128,7 +129,7 @@ int32_t H264Encoder::Encode(const webrtc::VideoFrame& frame,
         {
             if ((_OnFrame(i,
                           frame_type,
-                          i420_buf->DataY(),
+                          buf,
                           width,
                           height,
                           len)) != 0)

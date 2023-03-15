@@ -76,7 +76,7 @@ if (NOT EXISTS "${THIRD_PARTY_DIR}/webrtc/src/out/${CMAKE_BUILD_TYPE}")
                                                                 use_rtti=true \
                                                                 rtc_include_tests=false \
                                                                 rtc_build_examples=false \
-                                                                use_custom_libcxx=false
+                                                                use_custom_libcxx=false \
                                                                 rtc_use_h264=false' \
                         && ninja -C out/${CMAKE_BUILD_TYPE}")
 
@@ -138,11 +138,11 @@ target_link_libraries(rtc avcodec
                       webrtc)
 
 # If it is WIN32, you need to set the runtime library.
-if(WIN32)
+if(MSVC)
     if(CMAKE_BUILD_TYPE STREQUAL "Release")
-        set_property(TARGET rtc PROPERTY WIN32_RUNTIME_LIBRARY MultiThreaded)
+        set_property(TARGET rtc PROPERTY MSVC_RUNTIME_LIBRARY MultiThreaded)
     else()
-        set_property(TARGET rtc PROPERTY WIN32_RUNTIME_LIBRARY MultiThreadedDebug)
+        set_property(TARGET rtc PROPERTY MSVC_RUNTIME_LIBRARY MultiThreadedDebug)
     endif()
 endif()
 
@@ -205,7 +205,8 @@ if(WIN32)
                           secur32
                           msdmo
                           dmoguids
-                          wmcodecdspuuid)
+                          wmcodecdspuuid
+                          iphlpapi)
 elseif(APPLE)
     target_link_libraries(rtc
                           c++

@@ -10,6 +10,7 @@
 #pragma once
 
 #include "api/video_codecs/video_encoder_factory.h"
+#include <optional>
 
 class IVideoEncoderFactory
 : public webrtc::VideoEncoderFactory
