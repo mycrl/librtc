@@ -278,7 +278,9 @@ std::optional<H264EncoderLayer> H264Encoder::_OpenEncoder(const webrtc::Simulcas
         encoder.pkt_mode = webrtc::H264PacketizationMode::SingleNalUnit;
     }
 
-    for (std::string name: {"h264_videotoolbox",
+    for (std::string name: {"h264_qsv",
+                            "h264_nvenc",
+                            "h264_videotoolbox",
                             "libx264"})
     {
         encoder.codec = avcodec_find_encoder_by_name(name.c_str());
