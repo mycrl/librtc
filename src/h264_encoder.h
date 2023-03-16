@@ -42,8 +42,8 @@ private:
                     const webrtc::VideoFrame& frame);
     
     webrtc::H264BitstreamParser _h264_bitstream_parser;
+    webrtc::CodecSpecificInfo _codec_specific;
     webrtc::EncodedImageCallback* _callback;
-    webrtc::H264PacketizationMode _pkt_mode;
     webrtc::EncodedImage _image;
     const AVCodec* _codec;
     AVCodecContext* _ctx;

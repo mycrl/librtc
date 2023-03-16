@@ -21,10 +21,7 @@ std::unique_ptr<H264Decoder> H264Decoder::Create()
 
 bool H264Decoder::Configure(const Settings& settings)
 {
-    for (std::string name: {"h264_qsv",
-        "h264_cuvid",
-        "h264_videotoolbox",
-        "libx264"})
+    for (auto name: Decoders)
     {
         _codec = avcodec_find_decoder_by_name(name.c_str());
         if (_codec)

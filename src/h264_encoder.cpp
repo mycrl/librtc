@@ -18,14 +18,11 @@ extern "C"
 H264Encoder::H264Encoder(const webrtc::SdpVideoFormat& format)
 {
     auto mode = format.parameters.find(cricket::kH264FmtpPacketizationMode);
-    if (mode != format.parameters.end() && mode->second == "1")
-    {
-        _pkt_mode = webrtc::H264PacketizationMode::NonInterleaved;
-    }
-    else
-    {
-        _pkt_mode = webrtc::H264PacketizationMode::SingleNalUnit;
-    }
+    _codec_specific.codecSpecific.H264.packetization_mode =
+        mode != format.parameters.end() && mode->second == "1"
+            ? webrtc::H264PacketizationMode::NonInterleaved
+            : webrtc::H264PacketizationMode::SingleNalUnit;
+    _codec_specific.codecType = webrtc::kVideoCodecH264;
 }
 
 std::vector<webrtc::SdpVideoFormat> H264Encoder::GetSupportedFormats()
@@ -53,11 +50,7 @@ int H264Encoder::InitEncode(const webrtc::VideoCodec* codec_settings, const Sett
         return WEBRTC_VIDEO_CODEC_ERROR;
     }
     
-    for (std::string name: {
-        "h264_nvenc",
-        "h264_qsv",
-        "h264_videotoolbox",
-        "libx264"})
+    for (auto name: Encoders)
     {
         _codec = avcodec_find_encoder_by_name(name.c_str());
         if (_codec)
@@ -90,7 +83,7 @@ int H264Encoder::InitEncode(const webrtc::VideoCodec* codec_settings, const Sett
     _ctx->max_b_frames = 0;
     _ctx->width = codec_settings->width;
     _ctx->height = codec_settings->height;
-    _ctx->bit_rate = codec_settings->startBitrate * 1000;
+    _ctx->bit_rate = codec_settings->maxBitrate * 1000;
     _ctx->framerate = av_make_q(codec_settings->maxFramerate, 1);
     _ctx->time_base = av_make_q(1, codec_settings->maxFramerate);
     _ctx->pkt_timebase = av_make_q(1, codec_settings->maxFramerate);
@@ -99,9 +92,10 @@ int H264Encoder::InitEncode(const webrtc::VideoCodec* codec_settings, const Sett
     if (_name == "h264_videotoolbox")
     {
         av_opt_set_int(_ctx->priv_data, "prio_speed", 1, 0);
-        av_opt_set_int(_ctx->priv_data, "realtime", 0, 0);
+        av_opt_set_int(_ctx->priv_data, "realtime", 1, 0);
     }
-    else if (_name == "h264_nvenc")
+    
+    if (_name == "h264_nvenc")
     {
         av_opt_set_int(_ctx->priv_data, "zerolatency", 1, 0);
         av_opt_set_int(_ctx->priv_data, "b_adapt", 0, 0);
@@ -112,7 +106,8 @@ int H264Encoder::InitEncode(const webrtc::VideoCodec* codec_settings, const Sett
         av_opt_set_int(_ctx->priv_data, "cq", 30, 0);
         av_opt_set_int(_ctx->priv_data, "multipass", 2, 0);
     }
-    else
+    
+    if (_name == "libx264")
     {
         av_opt_set(_ctx->priv_data, "tune", "zerolatency", 0);
     }
@@ -150,8 +145,6 @@ int H264Encoder::InitEncode(const webrtc::VideoCodec* codec_settings, const Sett
 int32_t H264Encoder::Encode(const webrtc::VideoFrame& frame,
                             const std::vector<webrtc::VideoFrameType>* frame_types)
 {
-    using Vt = webrtc::VideoFrameBuffer::Type;
-    
     if (!_callback)
     {
         return WEBRTC_VIDEO_CODEC_ERROR;
@@ -183,7 +176,7 @@ int32_t H264Encoder::Encode(const webrtc::VideoFrame& frame,
     
     if (_ctx->pix_fmt == AV_PIX_FMT_NV12)
     {
-        libyuv::I420ToNV21(vb->DataY(),
+        libyuv::I420ToNV12(vb->DataY(),
                            stride_y,
                            vb->DataU(),
                            stride_u,
@@ -192,11 +185,11 @@ int32_t H264Encoder::Encode(const webrtc::VideoFrame& frame,
                            (uint8_t*)buf,
                            stride_y,
                            (uint8_t*)buf + size_y,
-                           stride_u,
+                           stride_u * 2,
                            width,
                            height);
     }
-    
+
     for (auto frame_type: *frame_types)
     {
         if (frame_type == webrtc::VideoFrameType::kEmptyFrame)
@@ -232,7 +225,7 @@ int32_t H264Encoder::Encode(const webrtc::VideoFrame& frame,
 
 void H264Encoder::SetRates(const webrtc::VideoEncoder::RateControlParameters& parameters)
 {
-    _ctx->bit_rate = parameters.bitrate.get_sum_bps() / 1000;
+    _ctx->bit_rate = parameters.bitrate.get_sum_bps();
     _ctx->framerate = av_make_q(parameters.framerate_fps, 1);
     _ctx->time_base = av_make_q(1, parameters.framerate_fps);
     _ctx->pkt_timebase = av_make_q(1, parameters.framerate_fps);
@@ -250,40 +243,33 @@ int32_t H264Encoder::Release()
 int H264Encoder::_ReadPacket(webrtc::VideoFrameType frame_type,
                              const webrtc::VideoFrame& frame)
 {
-    int a[] = {AVERROR(EAGAIN), AVERROR_EOF, AVERROR(EINVAL)};
     int ret = avcodec_receive_packet(_ctx, _packet);
     if (ret != 0)
     {
         return -1;
     }
     
-    auto img_buf = webrtc::EncodedImageBuffer::Create(_packet->data,
-                                                      _packet->size);
+    auto img_buf = webrtc::EncodedImageBuffer::Create(_packet->data,_packet->size);
     auto qp = _h264_bitstream_parser.GetLastSliceQp();
     if (!qp.has_value())
     {
-        auto buf = rtc::ArrayView<const uint8_t>(_packet->data,
-                                                 _packet->size);
+        auto buf = rtc::ArrayView<const uint8_t>(_packet->data, _packet->size);
         _h264_bitstream_parser.ParseBitstream(buf);
     }
     
     _image.SetSpatialIndex(0);
     _image.SetEncodedData(img_buf);
-    _image.SetTimestamp(frame.timestamp());
-    _image._encodedWidth = _ctx->width;
-    _image._encodedHeight = _ctx->height;
     _image.set_size(_packet->size);
     _image._frameType = frame_type;
+    _image._encodedWidth = _ctx->width;
+    _image._encodedHeight = _ctx->height;
+    _image.SetTimestamp(frame.timestamp());
     _image.ntp_time_ms_ = frame.ntp_time_ms();
     _image.capture_time_ms_ = frame.render_time_ms();
     _image.rotation_ = frame.rotation();
     _image.qp_ = qp.value_or(-1);
     
-    webrtc::CodecSpecificInfo codec_specific;
-    codec_specific.codecType = webrtc::kVideoCodecH264;
-    codec_specific.codecSpecific.H264.packetization_mode = _pkt_mode;
-    
-    _callback->OnEncodedImage(_image, &codec_specific);
+    _callback->OnEncodedImage(_image, &_codec_specific);
     av_packet_unref(_packet);
     return 0;
 }

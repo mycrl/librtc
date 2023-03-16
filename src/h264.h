@@ -11,6 +11,20 @@
 
 #include "modules/video_coding/codecs/h264/include/h264.h"
 
+static std::string Decoders[] = {
+    "h264_cuvid",
+    "h264_qsv",
+    "h264_videotoolbox",
+    "libx264"
+};
+
+static std::string Encoders[] = {
+    "h264_nvenc",
+    "h264_qsv",
+    "h264_videotoolbox",
+    "libx264"
+};
+
 constexpr webrtc::ScalabilityMode IkSupportedScalabilityModes[] = {
     webrtc::ScalabilityMode::kL1T1,
     webrtc::ScalabilityMode::kL1T2,
