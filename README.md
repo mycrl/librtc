@@ -25,6 +25,7 @@ C bindings for Google Chrome WebRTC Native. Using C++ ABI in other programming l
 - Custom video track and sink. <sup>(`YUV420 format`)</sup>
 - Audio track sink.
 - DataChannel create and sink.
+- Hardware codec support (Nvenc, Qsv, VideoToolBox).
 
 
 ### License
