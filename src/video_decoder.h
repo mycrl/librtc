@@ -22,6 +22,6 @@ public:
 private:
     std::unique_ptr<webrtc::VideoDecoderFactory> _factory;
     std::vector<webrtc::SdpVideoFormat> _formats;
-}
+};
 
 #endif /* librtc_video_decoder_h */

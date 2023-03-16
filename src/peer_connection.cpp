@@ -9,10 +9,10 @@
 #include "api/audio_codecs/builtin_audio_encoder_factory.h"
 #include "api/create_peerconnection_factory.h"
 #include "rtc_base/ssl_adapter.h"
-#include "video_encoder.h"
-#include "video_decoder.h"
 #include "audio_capture_module.h"
 #include "peer_connection.h"
+#include "video_encoder.h"
+#include "video_decoder.h"
 
 void rtc_run()
 {
