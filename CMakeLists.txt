@@ -83,6 +83,7 @@ if (NOT EXISTS "${THIRD_PARTY_DIR}/webrtc/src/out/${CMAKE_BUILD_TYPE}")
 endif()
 
 # FFmpeg
+
 if(APPLE)
 	execute_process(COMMAND bash -c "brew --prefix ffmpeg"
                     OUTPUT_VARIABLE FFMPEG_PREFIX

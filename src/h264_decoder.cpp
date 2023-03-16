@@ -6,7 +6,6 @@
 //
 
 #include "api/video/i420_buffer.h"
-#include "api/video/nv12_buffer.h"
 #include "h264_decoder.h"
 #include "h264.h"
 
@@ -70,9 +69,13 @@ int32_t H264Decoder::Decode(const webrtc::EncodedImage& input_image,
                             bool _missing_frames,
                             int64_t render_time_ms)
 {
+    if (!_codec)
+    {
+        return WEBRTC_VIDEO_CODEC_ERROR;
+    }
+    
     _packet->size = (int)input_image.size();
     _packet->data = (uint8_t*)input_image.data();
-    
     if (avcodec_send_packet(_ctx, _packet) != 0)
     {
         return WEBRTC_VIDEO_CODEC_ERROR;
@@ -111,21 +114,20 @@ int H264Decoder::_OnFrame()
         return -1;
     }
     
-    
-    if (_frame->format != AV_PIX_FMT_YUV420P || _frame->format != AV_PIX_FMT_NV12)
+    if (_frame->format != AV_PIX_FMT_YUV420P)
     {
         return 0;
     }
     
     int64_t time_ms =_frame->pts * (_frame->time_base.num * 1000 / _frame->time_base.den);
     webrtc::VideoFrame frame(webrtc::I420Buffer::Copy(_frame->width,
-                                                            _frame->height,
-                                                            _frame->data[0],
-                                                            _frame->linesize[0],
-                                                            _frame->data[1],
-                                                            _frame->linesize[1],
-                                                            _frame->data[2],
-                                                            _frame->linesize[2]),
+                                                      _frame->height,
+                                                      _frame->data[0],
+                                                      _frame->linesize[0],
+                                                      _frame->data[1],
+                                                      _frame->linesize[1],
+                                                      _frame->data[2],
+                                                      _frame->linesize[2]),
                              webrtc::kVideoRotation_0,
                              time_ms * rtc::kNumMicrosecsPerMillisec);
     _callback->Decoded(frame);

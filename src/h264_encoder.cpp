@@ -6,6 +6,7 @@
 //
 
 #include "h264_encoder.h"
+#include "libyuv.h"
 #include "h264.h"
 
 extern "C"
@@ -76,11 +77,19 @@ int H264Encoder::InitEncode(const webrtc::VideoCodec* codec_settings, const Sett
         return WEBRTC_VIDEO_CODEC_ERROR;
     }
     
+    if (_name == "h264_qsv")
+    {
+        _ctx->pix_fmt = AV_PIX_FMT_NV12;
+    }
+    else
+    {
+        _ctx->pix_fmt = AV_PIX_FMT_YUV420P;
+    }
+    
     _ctx->max_b_frames = 0;
     _ctx->width = codec_settings->width;
     _ctx->height = codec_settings->height;
-    _ctx->pix_fmt = AV_PIX_FMT_YUV420P;
-    _ctx->bit_rate = codec_settings->startBitrate;
+    _ctx->bit_rate = codec_settings->startBitrate * 1000;
     _ctx->framerate = av_make_q(codec_settings->maxFramerate, 1);
     _ctx->time_base = av_make_q(1, codec_settings->maxFramerate);
     _ctx->pkt_timebase = av_make_q(1, codec_settings->maxFramerate);
@@ -114,9 +123,9 @@ int H264Encoder::InitEncode(const webrtc::VideoCodec* codec_settings, const Sett
         return WEBRTC_VIDEO_CODEC_ERROR;
     }
     
-    _frame->format = _ctx->pix_fmt;
     _frame->width = _ctx->width;
     _frame->height = _ctx->height;
+    _frame->format = _ctx->pix_fmt;
     ret = av_frame_get_buffer(_frame, 32);
     if (ret < 0)
     {
@@ -129,6 +138,8 @@ int H264Encoder::InitEncode(const webrtc::VideoCodec* codec_settings, const Sett
 int32_t H264Encoder::Encode(const webrtc::VideoFrame& frame,
                             const std::vector<webrtc::VideoFrameType>* frame_types)
 {
+    using Vt = webrtc::VideoFrameBuffer::Type;
+    
     if (!_callback)
     {
         return WEBRTC_VIDEO_CODEC_ERROR;
@@ -139,26 +150,40 @@ int32_t H264Encoder::Encode(const webrtc::VideoFrame& frame,
         return WEBRTC_VIDEO_CODEC_OK;
     }
     
-    auto video_frame_buf = frame.video_frame_buffer();
-    auto i420_buf = video_frame_buf->GetI420();
-    if (!i420_buf)
-    {
-        i420_buf = video_frame_buf->ToI420().get();
-    }
-    
-    if (!i420_buf)
+    auto vfb = frame.video_frame_buffer();
+    auto vb = vfb->GetI420();
+    if (!vb)
     {
         return WEBRTC_VIDEO_CODEC_ERROR;
     }
     
-    int width = i420_buf->width();
-    int height = i420_buf->height();
-    int stride_y = i420_buf->StrideY();
-    int stride_u = i420_buf->StrideU();
+    int width = vb->width();
+    int height = vb->height();
+    int stride_y = vb->StrideY();
+    int stride_u = vb->StrideU();
     int size_y = stride_y * height;
     int size_uv = stride_u * (height / 2);
     int len = size_y + (size_uv * 2);
-    const uint8_t* buf = i420_buf->DataY();
+    
+    const uint8_t* buf = _ctx->pix_fmt == AV_PIX_FMT_NV12
+        ? (uint8_t*)malloc(sizeof(uint8_t) * len)
+        : vb->DataY();
+    
+    if (_ctx->pix_fmt == AV_PIX_FMT_NV12)
+    {
+        libyuv::I420ToNV21(vb->DataY(),
+                           stride_y,
+                           vb->DataU(),
+                           stride_u,
+                           vb->DataV(),
+                           vb->StrideV(),
+                           (uint8_t*)buf,
+                           stride_y,
+                           (uint8_t*)buf + size_y,
+                           stride_u,
+                           width,
+                           height);
+    }
     
     for (auto frame_type: *frame_types)
     {
@@ -183,6 +208,11 @@ int32_t H264Encoder::Encode(const webrtc::VideoFrame& frame,
                 break;
             }
         }
+    }
+    
+    if (_ctx->pix_fmt == AV_PIX_FMT_NV12)
+    {
+        free((void*)buf);
     }
     
     return WEBRTC_VIDEO_CODEC_OK;
