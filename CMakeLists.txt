@@ -118,10 +118,16 @@ add_library(rtc SHARED
 	src/ice_candidate.cpp
 	src/data_channel.h
 	src/data_channel.cpp
-	src/video/video_encoder.h
-	src/video/video_encoder.cpp
-    src/video/h264_encoder.h
-    src/video/h264_encoder.cpp)
+	src/video_encoder.h
+	src/video_encoder.cpp
+    src/video_decoder.h
+    src/video_decoder.cpp
+    src/h264.h
+    src/h264.cpp
+    src/h264_encoder.h
+    src/h264_encoder.cpp
+    src/h264_decoder.h
+    src/h264_decoder.cpp)
 
 # Add third-party libraries to the search path.
 include_directories("${THIRD_PARTY_DIR}/webrtc/src/third_party/libyuv/include"

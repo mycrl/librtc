@@ -8,10 +8,6 @@
 #include "ice_candidate.h"
 #include "base.h"
 
-/**
- * ice candidate
- */
-
 const webrtc::IceCandidateInterface* from_c(RTCIceCandidate* ice_candidate)
 {
     int index = ice_candidate->sdp_mline_index;

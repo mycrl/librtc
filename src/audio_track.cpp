@@ -7,9 +7,7 @@
 
 #include "audio_track.h"
 
-/*
- IAudioTrackSink
- */
+/* IAudioTrackSink */
 
 IAudioTrackSink::IAudioTrackSink(webrtc::AudioTrackInterface* track)
 {
@@ -58,9 +56,7 @@ void IAudioTrackSink::RemoveOnFrame()
     _ctx = NULL;
 }
 
-/*
- IAudioTrackSource
- */
+/* IAudioTrackSource */
 
 IAudioTrackSource* IAudioTrackSource::Create()
 {

@@ -10,8 +10,8 @@
 #include "h264_encoder.h"
 
 IVideoEncoderFactory::IVideoEncoderFactory()
-{    
-    _factory = webrtc::CreateBuiltinVideoEncoderFactory();
+: _factory(webrtc::CreateBuiltinVideoEncoderFactory())
+{
     for (auto formats: {H264Encoder::GetSupportedFormats()})
     {
         for (auto format: formats)

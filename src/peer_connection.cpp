@@ -7,11 +7,10 @@
 
 #include "api/audio_codecs/builtin_audio_decoder_factory.h"
 #include "api/audio_codecs/builtin_audio_encoder_factory.h"
-#include "api/video_codecs/builtin_video_decoder_factory.h"
-#include "api/video_codecs/builtin_video_encoder_factory.h"
 #include "api/create_peerconnection_factory.h"
-#include "video/video_encoder.h"
 #include "rtc_base/ssl_adapter.h"
+#include "video_encoder.h"
+#include "video_decoder.h"
 #include "audio_capture_module.h"
 #include "peer_connection.h"
 
@@ -46,7 +45,7 @@ RTCPeerConnection* rtc_create_peer_connection(RTCPeerConnectionConfigure* c_conf
                                                           webrtc::CreateBuiltinAudioEncoderFactory(),
                                                           webrtc::CreateBuiltinAudioDecoderFactory(),
                                                           IVideoEncoderFactory::Create(),
-                                                          webrtc::CreateBuiltinVideoDecoderFactory(),
+                                                          IVideoDecoderFactory::Create(),
                                                           nullptr,
                                                           nullptr);
     if (!rtc->pc_factory)

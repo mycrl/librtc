@@ -8,8 +8,6 @@
 #include "session_description.h"
 #include "base.h"
 
-/* offer / answer */
-
 webrtc::SdpType from_c(RTCSessionDescriptionType type)
 {
     if (type == RTCSessionDescriptionTypeAnswer)

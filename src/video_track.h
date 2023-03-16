@@ -17,9 +17,7 @@
 #include "frame.h"
 #include "base.h"
 
-/*
- video source
- */
+/* video source */
 
 struct AdaptFrameResult
 {
@@ -68,9 +66,7 @@ private:
     IVideoSource _source;
 };
 
-/*
- video Sink
- */
+/* video sink */
 
 class IVideoTrackSink
 : public rtc::VideoSinkInterface<webrtc::VideoFrame>

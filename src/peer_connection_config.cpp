@@ -9,9 +9,7 @@
 #include <vector>
 #include <string>
 
-/**
- * string array
- */
+/* string array */
 
 std::vector<std::string> from_c(char** raw, int size)
 {
@@ -24,9 +22,7 @@ std::vector<std::string> from_c(char** raw, int size)
     return strings;
 }
 
-/**
- * rtc peerconnection config
- */
+/* rtc peerconnection config */
 
 webrtc::PeerConnectionInterface::IceServer from_c(RTCIceServer raw)
 {

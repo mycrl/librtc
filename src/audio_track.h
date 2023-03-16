@@ -14,9 +14,8 @@
 #include "base.h"
 #include <set>
 
-/*
- audio source
- */
+/* audio source */
+
 class IAudioTrackSource
 : public webrtc::AudioSourceInterface
 {
@@ -40,9 +39,7 @@ private:
     std::set<webrtc::ObserverInterface*> _observers;
 };
 
-/*
- audio sink
- */
+/* audio sink */
 
 class IAudioTrackSink
 : public webrtc::AudioTrackSinkInterface

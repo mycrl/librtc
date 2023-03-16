@@ -20,8 +20,8 @@ public:
     static std::unique_ptr<IVideoEncoderFactory> Create();
     std::vector<webrtc::SdpVideoFormat> GetSupportedFormats() const;
     std::unique_ptr<webrtc::VideoEncoder> CreateVideoEncoder(const webrtc::SdpVideoFormat& format);
-    
-    std::optional<std::unique_ptr<webrtc::VideoEncoderFactory>> _factory = nullptr;
+private:
+    std::optional<std::unique_ptr<webrtc::VideoEncoderFactory>> _factory;
     std::vector<webrtc::SdpVideoFormat> _formats;
 };
 

@@ -8,9 +8,8 @@
 #include "api/video/i420_buffer.h"
 #include "video_track.h"
 
-/*
- IVideoSource
- */
+/* IVideoSource */
+
 void IVideoSource::AddOrUpdateSink(
                                    rtc::VideoSinkInterface<webrtc::VideoFrame>* sink,
                                    const rtc::VideoSinkWants& wants)
@@ -104,9 +103,7 @@ AdaptFrameResult IVideoSource::_AdaptFrameResolution(
     return ret;
 }
 
-/*
- IVideoTrackSource
- */
+/* IVideoTrackSource */
 
 IVideoTrackSource* IVideoTrackSource::Create()
 {
@@ -125,9 +122,7 @@ rtc::VideoSourceInterface<webrtc::VideoFrame>* IVideoTrackSource::source()
     return static_cast<rtc::VideoSourceInterface<webrtc::VideoFrame>*>(&_source);
 }
 
-/*
- IVideoTrackSink
- */
+/* IVideoTrackSink */
 
 IVideoTrackSink::IVideoTrackSink(webrtc::VideoTrackInterface* track)
 {

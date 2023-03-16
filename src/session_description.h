@@ -11,9 +11,7 @@
 
 #include "api/peer_connection_interface.h"
 
-/*
- An enum describing the session description's type.
- */
+/* An enum describing the session description's type. */
 typedef enum {
     /*
      The session description object describes the initial proposal in an 

@@ -8,9 +8,7 @@
 #include "api/peer_connection_interface.h"
 #include "observer.h"
 
-/*
- connection state
- */
+/* connection state */
 
 PeerConnectionState into_c(webrtc::PeerConnectionInterface::PeerConnectionState state)
 {
@@ -44,9 +42,7 @@ PeerConnectionState into_c(webrtc::PeerConnectionInterface::PeerConnectionState 
     }
 }
 
-/*
- signaling state
- */
+/* signaling state */
 
 SignalingState into_c(webrtc::PeerConnectionInterface::SignalingState state)
 {
@@ -80,9 +76,8 @@ SignalingState into_c(webrtc::PeerConnectionInterface::SignalingState state)
     }
 }
 
-/*
- ice gathering state
- */
+/* ice gathering state */
+
 IceGatheringState into_c(webrtc::PeerConnectionInterface::IceGatheringState state)
 {
     if (state == webrtc::PeerConnectionInterface::IceGatheringState::kIceGatheringNew)
@@ -100,9 +95,8 @@ IceGatheringState into_c(webrtc::PeerConnectionInterface::IceGatheringState stat
     }
 }
 
-/*
- ice connection state
- */
+/* ice connection state */
+
 IceConnectionState into_c(webrtc::PeerConnectionInterface::IceConnectionState state)
 {
     if (state == webrtc::PeerConnectionInterface::IceConnectionState::kIceConnectionNew)
