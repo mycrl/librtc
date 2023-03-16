@@ -22,7 +22,7 @@ std::unique_ptr<H264Decoder> H264Decoder::Create()
 bool H264Decoder::Configure(const Settings& settings)
 {
     for (std::string name: {"h264_qsv",
-        "h264_nvenc",
+        "h264_cuvid",
         "h264_videotoolbox",
         "libx264"})
     {
