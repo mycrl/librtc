@@ -10,7 +10,6 @@
 #pragma once
 
 #include "api/video_codecs/video_encoder_factory.h"
-#include <optional>
 
 class IVideoEncoderFactory
 : public webrtc::VideoEncoderFactory
@@ -21,7 +20,7 @@ public:
     std::vector<webrtc::SdpVideoFormat> GetSupportedFormats() const;
     std::unique_ptr<webrtc::VideoEncoder> CreateVideoEncoder(const webrtc::SdpVideoFormat& format);
 private:
-    std::optional<std::unique_ptr<webrtc::VideoEncoderFactory>> _factory;
+    std::unique_ptr<webrtc::VideoEncoderFactory> _factory;
     std::vector<webrtc::SdpVideoFormat> _formats;
 };
 

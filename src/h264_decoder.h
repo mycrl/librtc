@@ -16,11 +16,6 @@ extern "C"
 #include "libavcodec/avcodec.h"
 }
 
-typedef struct
-{
-    std::string name;
-} H264DecoderLayer;
-
 class H264Decoder
 : public webrtc::VideoDecoder
 {

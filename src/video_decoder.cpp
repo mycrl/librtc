@@ -12,7 +12,7 @@
 IVideoDecoderFactory::IVideoDecoderFactory()
 : _factory(webrtc::CreateBuiltinVideoDecoderFactory())
 {
-    _formats = (*_factory)->GetSupportedFormats();
+    _formats = _factory->GetSupportedFormats();
     for (auto formats: {H264Decoder::GetSupportedFormats()})
     {
         for (auto format: formats)
@@ -34,5 +34,10 @@ std::vector<webrtc::SdpVideoFormat> IVideoDecoderFactory::GetSupportedFormats() 
 
 std::unique_ptr<webrtc::VideoDecoder> IVideoDecoderFactory::CreateVideoDecoder(const webrtc::SdpVideoFormat& format)
 {
-    return (*_factory)->CreateVideoDecoder(format);
+    if (format.name == "H264")
+    {
+        return H264Decoder::Create();
+    }
+    
+    return _factory->CreateVideoDecoder(format);
 }

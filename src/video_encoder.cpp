@@ -38,5 +38,5 @@ std::unique_ptr<webrtc::VideoEncoder> IVideoEncoderFactory::CreateVideoEncoder(c
         return H264Encoder::Create(format);;
     }
     
-    return (*_factory)->CreateVideoEncoder(format);
+    return _factory->CreateVideoEncoder(format);
 }
