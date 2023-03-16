@@ -53,8 +53,9 @@ int H264Encoder::InitEncode(const webrtc::VideoCodec* codec_settings, const Sett
         return WEBRTC_VIDEO_CODEC_ERROR;
     }
     
-    for (std::string name: {"h264_qsv",
+    for (std::string name: {
         "h264_nvenc",
+        "h264_qsv",
         "h264_videotoolbox",
         "libx264"})
     {
@@ -99,6 +100,17 @@ int H264Encoder::InitEncode(const webrtc::VideoCodec* codec_settings, const Sett
     {
         av_opt_set_int(_ctx->priv_data, "prio_speed", 1, 0);
         av_opt_set_int(_ctx->priv_data, "realtime", 0, 0);
+    }
+    else if (_name == "h264_nvenc")
+    {
+        av_opt_set_int(_ctx->priv_data, "zerolatency", 1, 0);
+        av_opt_set_int(_ctx->priv_data, "b_adapt", 0, 0);
+        av_opt_set_int(_ctx->priv_data, "rc", 1, 0);
+        av_opt_set_int(_ctx->priv_data, "preset", 3, 0);
+        av_opt_set_int(_ctx->priv_data, "profile", 0, 0);
+        av_opt_set_int(_ctx->priv_data, "tune", 1, 0);
+        av_opt_set_int(_ctx->priv_data, "cq", 30, 0);
+        av_opt_set_int(_ctx->priv_data, "multipass", 2, 0);
     }
     else
     {
@@ -238,7 +250,9 @@ int32_t H264Encoder::Release()
 int H264Encoder::_ReadPacket(webrtc::VideoFrameType frame_type,
                              const webrtc::VideoFrame& frame)
 {
-    if (avcodec_receive_packet(_ctx, _packet) != 0)
+    int a[] = {AVERROR(EAGAIN), AVERROR_EOF, AVERROR(EINVAL)};
+    int ret = avcodec_receive_packet(_ctx, _packet);
+    if (ret != 0)
     {
         return -1;
     }
