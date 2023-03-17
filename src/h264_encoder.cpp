@@ -7,7 +7,6 @@
 
 #include "h264_encoder.h"
 #include "libyuv.h"
-#include "h264.h"
 
 extern "C"
 {
@@ -41,7 +40,8 @@ int32_t H264Encoder::RegisterEncodeCompleteCallback(webrtc::EncodedImageCallback
     return WEBRTC_VIDEO_CODEC_OK;
 }
 
-int H264Encoder::InitEncode(const webrtc::VideoCodec* codec_settings, const Settings& settings)
+int H264Encoder::InitEncode(const webrtc::VideoCodec* codec_settings, 
+                            const Settings& settings)
 {
     int ret;
     int number_of_streams = codec_settings->numberOfSimulcastStreams;
@@ -49,35 +49,17 @@ int H264Encoder::InitEncode(const webrtc::VideoCodec* codec_settings, const Sett
     {
         return WEBRTC_VIDEO_CODEC_ERROR;
     }
-    
-    for (auto name: Encoders)
-    {
-        _codec = avcodec_find_encoder_by_name(name.c_str());
-        if (_codec)
-        {
-            _name = name;
-            break;
-        }
-    }
-    
-    if (!_codec)
+
+    _layer = find_encoder();
+    if (!_layer.codec)
     {
         return WEBRTC_VIDEO_CODEC_ERROR;
     }
     
-    _ctx = avcodec_alloc_context3(_codec);
+    _ctx = avcodec_alloc_context3(_layer.codec);
     if (_ctx == NULL)
     {
         return WEBRTC_VIDEO_CODEC_ERROR;
-    }
-    
-    if (_name == "h264_qsv")
-    {
-        _ctx->pix_fmt = AV_PIX_FMT_NV12;
-    }
-    else
-    {
-        _ctx->pix_fmt = AV_PIX_FMT_YUV420P;
     }
     
     _ctx->max_b_frames = 0;
@@ -88,14 +70,29 @@ int H264Encoder::InitEncode(const webrtc::VideoCodec* codec_settings, const Sett
     _ctx->time_base = av_make_q(1, codec_settings->maxFramerate);
     _ctx->pkt_timebase = av_make_q(1, codec_settings->maxFramerate);
     _ctx->gop_size = codec_settings->H264().keyFrameInterval;
+
+    if (_layer.name == "h264_qsv")
+    {
+        _ctx->pix_fmt = AV_PIX_FMT_NV12;
+    }
+    else
+    {
+        _ctx->pix_fmt = AV_PIX_FMT_YUV420P;
+    }
     
-    if (_name == "h264_videotoolbox")
+    if (_layer.name == "h264_videotoolbox")
     {
         av_opt_set_int(_ctx->priv_data, "prio_speed", 1, 0);
         av_opt_set_int(_ctx->priv_data, "realtime", 1, 0);
     }
-    
-    if (_name == "h264_nvenc")
+    else
+    if (_layer.name == "h264_qsv")
+    {
+        av_opt_set_int(_ctx->priv_data, "preset", 7, 0);
+        av_opt_set_int(_ctx->priv_data, "profile", 66, 0);
+    }
+    else
+    if (_layer.name == "h264_nvenc")
     {
         av_opt_set_int(_ctx->priv_data, "zerolatency", 1, 0);
         av_opt_set_int(_ctx->priv_data, "b_adapt", 0, 0);
@@ -104,15 +101,14 @@ int H264Encoder::InitEncode(const webrtc::VideoCodec* codec_settings, const Sett
         av_opt_set_int(_ctx->priv_data, "profile", 0, 0);
         av_opt_set_int(_ctx->priv_data, "tune", 1, 0);
         av_opt_set_int(_ctx->priv_data, "cq", 30, 0);
-        av_opt_set_int(_ctx->priv_data, "multipass", 2, 0);
     }
-    
-    if (_name == "libx264")
+    else
+    if (_layer.name == "libx264")
     {
         av_opt_set(_ctx->priv_data, "tune", "zerolatency", 0);
     }
     
-    ret = avcodec_open2(_ctx, _codec, NULL);
+    ret = avcodec_open2(_ctx, _layer.codec, NULL);
     if (ret != 0)
     {
         return WEBRTC_VIDEO_CODEC_ERROR;
@@ -123,22 +119,29 @@ int H264Encoder::InitEncode(const webrtc::VideoCodec* codec_settings, const Sett
     {
         return WEBRTC_VIDEO_CODEC_ERROR;
     }
-    
+
     _frame = av_frame_alloc();
     if (_frame == NULL)
     {
-        return WEBRTC_VIDEO_CODEC_ERROR;
+        return -1;
     }
     
+    _frame_num = 0;
     _frame->width = _ctx->width;
     _frame->height = _ctx->height;
     _frame->format = _ctx->pix_fmt;
-    ret = av_frame_get_buffer(_frame, 32);
+
+    ret = av_image_alloc(_frame->data, 
+                         _frame->linesize,
+                         _ctx->width, 
+                         _ctx->height, 
+                         _ctx->pix_fmt, 
+                         32);
     if (ret < 0)
     {
-        return WEBRTC_VIDEO_CODEC_ERROR;
+        return -1;
     }
-    
+
     return WEBRTC_VIDEO_CODEC_OK;
 }
 
@@ -198,7 +201,7 @@ int32_t H264Encoder::Encode(const webrtc::VideoFrame& frame,
         }
         
         if ((_OnFrame(frame_type,
-                      buf,
+                      (uint8_t*)buf,
                       width,
                       height,
                       len)) != 0)
@@ -275,13 +278,11 @@ int H264Encoder::_ReadPacket(webrtc::VideoFrameType frame_type,
 }
 
 int H264Encoder::_OnFrame(webrtc::VideoFrameType frame_type,
-                          const uint8_t* frame_buf,
+                          uint8_t* frame_buf,
                           int width,
                           int height,
                           size_t len)
 {
-    int ret;
-    
     if (frame_type == webrtc::VideoFrameType::kVideoFrameKey)
     {
         _frame->pict_type = AV_PICTURE_TYPE_I;
@@ -289,12 +290,6 @@ int H264Encoder::_OnFrame(webrtc::VideoFrameType frame_type,
     else
     {
         _frame->pict_type = AV_PICTURE_TYPE_NONE;
-    }
-    
-    ret = av_frame_make_writable(_frame);
-    if (ret != 0)
-    {
-        return 0;
     }
     
     int need_size = av_image_fill_arrays(_frame->data,
@@ -308,14 +303,18 @@ int H264Encoder::_OnFrame(webrtc::VideoFrameType frame_type,
     {
         return -1;
     }
-    
-    ret = avcodec_send_frame(_ctx, _frame);
-    if(ret != 0)
+
+    _frame->pts = av_rescale_q(_frame_num, 
+                               _ctx->pkt_timebase,
+                               _ctx->time_base);
+    if(avcodec_send_frame(_ctx, _frame) != 0)
     {
         return -1;
     }
+    else
+    {
+        _frame_num ++;
+    }
     
-    _frame->pts ++;
-    _frame->pkt_dts ++;
     return 0;
 }

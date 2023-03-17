@@ -7,7 +7,6 @@
 
 #include "api/video/i420_buffer.h"
 #include "h264_decoder.h"
-#include "h264.h"
 
 std::vector<webrtc::SdpVideoFormat> H264Decoder::GetSupportedFormats()
 {
@@ -21,28 +20,19 @@ std::unique_ptr<H264Decoder> H264Decoder::Create()
 
 bool H264Decoder::Configure(const Settings& settings)
 {
-    for (auto name: Decoders)
-    {
-        _codec = avcodec_find_decoder_by_name(name.c_str());
-        if (_codec)
-        {
-            _name = name;
-            break;
-        }
-    }
-    
-    if (!_codec)
+    _layer = find_decoder();
+    if (!_layer.codec)
     {
         return WEBRTC_VIDEO_CODEC_ERROR;
     }
     
-    _ctx = avcodec_alloc_context3(_codec);
+    _ctx = avcodec_alloc_context3(_layer.codec);
     if (_ctx == NULL)
     {
         return WEBRTC_VIDEO_CODEC_ERROR;
     }
     
-    if (avcodec_open2(_ctx, _codec, NULL) != 0)
+    if (avcodec_open2(_ctx, _layer.codec, NULL) != 0)
     {
         return WEBRTC_VIDEO_CODEC_ERROR;
     }
@@ -66,7 +56,7 @@ int32_t H264Decoder::Decode(const webrtc::EncodedImage& input_image,
                             bool _missing_frames,
                             int64_t render_time_ms)
 {
-    if (!_codec)
+    if (!_layer.codec)
     {
         return WEBRTC_VIDEO_CODEC_ERROR;
     }

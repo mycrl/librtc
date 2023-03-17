@@ -13,6 +13,7 @@
 #include "api/create_peerconnection_factory.h"
 #include "common_video/h264/h264_common.h"
 #include <optional>
+#include "h264.h"
 
 extern "C"
 {
@@ -34,7 +35,7 @@ public:
     int32_t Release();
 private:
     int _OnFrame(webrtc::VideoFrameType frame_type,
-                 const uint8_t* frame_buf,
+                 uint8_t* frame_buf,
                  int width,
                  int height,
                  size_t len);
@@ -45,11 +46,11 @@ private:
     webrtc::CodecSpecificInfo _codec_specific;
     webrtc::EncodedImageCallback* _callback;
     webrtc::EncodedImage _image;
-    const AVCodec* _codec;
     AVCodecContext* _ctx;
     AVPacket* _packet;
     AVFrame* _frame;
-    std::string _name;
+    size_t _frame_num;
+    CodecLayer _layer;
 };
 
 #endif /* librtc_h264_encoder_h */

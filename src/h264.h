@@ -11,19 +11,30 @@
 
 #include "modules/video_coding/codecs/h264/include/h264.h"
 
+extern "C"
+{
+#include "libavcodec/avcodec.h"
+}
+
 static std::string Decoders[] = {
-    "h264_cuvid",
     "h264_qsv",
+    "h264_cuvid",
     "h264_videotoolbox",
     "libx264"
 };
 
 static std::string Encoders[] = {
-    "h264_nvenc",
     "h264_qsv",
+    "h264_nvenc",
     "h264_videotoolbox",
     "libx264"
 };
+
+typedef struct
+{
+    const AVCodec* codec;
+    std::string name;
+} CodecLayer;
 
 constexpr webrtc::ScalabilityMode IkSupportedScalabilityModes[] = {
     webrtc::ScalabilityMode::kL1T1,
@@ -36,5 +47,8 @@ webrtc::SdpVideoFormat ICreateH264Format(webrtc::H264Profile profile,
                                          const std::string& packetization_mode,
                                          bool add_scalability_modes);
 std::vector<webrtc::SdpVideoFormat> ISupportedH264Codecs(bool mode /* add_scalability_modes */);
+
+CodecLayer find_encoder();
+CodecLayer find_decoder();
 
 #endif /* librtc_h264_h */

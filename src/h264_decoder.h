@@ -10,6 +10,7 @@
 #pragma once
 
 #include "api/create_peerconnection_factory.h"
+#include "h264.h"
 
 extern "C"
 {
@@ -33,11 +34,10 @@ private:
     
     webrtc::DecodedImageCallback* _callback;
     webrtc::EncodedImage _image;
-    const AVCodec* _codec;
     AVCodecContext* _ctx;
     AVPacket* _packet;
     AVFrame* _frame;
-    std::string _name;
+    CodecLayer _layer;
 };
 
 #endif /* librtc_h264_decoder_h */
