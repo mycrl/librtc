@@ -35,8 +35,7 @@ typedef struct {
  Returns a newly-created RTCPeerConnection, which represents a
  connection between the local device and a remote peer.
  */
-extern "C" EXPORT RTCPeerConnection* rtc_create_peer_connection(
-                                                                RTCPeerConnectionConfigure* config,
+extern "C" EXPORT RTCPeerConnection* rtc_create_peer_connection(RTCPeerConnectionConfigure* config,
                                                                 Events* events,
                                                                 void* ctx);
 

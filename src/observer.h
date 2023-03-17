@@ -63,7 +63,9 @@ typedef struct
 } Events;
 
 typedef void (*SetDescCallback)(const char* error, void* ctx);
-typedef void (*CreateDescCallback)(const char* error, RTCSessionDescription* desc, void* ctx);
+typedef void (*CreateDescCallback)(const char* error,
+                                   RTCSessionDescription* desc,
+                                   void* ctx);
 
 class Observer
 : public webrtc::PeerConnectionObserver

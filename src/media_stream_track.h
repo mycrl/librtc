@@ -50,28 +50,19 @@ typedef struct {
 } MediaStreamTrack;
 
 extern "C" EXPORT MediaStreamTrack* rtc_create_video_track(char* label);
-extern "C" EXPORT void rtc_set_video_track_frame_h(
-                                                   MediaStreamTrack * track,
+extern "C" EXPORT void rtc_set_video_track_frame_h(MediaStreamTrack * track,
                                                    void(handler)(void* ctx, IVideoFrame * frame),
                                                    void* ctx);
-
-extern "C" EXPORT void rtc_add_video_track_frame(
-                                                 MediaStreamTrack * track, 
+extern "C" EXPORT void rtc_add_video_track_frame(MediaStreamTrack * track,
                                                  IVideoFrame* frame);
-
 extern "C" EXPORT MediaStreamTrack* rtc_create_audio_track(char* label);
-extern "C" EXPORT void rtc_add_audio_track_frame(
-                                                 MediaStreamTrack * track,
+extern "C" EXPORT void rtc_add_audio_track_frame(MediaStreamTrack * track,
                                                  IAudioFrame* frame);
-
-extern "C" EXPORT void rtc_set_audio_track_frame_h(
-                                                   MediaStreamTrack* track,
+extern "C" EXPORT void rtc_set_audio_track_frame_h(MediaStreamTrack* track,
                                                    void(handler)(void* ctx, IAudioFrame* frame),
                                                    void* ctx);
-
 extern "C" EXPORT void rtc_free_media_stream_track(MediaStreamTrack * track);
-extern "C" EXPORT void rtc_remove_media_stream_track_frame_h(
-                                                             MediaStreamTrack * track);
+extern "C" EXPORT void rtc_remove_media_stream_track_frame_h(MediaStreamTrack * track);
 
 MediaStreamTrack* from(webrtc::VideoTrackInterface* track);
 MediaStreamTrack* from(webrtc::AudioTrackInterface* track);

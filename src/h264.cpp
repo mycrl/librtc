@@ -7,13 +7,13 @@
 
 #include "h264.h"
 
-webrtc::SdpVideoFormat ICreateH264Format(webrtc::H264Profile profile,
+webrtc::SdpVideoFormat create_h264_format(webrtc::H264Profile profile,
                                          webrtc::H264Level level,
                                          const std::string& packetization_mode,
                                          bool add_scalability_modes)
 {
     const absl::optional<std::string> profile_string =
-        H264ProfileLevelIdToString(webrtc::H264ProfileLevelId(profile, level));
+    H264ProfileLevelIdToString(webrtc::H264ProfileLevelId(profile, level));
     absl::InlinedVector<webrtc::ScalabilityMode, webrtc::kScalabilityModeCount> scalability_modes;
     
     if (add_scalability_modes)
@@ -32,14 +32,14 @@ webrtc::SdpVideoFormat ICreateH264Format(webrtc::H264Profile profile,
                                   scalability_modes);
 }
 
-std::vector<webrtc::SdpVideoFormat> ISupportedH264Codecs(bool mode /* add_scalability_modes */)
+std::vector<webrtc::SdpVideoFormat> supported_h264_codecs(bool mode)
 {
-    return {ICreateH264Format(webrtc::H264Profile::kProfileBaseline, webrtc::H264Level::kLevel3_1, "1", mode),
-        ICreateH264Format(webrtc::H264Profile::kProfileBaseline, webrtc::H264Level::kLevel3_1, "0", mode),
-        ICreateH264Format(webrtc::H264Profile::kProfileConstrainedBaseline, webrtc::H264Level::kLevel3_1, "1", mode),
-        ICreateH264Format(webrtc::H264Profile::kProfileConstrainedBaseline, webrtc::H264Level::kLevel3_1, "0", mode),
-        ICreateH264Format(webrtc::H264Profile::kProfileMain, webrtc::H264Level::kLevel3_1, "1", mode),
-        ICreateH264Format(webrtc::H264Profile::kProfileMain, webrtc::H264Level::kLevel3_1, "0", mode)};
+    return {create_h264_format(webrtc::H264Profile::kProfileBaseline, webrtc::H264Level::kLevel3_1, "1", mode),
+        create_h264_format(webrtc::H264Profile::kProfileBaseline, webrtc::H264Level::kLevel3_1, "0", mode),
+        create_h264_format(webrtc::H264Profile::kProfileConstrainedBaseline, webrtc::H264Level::kLevel3_1, "1", mode),
+        create_h264_format(webrtc::H264Profile::kProfileConstrainedBaseline, webrtc::H264Level::kLevel3_1, "0", mode),
+        create_h264_format(webrtc::H264Profile::kProfileMain, webrtc::H264Level::kLevel3_1, "1", mode),
+        create_h264_format(webrtc::H264Profile::kProfileMain, webrtc::H264Level::kLevel3_1, "0", mode)};
 }
 
 CodecLayer find_encoder()
@@ -54,7 +54,7 @@ CodecLayer find_encoder()
             break;
         }
     }
-
+    
     return layer;
 }
 
@@ -70,6 +70,6 @@ CodecLayer find_decoder()
             break;
         }
     }
-
+    
     return layer;
 }

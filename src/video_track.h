@@ -40,13 +40,15 @@ class IVideoSource
 : public rtc::VideoSourceInterface<webrtc::VideoFrame>
 {
 public:
-    void AddOrUpdateSink(rtc::VideoSinkInterface<webrtc::VideoFrame>* sink, const rtc::VideoSinkWants& wants);
+    void AddOrUpdateSink(rtc::VideoSinkInterface<webrtc::VideoFrame>* sink,
+                         const rtc::VideoSinkWants& wants);
     void RemoveSink(rtc::VideoSinkInterface<webrtc::VideoFrame>* sink);
     void AddFrame(const webrtc::VideoFrame& original_frame);
 private:
     webrtc::VideoFrame _MaybePreprocess(const webrtc::VideoFrame& frame);
     AdaptFrameResult _AdaptFrameResolution(const webrtc::VideoFrame& frame);
-    webrtc::VideoFrame _ScaleFrame(const webrtc::VideoFrame& original_frame, AdaptFrameResult& ret);
+    webrtc::VideoFrame _ScaleFrame(const webrtc::VideoFrame& original_frame,
+                                   AdaptFrameResult& ret);
     
     webrtc::Mutex _lock;
     rtc::VideoBroadcaster _broadcaster;

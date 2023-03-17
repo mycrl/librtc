@@ -34,11 +34,7 @@ public:
     void SetRates(const webrtc::VideoEncoder::RateControlParameters& parameters);
     int32_t Release();
 private:
-    int _OnFrame(webrtc::VideoFrameType frame_type,
-                 uint8_t* frame_buf,
-                 int width,
-                 int height,
-                 size_t len);
+    int _OnFrame(webrtc::VideoFrameType frame_type);
     int _ReadPacket(webrtc::VideoFrameType frame_type,
                     const webrtc::VideoFrame& frame);
     

@@ -37,8 +37,7 @@ RTCPeerConnection* rtc_create_peer_connection(RTCPeerConnectionConfigure* c_conf
         return NULL;
     }
     
-    rtc->pc_factory = webrtc::CreatePeerConnectionFactory(
-                                                          nullptr,
+    rtc->pc_factory = webrtc::CreatePeerConnectionFactory(nullptr,
                                                           nullptr,
                                                           nullptr,
                                                           AudioCaptureModule::Create(),
@@ -54,8 +53,7 @@ RTCPeerConnection* rtc_create_peer_connection(RTCPeerConnectionConfigure* c_conf
     }
     
     webrtc::PeerConnectionDependencies pc_dependencies(Observer::Create(events, ctx));
-    auto error_or_pc = rtc->pc_factory->CreatePeerConnectionOrError(
-                                                                    from_c(c_config),
+    auto error_or_pc = rtc->pc_factory->CreatePeerConnectionOrError(from_c(c_config),
                                                                     std::move(pc_dependencies));
     if (error_or_pc.ok()) 
     {

@@ -10,15 +10,13 @@
 
 /* IVideoSource */
 
-void IVideoSource::AddOrUpdateSink(
-                                   rtc::VideoSinkInterface<webrtc::VideoFrame>* sink,
+void IVideoSource::AddOrUpdateSink(rtc::VideoSinkInterface<webrtc::VideoFrame>* sink,
                                    const rtc::VideoSinkWants& wants)
 {
     _broadcaster.AddOrUpdateSink(sink, wants);
 }
 
-void IVideoSource::RemoveSink(
-                              rtc::VideoSinkInterface<webrtc::VideoFrame>* sink)
+void IVideoSource::RemoveSink(rtc::VideoSinkInterface<webrtc::VideoFrame>* sink)
 {
     _broadcaster.RemoveSink(sink);
 }
@@ -42,8 +40,7 @@ void IVideoSource::AddFrame(const webrtc::VideoFrame& original_frame)
     }
 }
 
-webrtc::VideoFrame IVideoSource::_MaybePreprocess(
-                                                  const webrtc::VideoFrame& frame)
+webrtc::VideoFrame IVideoSource::_MaybePreprocess(const webrtc::VideoFrame& frame)
 {
     webrtc::MutexLock lock(&_lock);
     if (_preprocessor != nullptr)
@@ -56,8 +53,7 @@ webrtc::VideoFrame IVideoSource::_MaybePreprocess(
     }
 }
 
-webrtc::VideoFrame IVideoSource::_ScaleFrame(
-                                             const webrtc::VideoFrame& original_frame,
+webrtc::VideoFrame IVideoSource::_ScaleFrame(const webrtc::VideoFrame& original_frame,
                                              AdaptFrameResult& ret)
 {
     auto scaled_buffer = webrtc::I420Buffer::Create(ret.width, ret.height);
@@ -73,8 +69,7 @@ webrtc::VideoFrame IVideoSource::_ScaleFrame(
         return new_frame_builder.build();
     }
     
-    auto rect = original_frame.update_rect().ScaleWithFrame(
-                                                            original_frame.width(),
+    auto rect = original_frame.update_rect().ScaleWithFrame(original_frame.width(),
                                                             original_frame.height(),
                                                             0,
                                                             0,
@@ -86,12 +81,10 @@ webrtc::VideoFrame IVideoSource::_ScaleFrame(
     return new_frame_builder.build();
 }
 
-AdaptFrameResult IVideoSource::_AdaptFrameResolution(
-                                                     const webrtc::VideoFrame& frame)
+AdaptFrameResult IVideoSource::_AdaptFrameResolution(const webrtc::VideoFrame& frame)
 {
     AdaptFrameResult ret;
-    ret.drop = _video_adapter.AdaptFrameResolution(
-                                                   frame.width(),
+    ret.drop = _video_adapter.AdaptFrameResolution(frame.width(),
                                                    frame.height(),
                                                    frame.timestamp_us() * 1000,
                                                    &ret.cropped_width,

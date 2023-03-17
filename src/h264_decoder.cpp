@@ -10,7 +10,7 @@
 
 std::vector<webrtc::SdpVideoFormat> H264Decoder::GetSupportedFormats()
 {
-    return ISupportedH264Codecs(true);
+    return supported_h264_codecs(true);
 }
 
 std::unique_ptr<H264Decoder> H264Decoder::Create()
@@ -23,33 +23,35 @@ bool H264Decoder::Configure(const Settings& settings)
     _layer = find_decoder();
     if (!_layer.codec)
     {
-        return WEBRTC_VIDEO_CODEC_ERROR;
+        return CodecRet::Err;
     }
     
     _ctx = avcodec_alloc_context3(_layer.codec);
     if (_ctx == NULL)
     {
-        return WEBRTC_VIDEO_CODEC_ERROR;
+        return CodecRet::Err;
     }
     
     if (avcodec_open2(_ctx, _layer.codec, NULL) != 0)
     {
-        return WEBRTC_VIDEO_CODEC_ERROR;
+        return CodecRet::Err;
     }
     
     _packet = av_packet_alloc();
     if (_packet == NULL)
     {
-        return WEBRTC_VIDEO_CODEC_ERROR;
+        return CodecRet::Err;
     }
     
     _frame = av_frame_alloc();
     if (_frame == NULL)
     {
-        return WEBRTC_VIDEO_CODEC_ERROR;
+        return CodecRet::Err;
     }
-    
-    return WEBRTC_VIDEO_CODEC_OK;
+    else
+    {
+        return CodecRet::Ok;
+    }
 }
 
 int32_t H264Decoder::Decode(const webrtc::EncodedImage& input_image,
@@ -58,43 +60,43 @@ int32_t H264Decoder::Decode(const webrtc::EncodedImage& input_image,
 {
     if (!_layer.codec)
     {
-        return WEBRTC_VIDEO_CODEC_ERROR;
+        return CodecRet::Err;
     }
     
     _packet->size = (int)input_image.size();
     _packet->data = (uint8_t*)input_image.data();
     if (avcodec_send_packet(_ctx, _packet) != 0)
     {
-        return WEBRTC_VIDEO_CODEC_ERROR;
+        return CodecRet::Err;
     }
     
     while (true)
     {
-        if (_OnFrame() == -1)
+        if (_ReadFrame() == -1)
         {
             break;
         }
     }
     
-    return WEBRTC_VIDEO_CODEC_OK;
+    return CodecRet::Ok;
 }
 
 int32_t H264Decoder::RegisterDecodeCompleteCallback(webrtc::DecodedImageCallback* callback)
 {
     _callback = callback;
-    return WEBRTC_VIDEO_CODEC_OK;
+    return CodecRet::Ok;
 }
 
 int32_t H264Decoder::Release()
 {
     avcodec_send_frame(_ctx, NULL);
-    av_frame_free(&_frame);
-    av_packet_free(&_packet);
     avcodec_free_context(&_ctx);
-    return WEBRTC_VIDEO_CODEC_OK;
+    av_packet_free(&_packet);
+    av_frame_free(&_frame);
+    return CodecRet::Ok;
 }
 
-int H264Decoder::_OnFrame()
+int H264Decoder::_ReadFrame()
 {
     if (avcodec_receive_frame(_ctx, _frame) != 0)
     {

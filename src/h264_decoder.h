@@ -30,7 +30,7 @@ public:
     int32_t RegisterDecodeCompleteCallback(webrtc::DecodedImageCallback* callback);
     int32_t Release();
 private:
-    int _OnFrame();
+    int _ReadFrame();
     
     webrtc::DecodedImageCallback* _callback;
     webrtc::EncodedImage _image;

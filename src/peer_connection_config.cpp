@@ -57,8 +57,7 @@ webrtc::PeerConnectionInterface::IceServers from_c(RTCIceServer* raw, int size)
     return servers;
 }
 
-webrtc::PeerConnectionInterface::RTCConfiguration from_c(
-                                                         RTCPeerConnectionConfigure* raw)
+webrtc::PeerConnectionInterface::RTCConfiguration from_c(RTCPeerConnectionConfigure* raw)
 {
     using Peer = webrtc::PeerConnectionInterface;
     
