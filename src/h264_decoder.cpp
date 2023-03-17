@@ -26,6 +26,12 @@ bool H264Decoder::Configure(const Settings& settings)
         return CodecRet::Err;
     }
     
+    _parser_ctx = av_parser_init(_layer.codec->id);
+    if (!_parser_ctx)
+    {
+        return CodecRet::Err;
+    }
+    
     _ctx = avcodec_alloc_context3(_layer.codec);
     if (_ctx == NULL)
     {
@@ -103,20 +109,23 @@ int H264Decoder::_ReadFrame()
         return -1;
     }
     
-    if (_frame->format != AV_PIX_FMT_YUV420P)
+    if (_i420_buffer == nullptr)
     {
-        return 0;
+        _i420_buffer = webrtc::I420Buffer::Create(_frame->width,
+                                                  _frame->height);
     }
     
-    int64_t time_ms =_frame->pts * (_frame->time_base.num * 1000 / _frame->time_base.den);
-    webrtc::VideoFrame frame(webrtc::I420Buffer::Copy(_frame->width,
-                                                      _frame->height,
-                                                      _frame->data[0],
-                                                      _frame->linesize[0],
-                                                      _frame->data[1],
-                                                      _frame->linesize[1],
-                                                      _frame->data[2],
-                                                      _frame->linesize[2]),
+    _i420_buffer->Copy(_frame->width,
+                       _frame->height,
+                       _frame->data[0],
+                       _frame->linesize[0],
+                       _frame->data[1],
+                       _frame->linesize[1],
+                       _frame->data[2],
+                       _frame->linesize[2]);
+    
+    int64_t time_ms = _frame->pts * (_frame->time_base.num * 1000 / _frame->time_base.den);
+    webrtc::VideoFrame frame(_i420_buffer,
                              webrtc::kVideoRotation_0,
                              time_ms * rtc::kNumMicrosecsPerMillisec);
     _callback->Decoded(frame);

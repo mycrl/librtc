@@ -32,8 +32,10 @@ public:
 private:
     int _ReadFrame();
     
-    webrtc::DecodedImageCallback* _callback;
     webrtc::EncodedImage _image;
+    webrtc::DecodedImageCallback* _callback;
+    rtc::scoped_refptr<webrtc::I420Buffer> _i420_buffer = nullptr;
+    AVCodecParserContext* _parser_ctx;
     AVCodecContext* _ctx;
     AVPacket* _packet;
     AVFrame* _frame;
