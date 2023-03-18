@@ -10,6 +10,7 @@
 #pragma once
 
 #include "api/create_peerconnection_factory.h"
+#include "api/video/i420_buffer.h"
 #include "h264.h"
 
 extern "C"

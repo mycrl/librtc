@@ -48,5 +48,6 @@ IAudioFrame* into_c(const void* buf,
                     size_t frames_);
 IVideoFrame* into_c(webrtc::VideoFrame* frame);
 webrtc::VideoFrame from_c(IVideoFrame* frame);
+size_t get_i420_buffer_size(webrtc::I420BufferInterface* buf);
 
 #endif  // librtc_frame_h

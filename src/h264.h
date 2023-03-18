@@ -48,13 +48,12 @@ constexpr webrtc::ScalabilityMode IkSupportedScalabilityModes[] = {
     webrtc::ScalabilityMode::kL1T3
 };
 
+CodecLayer find_encoder();
+CodecLayer find_decoder();
 webrtc::SdpVideoFormat create_h264_format(webrtc::H264Profile profile,
                                          webrtc::H264Level level,
                                          const std::string& packetization_mode,
                                          bool add_scalability_modes);
 std::vector<webrtc::SdpVideoFormat> supported_h264_codecs(bool mode /* add_scalability_modes */);
-
-CodecLayer find_encoder();
-CodecLayer find_decoder();
 
 #endif /* librtc_h264_h */

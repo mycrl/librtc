@@ -29,14 +29,12 @@ public:
     static std::unique_ptr<H264Encoder> Create(const webrtc::SdpVideoFormat& format);
     int InitEncode(const webrtc::VideoCodec* codec_settings, const Settings& settings);
     int32_t RegisterEncodeCompleteCallback(webrtc::EncodedImageCallback* callback);
-    int32_t Encode(const webrtc::VideoFrame& frame,
-                   const std::vector<webrtc::VideoFrameType>* frame_types);
+    int32_t Encode(const webrtc::VideoFrame& frame, const std::vector<webrtc::VideoFrameType>* frame_types);
     void SetRates(const webrtc::VideoEncoder::RateControlParameters& parameters);
     int32_t Release();
 private:
+    int _ReadPacket(webrtc::VideoFrameType frame_type, const webrtc::VideoFrame& frame);
     int _OnFrame(webrtc::VideoFrameType frame_type);
-    int _ReadPacket(webrtc::VideoFrameType frame_type,
-                    const webrtc::VideoFrame& frame);
     
     webrtc::H264BitstreamParser _h264_bitstream_parser;
     webrtc::CodecSpecificInfo _codec_specific;

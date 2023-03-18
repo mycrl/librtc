@@ -81,3 +81,10 @@ IAudioFrame* into_c(const void* buf,
     frames->bits_per_sample = bits_per_sample;
     return frames;
 }
+
+size_t get_i420_buffer_size(webrtc::I420BufferInterface* buf)
+{
+    size_t sizey = buf->StrideY() * buf->height();
+    size_t sizeu = buf->StrideU() * (buf->height() / 2);
+    return sizey + (sizeu * 2);
+}

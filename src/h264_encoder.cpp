@@ -7,6 +7,7 @@
 
 #include "h264_encoder.h"
 #include "libyuv.h"
+#include "frame.h"
 
 extern "C"
 {
@@ -71,7 +72,6 @@ int H264Encoder::InitEncode(const webrtc::VideoCodec* codec_settings,
     _ctx->pkt_timebase = av_make_q(1, codec_settings->maxFramerate);
     _ctx->gop_size = codec_settings->H264().keyFrameInterval;
     
-    /* qsv only support for nv12 format */
     if (_layer.name == "h264_qsv")
     {
         _ctx->pix_fmt = AV_PIX_FMT_NV12;
@@ -86,13 +86,13 @@ int H264Encoder::InitEncode(const webrtc::VideoCodec* codec_settings,
         av_opt_set_int(_ctx->priv_data, "prio_speed", 1, 0);
         av_opt_set_int(_ctx->priv_data, "realtime", 1, 0);
     }
-
+    else
     if (_layer.name == "h264_qsv")
     {
         av_opt_set_int(_ctx->priv_data, "preset", 7, 0);
         av_opt_set_int(_ctx->priv_data, "profile", 66, 0);
     }
-
+    else
     if (_layer.name == "h264_nvenc")
     {
         av_opt_set_int(_ctx->priv_data, "zerolatency", 1, 0);
@@ -103,10 +103,11 @@ int H264Encoder::InitEncode(const webrtc::VideoCodec* codec_settings,
         av_opt_set_int(_ctx->priv_data, "tune", 1, 0);
         av_opt_set_int(_ctx->priv_data, "cq", 30, 0);
     }
-
+    else
     if (_layer.name == "libx264")
     {
         av_opt_set(_ctx->priv_data, "tune", "zerolatency", 0);
+        av_opt_set(_ctx->priv_data, "profile", "baseline", 0);
     }
     
     ret = avcodec_open2(_ctx, _layer.codec, NULL);
@@ -131,13 +132,21 @@ int H264Encoder::InitEncode(const webrtc::VideoCodec* codec_settings,
     _frame->width = _ctx->width;
     _frame->height = _ctx->height;
     _frame->format = _ctx->pix_fmt;
+    if (_layer.name == "h264_qsv")
+    {
+        ret = av_image_alloc(_frame->data,
+                             _frame->linesize,
+                             _ctx->width,
+                             _ctx->height,
+                             _ctx->pix_fmt,
+                             32);
+    }
+    else
+    if (_layer.name == "libx264")
+    {
+        ret = av_frame_get_buffer(_frame, 32);
+    }
     
-    ret = av_image_alloc(_frame->data,
-                         _frame->linesize,
-                         _ctx->width,
-                         _ctx->height,
-                         _ctx->pix_fmt,
-                         32);
     if (ret < 0)
     {
         return -1;
@@ -166,7 +175,7 @@ int32_t H264Encoder::Encode(const webrtc::VideoFrame& frame,
         return CodecRet::Err;
     }
     
-    if (_ctx->pix_fmt == AV_PIX_FMT_NV12)
+    if (_layer.name == "h264_qsv")
     {
         libyuv::I420ToNV12(i420_buffer->DataY(),
                            i420_buffer->StrideY(),
@@ -181,11 +190,36 @@ int32_t H264Encoder::Encode(const webrtc::VideoFrame& frame,
                            i420_buffer->width(),
                            i420_buffer->height());
     }
+    if (_layer.name == "libx264")
+    {
+        int ret = av_frame_make_writable(_frame);
+        if (ret != 0)
+        {
+            return CodecRet::Ok;
+        }
+        
+        int need_size = av_image_fill_arrays(_frame->data,
+                                             _frame->linesize,
+                                             i420_buffer->DataY(),
+                                             (enum AVPixelFormat)_frame->format,
+                                             i420_buffer->width(),
+                                             i420_buffer->height(),
+                                             1);
+        size_t size = get_i420_buffer_size((webrtc::I420BufferInterface*)i420_buffer);
+        if (need_size != size)
+        {
+            return CodecRet::Ok;
+        }
+    }
     else
     {
         _frame->data[0] = (uint8_t*)i420_buffer->DataY();
         _frame->data[1] = (uint8_t*)i420_buffer->DataU();
         _frame->data[2] = (uint8_t*)i420_buffer->DataV();
+        
+        _frame->linesize[0] = (int)i420_buffer->StrideY();
+        _frame->linesize[1] = (int)i420_buffer->StrideU();
+        _frame->linesize[2] = (int)i420_buffer->StrideV();
     }
     
     for (auto frame_type: *frame_types)
