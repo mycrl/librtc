@@ -69,18 +69,38 @@ int32_t H264Decoder::Decode(const webrtc::EncodedImage& input_image,
         return CodecRet::Err;
     }
     
-    _packet->size = (int)input_image.size();
-    _packet->data = (uint8_t*)input_image.data();
-    if (avcodec_send_packet(_ctx, _packet) != 0)
+    uint8_t* buf = (uint8_t*)input_image.data();
+    int len = (int)input_image.size();
+    while (len > 0)
     {
-        return CodecRet::Err;
-    }
-    
-    while (true)
-    {
-        if (_ReadFrame() == -1)
+        int size = av_parser_parse2(_parser_ctx,
+                                    _ctx,
+                                    &(_packet->data),
+                                    &(_packet->size),
+                                    buf,
+                                    len,
+                                    AV_NOPTS_VALUE,
+                                    AV_NOPTS_VALUE,
+                                    AV_NOPTS_VALUE);
+        buf += size;
+        len -= size;
+        
+        if (_packet->size == 0)
         {
-            break;
+            continue;
+        }
+        
+        if (avcodec_send_packet(_ctx, _packet) != 0)
+        {
+            return CodecRet::Err;
+        }
+        
+        while (true)
+        {
+            if (_ReadFrame() == -1)
+            {
+                break;
+            }
         }
     }
     
@@ -114,7 +134,7 @@ int H264Decoder::_ReadFrame()
         _i420_buffer = webrtc::I420Buffer::Create(_frame->width,
                                                   _frame->height);
     }
-    
+
     _i420_buffer->Copy(_frame->width,
                        _frame->height,
                        _frame->data[0],
@@ -123,7 +143,7 @@ int H264Decoder::_ReadFrame()
                        _frame->linesize[1],
                        _frame->data[2],
                        _frame->linesize[2]);
-    
+
     int64_t time_ms = _frame->pts * (_frame->time_base.num * 1000 / _frame->time_base.den);
     webrtc::VideoFrame frame(_i420_buffer,
                              webrtc::kVideoRotation_0,
