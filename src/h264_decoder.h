@@ -40,6 +40,7 @@ private:
     rtc::scoped_refptr<webrtc::I420Buffer> _i420_buffer = nullptr;
     webrtc::DecodedImageCallback* _callback;
     webrtc::EncodedImage _image;
+    AVCodecParserContext* _parser;
     AVCodecContext* _ctx;
     AVPacket* _packet;
     AVFrame* _frame;

@@ -158,7 +158,7 @@ int H264Encoder::InitEncode(const webrtc::VideoCodec* codec_settings,
 int32_t H264Encoder::Encode(const webrtc::VideoFrame& frame,
                             const std::vector<webrtc::VideoFrameType>* frame_types)
 {
-    if (!_callback)
+    if (!_callback || !_ctx)
     {
         return CodecRet::Err;
     }
