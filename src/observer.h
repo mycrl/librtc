@@ -93,7 +93,18 @@ class CreateDescObserver
 public:
     CreateDescObserver(CreateDescCallback callback, void* ctx);
     static CreateDescObserver* Create(CreateDescCallback callback, void* ctx);
+    
+    // This callback transfers the ownership of the `desc`.
+    // TODO(deadbeef): Make this take an std::unique_ptr<> to avoid confusion
+    // around ownership.
     void OnSuccess(webrtc::SessionDescriptionInterface* desc);
+    
+    // The OnFailure callback takes an RTCError, which consists of an
+    // error code and a string.
+    // RTCError is non-copyable, so it must be passed using std::move.
+    // Earlier versions of the API used a string argument. This version
+    // is removed; its functionality was the same as passing
+    // error.message.
     void OnFailure(webrtc::RTCError error);
 private:
     CreateDescCallback _callback;
@@ -107,6 +118,8 @@ public:
     SetDescObserver(SetDescCallback callback, void* ctx);
     static SetDescObserver* Create(SetDescCallback callback, void* ctx);
     virtual void OnSuccess();
+    
+    // See description in CreateSessionDescriptionObserver for OnFailure.
     virtual void OnFailure(webrtc::RTCError error);
 private:
     SetDescCallback _callback;

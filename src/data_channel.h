@@ -30,8 +30,10 @@ typedef struct {
     // Deprecated. Reliability is assumed, and channel will be unreliable if
     // maxRetransmitTime or MaxRetransmits is set.
     bool reliable;
+    
     // True if ordered delivery is required.
     bool ordered;
+    
     // The max period of time in milliseconds in which retransmissions will be
     // sent. After this time, no more retransmissions will be sent.
     //
@@ -39,22 +41,28 @@ typedef struct {
     // This is called `maxPacketLifeTime` in the WebRTC JS API.
     // Negative values are ignored, and positive values are clamped to [0-65535]
     uint64_t max_retransmit_time;
+    
     // The max number of retransmissions.
     //
     // Cannot be set along with `maxRetransmitTime`.
     // Negative values are ignored, and positive values are clamped to [0-65535]
     uint64_t max_retransmits;
+    
     // This is set by the application and opaque to the WebRTC implementation.
     char* protocol;
+    
     // True if the channel has been externally negotiated and we do not send an
     // in-band signalling in the form of an "open" message. If this is true, `id`
     // below must be set; otherwise it should be unset and will be negotiated
     // in-band.
+    
     bool negotiated;
     // The stream id, or SID, for SCTP data channels. -1 if unset (see above).
     int id;
     Priority priority;
 } DataChannelOptions;
+
+namespace librtc {
 
 class IDataChannel
 : public webrtc::DataChannelObserver
@@ -76,18 +84,16 @@ private:
     void* _ctx;
 };
 
-/*
- RTCDataChannel
- 
- The RTCDataChannel interface represents a network channel which can be used for
- bidirectional peer-to-peer transfers of arbitrary data. Every data channel is
- associated with an RTCPeerConnection, and each peer connection can have up to a
- theoretical maximum of 65,534 data
- channels (the actual limit may vary from browser to browser).
- */
+// RTCDataChannel
+//
+// The RTCDataChannel interface represents a network channel which can be used for
+// bidirectional peer-to-peer transfers of arbitrary data. Every data channel is
+// associated with an RTCPeerConnection, and each peer connection can have up to a
+// theoretical maximum of 65,534 data
+// channels (the actual limit may vary from browser to browser).
 typedef struct {
     char* label;
-    IDataChannel* channel;
+    librtc::IDataChannel* channel;
     bool remote;
 } RTCDataChannel;
 

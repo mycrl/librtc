@@ -24,9 +24,15 @@ class H264Decoder
 public:
     static std::vector<webrtc::SdpVideoFormat> GetSupportedFormats();
     static std::unique_ptr<H264Decoder> Create();
+    
+    // Prepares decoder to handle incoming encoded frames. Can be called multiple
+    // times, in such case only latest `settings` are in effect.
     bool Configure(const Settings& settings);
     int32_t Decode(const webrtc::EncodedImage& image, bool missing_frames, int64_t render_time_ms);
     int32_t RegisterDecodeCompleteCallback(webrtc::DecodedImageCallback* callback);
+    
+    // Free encoder memory.
+    // Return value                : WEBRTC_VIDEO_CODEC_OK if OK, < 0 otherwise.
     int32_t Release();
 private:
     int _ReadFrame();

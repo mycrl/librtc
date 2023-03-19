@@ -18,26 +18,22 @@ typedef enum {
     MediaStreamTrackKindAudio,
 } MediaStreamTrackKind;
 
-/*
- MediaStreamTrack
- 
- The MediaStreamTrack interface represents a single media track within a stream;
- typically, these are audio or video tracks, but other track types may exist as
- well.
- */
+
+// MediaStreamTrack
+//
+// The MediaStreamTrack interface represents a single media track within a stream;
+// typically, these are audio or video tracks, but other track types may exist as
+// well.
 typedef struct {
-    /*
-     Returns a string set to "audio" if the track is an audio track and to
-     "video", if it is a video track. It doesn't change if the track is
-     disassociated from its source.
-     */
+    // Returns a string set to "audio" if the track is an audio track and to
+    // "video", if it is a video track. It doesn't change if the track is
+    // disassociated from its source.
     MediaStreamTrackKind kind;
-    /*
-     Returns a string containing a user agent-assigned label that identifies the
-     track source, as in "internal microphone". The string may be left empty and
-     is empty as long as no source has been connected. When the track is
-     disassociated from its source, the label is not changed.
-     */
+    
+    // Returns a string containing a user agent-assigned label that identifies the
+    // track source, as in "internal microphone". The string may be left empty and
+    // is empty as long as no source has been connected. When the track is
+    // disassociated from its source, the label is not changed.
     char* label;
     
     /* --------------- video --------------- */

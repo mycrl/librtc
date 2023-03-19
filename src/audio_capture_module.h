@@ -5,8 +5,8 @@
 //  Created by Mr.Panda on 2023/2/22.
 //
 
-#ifndef audio_capture_module_h
-#define audio_capture_module_h
+#ifndef librtc_audio_capture_module_h
+#define librtc_audio_capture_module_h
 #pragma once
 
 #include "modules/audio_device/include/audio_device.h"
@@ -123,5 +123,4 @@ private:
     bool _playing;
 };
 
-
-#endif /* audio_capture_module_h */
+#endif /* librtc_audio_capture_module_h */
