@@ -62,8 +62,6 @@ typedef struct {
     Priority priority;
 } DataChannelOptions;
 
-namespace librtc {
-
 class IDataChannel
 : public webrtc::DataChannelObserver
 , public rtc::RefCountInterface
@@ -93,7 +91,7 @@ private:
 // channels (the actual limit may vary from browser to browser).
 typedef struct {
     char* label;
-    librtc::IDataChannel* channel;
+    IDataChannel* channel;
     bool remote;
 } RTCDataChannel;
 
