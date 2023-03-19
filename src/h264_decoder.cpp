@@ -85,7 +85,7 @@ int32_t H264Decoder::Decode(const webrtc::EncodedImage& input_image,
         data += ret;
         data_size -= ret;
 
-        if (_packet->size > 0)
+        if (_packet->size == 0)
         {
             continue;
         }
@@ -97,7 +97,7 @@ int32_t H264Decoder::Decode(const webrtc::EncodedImage& input_image,
         
         while (true)
         {
-            if (_ReadFrame() != 0)
+            if (_ReadFrame(input_image, render_time_ms) != 0)
             {
                 break;
             }
@@ -117,12 +117,14 @@ int32_t H264Decoder::Release()
 {
     avcodec_send_frame(_ctx, NULL);
     avcodec_free_context(&_ctx);
+    av_parser_close(_parser);
     av_packet_free(&_packet);
     av_frame_free(&_frame);
     return CodecRet::Ok;
 }
 
-int H264Decoder::_ReadFrame()
+int H264Decoder::_ReadFrame(const webrtc::EncodedImage& input_image,
+                            int64_t render_time_ms)
 {
     if (avcodec_receive_frame(_ctx, _frame) != 0)
     {
@@ -168,10 +170,11 @@ int H264Decoder::_ReadFrame()
                            _frame->linesize[2]);
     }
     
-    uint64_t time_ms = _frame->pts * (_frame->time_base.num * 1000 / _frame->time_base.den);
     webrtc::VideoFrame frame(_i420_buffer,
                              webrtc::kVideoRotation_0,
-                             time_ms * rtc::kNumMicrosecsPerMillisec);
+                             render_time_ms * rtc::kNumMicrosecsPerMillisec);
+    frame.set_timestamp(input_image.Timestamp());
+    frame.set_ntp_time_ms(input_image.ntp_time_ms_);
     _callback->Decoded(frame);
     return 0;
 }

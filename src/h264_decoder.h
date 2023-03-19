@@ -35,7 +35,7 @@ public:
     // Return value                : WEBRTC_VIDEO_CODEC_OK if OK, < 0 otherwise.
     int32_t Release();
 private:
-    int _ReadFrame();
+    int _ReadFrame(const webrtc::EncodedImage& input_image, int64_t render_time_ms);
     
     rtc::scoped_refptr<webrtc::I420Buffer> _i420_buffer = nullptr;
     webrtc::DecodedImageCallback* _callback;

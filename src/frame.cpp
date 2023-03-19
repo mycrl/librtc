@@ -88,3 +88,8 @@ size_t get_i420_buffer_size(webrtc::I420BufferInterface* buf)
     size_t sizeu = buf->StrideU() * (buf->height() / 2);
     return sizey + (sizeu * 2);
 }
+
+size_t get_i420_buffer_size(const webrtc::I420BufferInterface* buf)
+{
+    return get_i420_buffer_size((webrtc::I420BufferInterface*)buf);
+}
