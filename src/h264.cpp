@@ -8,9 +8,9 @@
 #include "h264.h"
 
 webrtc::SdpVideoFormat create_h264_format(webrtc::H264Profile profile,
-                                         webrtc::H264Level level,
-                                         const std::string& packetization_mode,
-                                         bool add_scalability_modes)
+                                          webrtc::H264Level level,
+                                          const std::string& packetization_mode,
+                                          bool add_scalability_modes)
 {
     const absl::optional<std::string> profile_string =
     H264ProfileLevelIdToString(webrtc::H264ProfileLevelId(profile, level));
@@ -42,28 +42,14 @@ std::vector<webrtc::SdpVideoFormat> supported_h264_codecs(bool mode)
         create_h264_format(webrtc::H264Profile::kProfileMain, webrtc::H264Level::kLevel3_1, "0", mode)};
 }
 
-CodecLayer find_encoder()
+CodecLayer find_codec(CodecKind kind)
 {
     CodecLayer layer;
     for (auto name: Encoders)
     {
-        layer.codec = avcodec_find_encoder_by_name(name.c_str());
-        if (layer.codec)
-        {
-            layer.name = name;
-            break;
-        }
-    }
-    
-    return layer;
-}
-
-CodecLayer find_decoder()
-{
-    CodecLayer layer;
-    for (auto name: Decoders)
-    {
-        layer.codec = avcodec_find_decoder_by_name(name.c_str());
+        layer.codec = (kind == CodecKind::kEncoder)
+            ? avcodec_find_encoder_by_name(name.c_str())
+            : avcodec_find_decoder_by_name(name.c_str());
         if (layer.codec)
         {
             layer.name = name;

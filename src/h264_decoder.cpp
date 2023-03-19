@@ -6,6 +6,8 @@
 //
 
 #include "h264_decoder.h"
+#include "libyuv.h"
+#include "frame.h"
 
 std::vector<webrtc::SdpVideoFormat> H264Decoder::GetSupportedFormats()
 {
@@ -19,44 +21,31 @@ std::unique_ptr<H264Decoder> H264Decoder::Create()
 
 bool H264Decoder::Configure(const Settings& settings)
 {
-    _layer = find_decoder();
+    _layer = find_codec(CodecKind::kDecoder);
     if (!_layer.codec)
     {
-        return CodecRet::Err;
-    }
-    
-    _parser_ctx = av_parser_init(_layer.codec->id);
-    if (!_parser_ctx)
-    {
-        return CodecRet::Err;
+        return false;
     }
     
     _ctx = avcodec_alloc_context3(_layer.codec);
     if (_ctx == NULL)
     {
-        return CodecRet::Err;
+        return false;
     }
     
     if (avcodec_open2(_ctx, _layer.codec, NULL) != 0)
     {
-        return CodecRet::Err;
+        return false;
     }
     
     _packet = av_packet_alloc();
     if (_packet == NULL)
     {
-        return CodecRet::Err;
+        return false;
     }
     
     _frame = av_frame_alloc();
-    if (_frame == NULL)
-    {
-        return CodecRet::Err;
-    }
-    else
-    {
-        return CodecRet::Ok;
-    }
+    return _frame != NULL;
 }
 
 int32_t H264Decoder::Decode(const webrtc::EncodedImage& input_image,
@@ -68,38 +57,19 @@ int32_t H264Decoder::Decode(const webrtc::EncodedImage& input_image,
         return CodecRet::Err;
     }
     
-    uint8_t* buf = (uint8_t*)input_image.data();
-    int len = (int)input_image.size();
-    while (len > 0)
+    _packet->data = (uint8_t*)input_image.data();
+    _packet->size = (int)input_image.size();
+    
+    if (avcodec_send_packet(_ctx, _packet) != 0)
     {
-        int size = av_parser_parse2(_parser_ctx,
-                                    _ctx,
-                                    &(_packet->data),
-                                    &(_packet->size),
-                                    buf,
-                                    len,
-                                    AV_NOPTS_VALUE,
-                                    AV_NOPTS_VALUE,
-                                    AV_NOPTS_VALUE);
-        buf += size;
-        len -= size;
-        
-        if (_packet->size == 0)
+        return CodecRet::Err;
+    }
+    
+    while (true)
+    {
+        if (_ReadFrame() != 0)
         {
-            continue;
-        }
-        
-        if (avcodec_send_packet(_ctx, _packet) != 0)
-        {
-            return CodecRet::Err;
-        }
-        
-        while (true)
-        {
-            if (_ReadFrame() == -1)
-            {
-                break;
-            }
+            break;
         }
     }
     
@@ -128,21 +98,44 @@ int H264Decoder::_ReadFrame()
         return -1;
     }
     
-    if (_i420_buffer == nullptr)
+    if (!_i420_buffer)
     {
+        int stride_u = _frame->format == AV_PIX_FMT_NV12 ? _frame->linesize[1] / 2 : _frame->linesize[1];
+        int stride_v = _frame->format == AV_PIX_FMT_NV12 ? stride_u : _frame->linesize[2];
         _i420_buffer = webrtc::I420Buffer::Create(_frame->width,
-                                                  _frame->height);
+                                                  _frame->height,
+                                                  _frame->linesize[0],
+                                                  stride_u,
+                                                  stride_v);
     }
-
-    _i420_buffer->Copy(_frame->width,
-                       _frame->height,
-                       _frame->data[0],
-                       _frame->linesize[0],
-                       _frame->data[1],
-                       _frame->linesize[1],
-                       _frame->data[2],
-                       _frame->linesize[2]);
-
+    
+    if (_frame->format == AV_PIX_FMT_NV12)
+    {
+        libyuv::NV12ToI420(_frame->data[0],
+                           _frame->linesize[0],
+                           _frame->data[1],
+                           _frame->linesize[1],
+                           (uint8_t*)_i420_buffer->DataY(),
+                           _i420_buffer->StrideY(),
+                           (uint8_t*)_i420_buffer->DataU(),
+                           _i420_buffer->StrideU(),
+                           (uint8_t*)_i420_buffer->DataV(),
+                           _i420_buffer->StrideV(),
+                           _frame->width,
+                           _frame->height);
+    }
+    else
+    {
+        _i420_buffer->Copy(_frame->width,
+                           _frame->height,
+                           _frame->data[0],
+                           _frame->linesize[0],
+                           _frame->data[1],
+                           _frame->linesize[1],
+                           _frame->data[2],
+                           _frame->linesize[2]);
+    }
+    
     int64_t time_ms = _frame->pts * (_frame->time_base.num * 1000 / _frame->time_base.den);
     webrtc::VideoFrame frame(_i420_buffer,
                              webrtc::kVideoRotation_0,
