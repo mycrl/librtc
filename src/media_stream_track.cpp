@@ -75,19 +75,20 @@ MediaStreamTrack* from(webrtc::AudioTrackInterface* itrack)
 
 void rtc_add_video_track_frame(MediaStreamTrack* track, IVideoFrame* frame)
 {
-    if (!track->video_source) {
+    if (!track->video_source)
+    {
         return;
     }
     
     track->video_source->AddFrame(from_c(frame));
 }
 
-void rtc_set_video_track_frame_h(
-                                 MediaStreamTrack* track,
+void rtc_set_video_track_frame_h(MediaStreamTrack* track,
                                  void(handler)(void* ctx, IVideoFrame* frame),
                                  void* ctx)
 {
-    if (!track->video_sink) {
+    if (!track->video_sink)
+    {
         return;
     }
     
@@ -163,16 +164,10 @@ void rtc_add_audio_track_frame(MediaStreamTrack* track, IAudioFrame* frame)
         return;
     }
     
-    track->audio_source->OnData(frame->buf,
-                                frame->frames,
-                                frame->channels,
-                                16,
-                                frame->sample_rate,
-                                frame->ms);
+    track->audio_source->OnData(frame);
 }
 
-void rtc_set_audio_track_frame_h(
-                                 MediaStreamTrack* track,
+void rtc_set_audio_track_frame_h(MediaStreamTrack* track,
                                  void(handler)(void* ctx, IAudioFrame* frame),
                                  void* ctx)
 {

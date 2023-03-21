@@ -17,8 +17,7 @@ int32_t AudioCaptureModule::ActiveAudioLayer(AudioLayer* audio_layer) const
     return 0;
 }
 
-int32_t AudioCaptureModule::RegisterAudioCallback(
-                                                  webrtc::AudioTransport* _audio_transport)
+int32_t AudioCaptureModule::RegisterAudioCallback(webrtc::AudioTransport* _audio_transport)
 {
     return 0;
 }
@@ -50,16 +49,14 @@ int16_t AudioCaptureModule::RecordingDevices()
     return 0;
 }
 
-int32_t AudioCaptureModule::PlayoutDeviceName(
-                                              uint16_t index,
+int32_t AudioCaptureModule::PlayoutDeviceName(uint16_t index,
                                               char name[webrtc::kAdmMaxDeviceNameSize],
                                               char guid[webrtc::kAdmMaxGuidSize])
 {
     return 0;
 }
 
-int32_t AudioCaptureModule::RecordingDeviceName(
-                                                uint16_t index,
+int32_t AudioCaptureModule::RecordingDeviceName(uint16_t index,
                                                 char name[webrtc::kAdmMaxDeviceNameSize],
                                                 char guid[webrtc::kAdmMaxGuidSize])
 {
@@ -317,14 +314,12 @@ int32_t AudioCaptureModule::EnableBuiltInNS(bool enable)
 }
 
 #if defined(WEBRTC_IOS)
-int AudioCaptureModule::GetPlayoutAudioParameters(
-                                                  webrtc::AudioParameters* params) const
+int AudioCaptureModule::GetPlayoutAudioParameters(webrtc::AudioParameters* params) const
 {
     return 0;
 }
 
-int AudioCaptureModule::GetRecordAudioParameters(
-                                                 webrtc::AudioParameters* params) const
+int AudioCaptureModule::GetRecordAudioParameters(webrtc::AudioParameters* params) const
 {
     return 0;
 }

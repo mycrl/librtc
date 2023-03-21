@@ -12,44 +12,54 @@
 #include "api/video/video_frame.h"
 #include "base.h"
 
+/* yuv420p format */
+
 typedef struct
 {
-    const uint8_t* buf;
-    size_t len;
-    
+    bool remote;
     uint32_t width;
     uint32_t height;
+    int64_t timestamp;
+    
+    // planar y
+    const uint8_t* data_y;
     uint32_t stride_y;
+    
+    // planar u
+    const uint8_t* data_u;
     uint32_t stride_u;
+    
+    // planar v
+    const uint8_t* data_v;
     uint32_t stride_v;
-    bool remote;
 } IVideoFrame;
+
+/* pcm format */
 
 typedef struct
 {
-    const void* buf;
-    size_t len;
-    
-    int bits_per_sample;
-    int sample_rate;
-    size_t channels;
-    size_t frames;
-    int64_t ms;
     bool remote;
+    size_t size;
+    size_t frames;
+    size_t channels;
+    int sample_rate;
+    int bits_per_sample;
+    int64_t timestamp;
+    const void* data;
 } IAudioFrame;
 
-extern "C" EXPORT void rtc_free_video_frame(IVideoFrame* frame);
-extern "C" EXPORT void rtc_free_audio_frame(IAudioFrame* frame);
+extern "C" EXPORT void rtc_free_frame(void* frame);
 
-IAudioFrame* into_c(const void* buf,
+IAudioFrame* into_c(const void* data,
                     int bits_per_sample,
                     int sample_rate,
                     size_t channels,
-                    size_t frames_);
+                    size_t frames,
+                    int64_t timestamp);
 IVideoFrame* into_c(webrtc::VideoFrame* frame);
 webrtc::VideoFrame from_c(IVideoFrame* frame);
 
-size_t get_i420_buffer_size(webrtc::I420BufferInterface* buf);
-size_t get_i420_buffer_size(const webrtc::I420BufferInterface* buf);
+size_t get_i420_buffer_size(webrtc::I420BufferInterface* data);
+size_t get_i420_buffer_size(const webrtc::I420BufferInterface* data);
 
 #endif  // librtc_frame_h

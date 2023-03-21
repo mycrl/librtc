@@ -261,10 +261,14 @@ void H264Encoder::SetRates(const webrtc::VideoEncoder::RateControlParameters& pa
 
 int32_t H264Encoder::Release()
 {
-    avcodec_send_frame(_ctx, NULL);
-    avcodec_free_context(&_ctx);
-    av_packet_free(&_packet);
-    av_frame_free(&_frame);
+    if (_layer.codec)
+    {
+        avcodec_send_frame(_ctx, NULL);
+        avcodec_free_context(&_ctx);
+        av_packet_free(&_packet);
+        av_frame_free(&_frame);
+    }
+
     return CodecRet::Ok;
 }
 

@@ -39,7 +39,7 @@ static std::string Encoders[] = {
     "h264_nvenc",
     "h264_qsv",
     "h264_videotoolbox",
-#ifndef WEBRTC_IOS
+#ifdef WEBRTC_IOS
     "libx264",
 #endif
 };

@@ -58,7 +58,7 @@ int32_t H264Decoder::Decode(const webrtc::EncodedImage& input_image,
                             bool _missing_frames,
                             int64_t render_time_ms)
 {
-    if (!_callback || !_ctx)
+    if (!_callback || !_layer.codec)
     {
         return CodecRet::Err;
     }
@@ -115,11 +115,15 @@ int32_t H264Decoder::RegisterDecodeCompleteCallback(webrtc::DecodedImageCallback
 
 int32_t H264Decoder::Release()
 {
-    avcodec_send_frame(_ctx, NULL);
-    avcodec_free_context(&_ctx);
-    av_parser_close(_parser);
-    av_packet_free(&_packet);
-    av_frame_free(&_frame);
+    if (_layer.codec)
+    {
+        avcodec_send_frame(_ctx, NULL);
+        avcodec_free_context(&_ctx);
+        av_parser_close(_parser);
+        av_packet_free(&_packet);
+        av_frame_free(&_frame);
+    }
+    
     return CodecRet::Ok;
 }
 

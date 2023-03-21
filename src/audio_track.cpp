@@ -26,7 +26,8 @@ void IAudioTrackSink::OnData(const void* audio_data,
                              int bits_per_sample,
                              int sample_rate,
                              size_t number_of_channels,
-                             size_t number_of_frames)
+                             size_t number_of_frames,
+                             absl::optional<int64_t> capture_timestamp_ms)
 {
     if (!_handler || !audio_data)
     {
@@ -37,7 +38,8 @@ void IAudioTrackSink::OnData(const void* audio_data,
                          bits_per_sample,
                          sample_rate,
                          number_of_channels,
-                         number_of_frames);
+                         number_of_frames,
+                         capture_timestamp_ms.value_or(0));
     _handler(_ctx, frames);
 }
 
@@ -96,20 +98,15 @@ bool IAudioTrackSource::remote() const
     return false;
 }
 
-void IAudioTrackSource::OnData(const void* audio_data,
-                               size_t number_of_frames,
-                               size_t number_of_channels,
-                               int bits_per_sample,
-                               int sample_rate,
-                               int64_t ms)
+void IAudioTrackSource::OnData(IAudioFrame* frame)
 {
     for (auto &sink: _sinks)
     {
-        sink->OnData(audio_data,
-                     bits_per_sample,
-                     sample_rate,
-                     number_of_channels,
-                     number_of_frames,
-                     ms);
+        sink->OnData(frame->data,
+                     frame->bits_per_sample,
+                     frame->sample_rate,
+                     frame->channels,
+                     frame->frames,
+                     frame->timestamp);
     }
 }

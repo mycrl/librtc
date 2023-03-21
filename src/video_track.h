@@ -5,8 +5,8 @@
 //  Created by Mr.Panda on 2023/2/21.
 //
 
-#ifndef video_track_h
-#define video_track_h
+#ifndef librtc_video_track_h
+#define librtc_video_track_h
 #pragma once
 
 #include "rtc_base/synchronization/mutex.h"
@@ -85,4 +85,4 @@ private:
     void* _ctx;
 };
 
-#endif /* video_track_h */
+#endif /* librtc_video_track_h */
