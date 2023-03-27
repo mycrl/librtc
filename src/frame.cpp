@@ -59,13 +59,12 @@ webrtc::VideoFrame from_c(IVideoFrame* frame)
                                              frame->stride_u,
                                              frame->data_v,
                                              frame->stride_v);
-    return std::move(webrtc::VideoFrame(i420_buf,
-										webrtc::kVideoRotation_0,
-										frame->timestamp * rtc::kNumMicrosecsPerMillisec));
+    return webrtc::VideoFrame(i420_buf,
+                              webrtc::kVideoRotation_0,
+                              frame->timestamp * rtc::kNumMicrosecsPerMillisec);
 }
 
-IAudioFrame* into_c(const void* data,
-                    int bits_per_sample,
+IAudioFrame* into_c(const int16_t* data,
                     int sample_rate,
                     size_t channels,
                     size_t frames,
@@ -83,7 +82,6 @@ IAudioFrame* into_c(const void* data,
     frame->channels = channels;
     frame->timestamp = timestamp;
     frame->sample_rate = sample_rate;
-    frame->bits_per_sample = bits_per_sample;
     
     return frame;
 }

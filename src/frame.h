@@ -43,15 +43,13 @@ typedef struct
     size_t frames;
     size_t channels;
     int sample_rate;
-    int bits_per_sample;
     int64_t timestamp;
-    const void* data;
+    const int16_t* data;
 } IAudioFrame;
 
 extern "C" EXPORT void rtc_free_frame(void* frame);
 
-IAudioFrame* into_c(const void* data,
-                    int bits_per_sample,
+IAudioFrame* into_c(const int16_t* data,
                     int sample_rate,
                     size_t channels,
                     size_t frames,

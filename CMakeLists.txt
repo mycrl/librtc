@@ -82,8 +82,10 @@ if (NOT EXISTS "${THIRD_PARTY_DIR}/webrtc/src/out/${CMAKE_BUILD_TYPE}")
 
 endif()
 
-# FFmpeg
+# FFmpeg.
 
+# In addition to windows, other platforms use package management
+# to install ffmpeg.
 if(APPLE)
 	execute_process(COMMAND bash -c "brew --prefix ffmpeg"
                     OUTPUT_VARIABLE FFMPEG_PREFIX

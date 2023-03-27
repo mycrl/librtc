@@ -34,8 +34,7 @@ void IAudioTrackSink::OnData(const void* audio_data,
         return;
     }
     
-    auto frames = into_c(audio_data,
-                         bits_per_sample,
+    auto frames = into_c((const int16_t*)audio_data,
                          sample_rate,
                          number_of_channels,
                          number_of_frames,
@@ -70,12 +69,6 @@ IAudioTrackSource* IAudioTrackSource::Create()
 void IAudioTrackSource::RegisterObserver(webrtc::ObserverInterface* observer)
 {
     observer->OnChanged();
-    _observers.insert(observer);
-}
-
-void IAudioTrackSource::UnregisterObserver(webrtc::ObserverInterface* observer)
-{
-    _observers.erase(observer);
 }
 
 void IAudioTrackSource::AddSink(webrtc::AudioTrackSinkInterface* sink)
@@ -86,6 +79,18 @@ void IAudioTrackSource::AddSink(webrtc::AudioTrackSinkInterface* sink)
 void IAudioTrackSource::RemoveSink(webrtc::AudioTrackSinkInterface* sink)
 {
     _sinks.erase(sink);
+}
+
+const cricket::AudioOptions IAudioTrackSource::options() const
+{
+    cricket::AudioOptions options;
+#if defined(WEBRTC_IOS)
+    options.ios_force_software_aec_HACK = true;
+#endif
+    options.echo_cancellation = true;
+    options.auto_gain_control = true;
+    options.noise_suppression = true;
+    return options;
 }
 
 webrtc::AudioSourceInterface::SourceState IAudioTrackSource::state() const
@@ -103,7 +108,7 @@ void IAudioTrackSource::OnData(IAudioFrame* frame)
     for (auto &sink: _sinks)
     {
         sink->OnData(frame->data,
-                     frame->bits_per_sample,
+                     16,
                      frame->sample_rate,
                      frame->channels,
                      frame->frames,
