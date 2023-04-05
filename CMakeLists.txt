@@ -72,7 +72,7 @@ if (NOT EXISTS "${THIRD_PARTY_DIR}/webrtc")
 
         # (only windows) In the M110 version, a header file is missing in a file in the webrtc
         # source code, and there will be a problem that the definition of `std::towupper`
-        # cannot be found. Here, a temporary fix was applied and the cwctype
+        # cannot be found. Here, a temporary fix was applied and the `cwctype`
         # header was added to fix this error.
         set(FIX_REP_SRC "#include <vector>")
         set(FIX_REP_DST "#include <vector>`n#include <cwctype>")
@@ -189,7 +189,8 @@ include_directories("${THIRD_PARTY_DIR}/webrtc/src/third_party/libyuv/include"
 target_link_directories(rtc PRIVATE
                         "${THIRD_PARTY_DIR}/webrtc/src/out/${CMAKE_BUILD_TYPE}/obj"
                         "${FFMPEG_PREFIX}/lib")
-target_link_libraries(rtc avcodec
+target_link_libraries(rtc 
+                      avcodec
                       avutil
                       webrtc)
 
