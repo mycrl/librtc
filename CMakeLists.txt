@@ -15,43 +15,81 @@ set(THIRD_PARTY_DIR "${CMAKE_CURRENT_SOURCE_DIR}/third_party")
 
 # Check whether the third-party dependent library directory is created.
 if (NOT EXISTS "${THIRD_PARTY_DIR}")
-    execute_process(COMMAND mkdir "${THIRD_PARTY_DIR}")
+    if (WIN32)
+        execute_process(COMMAND powershell.exe -Command "mkdir ${THIRD_PARTY_DIR}")
+    else()
+        execute_process(COMMAND mkdir "${THIRD_PARTY_DIR}")
+    endif()
 endif()
 
 # WebRTC Native Module.
 
 # Clone the depot_tools repository.
 if (NOT EXISTS "${THIRD_PARTY_DIR}/depot_tools")
-    execute_process(
-        WORKING_DIRECTORY "${THIRD_PARTY_DIR}"
-        COMMAND bash -c "git clone \
-                         https://chromium.googlesource.com/chromium/tools/depot_tools.git")
+    if (WIN32)
+        execute_process(
+            WORKING_DIRECTORY "${THIRD_PARTY_DIR}"
+            COMMAND powershell.exe -Command "git clone \
+                                             https://chromium.googlesource.com/chromium/tools/depot_tools.git")
+    else()
+        execute_process(
+            WORKING_DIRECTORY "${THIRD_PARTY_DIR}"
+            COMMAND bash -c "git clone \
+                             https://chromium.googlesource.com/chromium/tools/depot_tools.git")
+    endif()
 endif()
 
-# On Windows operating systems, the PATH environment variable uses a 
-# semicolon ; to separate paths. On Linux and macOS operating systems, 
+# Compile with native toolchain (only Windows).
+if (WIN32)
+    set(DEPOT_TOOLS_WIN_TOOLCHAIN "0")
+endif()
+
+# On Windows operating systems, the PATH environment variable uses a
+# semicolon ; to separate paths. On Linux and macOS operating systems,
 # use a colon : to separate paths.
 if (WIN32)
-    set(ENV{PATH} "$ENV{PATH};${THIRD_PARTY_DIR}/depot_tools")
+    set(ENV{PATH} "${THIRD_PARTY_DIR}/depot_tools;$ENV{PATH}")
 else()
-    set(ENV{PATH} "$ENV{PATH}:${THIRD_PARTY_DIR}/depot_tools")
+    set(ENV{PATH} "${THIRD_PARTY_DIR}/depot_tools:$ENV{PATH}")
 endif()
 
-# Sync webrtc toolchain and many dependencies. The checkout size is large due the 
+# Sync webrtc toolchain and many dependencies. The checkout size is large due the
 # use of the Chromium build toolchain and many dependencies. Estimated size:
 #
 # - Linux: 6.4 GB.
 # - Linux (with Android): 16 GB (of which ~8 GB is Android SDK+NDK images).
 # - Mac (with iOS support): 5.6GB
 if (NOT EXISTS "${THIRD_PARTY_DIR}/webrtc")
-    # Get webrtc native source code and synchronize third-party dependencies.
-    execute_process(COMMAND mkdir "${THIRD_PARTY_DIR}/webrtc")
-    execute_process(
-        WORKING_DIRECTORY "${THIRD_PARTY_DIR}/webrtc"
-        COMMAND bash -c "fetch --nohooks webrtc \
-                         && cd src \
-                         && git checkout branch-heads/5481 \
-                         && gclient sync")
+    Get webrtc native source code and synchronize third-party dependencies.
+    if (WIN32)
+        execute_process(COMMAND powershell.exe -Command "mkdir ${THIRD_PARTY_DIR}/webrtc")
+        execute_process(
+            WORKING_DIRECTORY "${THIRD_PARTY_DIR}/webrtc"
+            COMMAND powershell.exe -Command "fetch --nohooks webrtc; \
+                                            cd src; \
+                                            git checkout branch-heads/5481; \
+                                            gclient sync")
+
+        # (only windows) In the M110 version, a header file is missing in a file in the webrtc
+        # source code, and there will be a problem that the definition of `std::towupper`
+        # cannot be found. Here, a temporary fix was applied and the cwctype
+        # header was added to fix this error.
+        set(FIX_REP_SRC "#include <vector>")
+        set(FIX_REP_DST "#include <vector>`n#include <cwctype>")
+        set(FIX_FILE "src/modules/desktop_capture/win/full_screen_win_application_handler.cc")
+        set(FIX_CMD "(Get-Content ${FIX_FILE}) -replace '${FIX_REP_SRC}', \"${FIX_REP_DST}\" | Set-Content ${FIX_FILE}")
+        execute_process(
+            WORKING_DIRECTORY "${THIRD_PARTY_DIR}/webrtc"
+            COMMAND powershell.exe -Command "${FIX_CMD}")
+    else()
+        execute_process(COMMAND mkdir "${THIRD_PARTY_DIR}/webrtc")
+        execute_process(
+            WORKING_DIRECTORY "${THIRD_PARTY_DIR}/webrtc"
+            COMMAND bash -c "fetch --nohooks webrtc && \
+                            cd src && \
+                            git checkout branch-heads/5481 && \
+                            gclient sync")
+    endif()
 endif()
 
 # Compile the Debug/Release target of the webrtc static library.
@@ -62,24 +100,33 @@ if (NOT EXISTS "${THIRD_PARTY_DIR}/webrtc/src/out/${CMAKE_BUILD_TYPE}")
         set(DEBUG "true")
     endif()
 
-    # Compile with native toolchain (only Windows).
     if (WIN32)
-        set(DEPOT_TOOLS_WIN_TOOLCHAIN "0")
+        execute_process(
+            WORKING_DIRECTORY "${THIRD_PARTY_DIR}/webrtc/src"
+            COMMAND powershell.exe -Command "gn gen out/${CMAKE_BUILD_TYPE} --args='is_debug=${DEBUG} \
+                                                                                    is_component_build=false \
+                                                                                    use_lld=false \
+                                                                                    treat_warnings_as_errors=false \
+                                                                                    use_rtti=true \
+                                                                                    rtc_include_tests=false \
+                                                                                    rtc_build_examples=false \
+                                                                                    use_custom_libcxx=false \
+                                                                                    rtc_use_h264=false'; \
+                                            ninja -C out/${CMAKE_BUILD_TYPE}")
+    else()
+        execute_process(
+            WORKING_DIRECTORY "${THIRD_PARTY_DIR}/webrtc/src"
+            COMMAND bash -c "gn gen out/${CMAKE_BUILD_TYPE} --args='is_debug=${DEBUG} \
+                                                                    is_component_build=false \
+                                                                    use_lld=false \
+                                                                    treat_warnings_as_errors=false \
+                                                                    use_rtti=true \
+                                                                    rtc_include_tests=false \
+                                                                    rtc_build_examples=false \
+                                                                    use_custom_libcxx=false \
+                                                                    rtc_use_h264=false' && \
+                            ninja -C out/${CMAKE_BUILD_TYPE}")
     endif()
-
-    execute_process(
-        WORKING_DIRECTORY "${THIRD_PARTY_DIR}/webrtc/src"
-        COMMAND bash -c "gn gen out/${CMAKE_BUILD_TYPE} --args='is_debug=${DEBUG} \
-                                                                is_component_build=false \
-                                                                use_lld=false \
-                                                                treat_warnings_as_errors=false \
-                                                                use_rtti=true \
-                                                                rtc_include_tests=false \
-                                                                rtc_build_examples=false \
-                                                                use_custom_libcxx=false \
-                                                                rtc_use_h264=false' \
-                        && ninja -C out/${CMAKE_BUILD_TYPE}")
-
 endif()
 
 # FFmpeg.
@@ -87,7 +134,7 @@ endif()
 # In addition to windows, other platforms use package management
 # to install ffmpeg.
 if(APPLE)
-	execute_process(COMMAND bash -c "brew --prefix ffmpeg"
+    execute_process(COMMAND bash -c "brew --prefix ffmpeg"
                     OUTPUT_VARIABLE FFMPEG_PREFIX
                     OUTPUT_STRIP_TRAILING_WHITESPACE)
     set(FFMPEG_PREFIX ${FFMPEG_PREFIX})
@@ -97,32 +144,32 @@ endif()
 
 # The compilation target is a dynamic library.
 add_library(rtc SHARED
-	src/base.h
-	src/base.cpp
-	src/frame.h
-	src/frame.cpp
-	src/media_stream_track.h
-	src/media_stream_track.cpp
-	src/video_track.h
-	src/video_track.cpp
-	src/audio_track.h
-	src/audio_track.cpp
-	src/audio_capture_module.h
+    src/base.h
+    src/base.cpp
+    src/frame.h
+    src/frame.cpp
+    src/media_stream_track.h
+    src/media_stream_track.cpp
+    src/video_track.h
+    src/video_track.cpp
+    src/audio_track.h
+    src/audio_track.cpp
+    src/audio_capture_module.h
     src/audio_capture_module.cpp
-	src/observer.cpp
-	src/observer.h
-	src/peer_connection.cpp
-	src/peer_connection.h
-	src/peer_connection_config.h
-	src/peer_connection_config.cpp
-	src/session_description.h
-	src/session_description.cpp
-	src/ice_candidate.h
-	src/ice_candidate.cpp
-	src/data_channel.h
-	src/data_channel.cpp
-	src/video_encoder.h
-	src/video_encoder.cpp
+    src/observer.cpp
+    src/observer.h
+    src/peer_connection.cpp
+    src/peer_connection.h
+    src/peer_connection_config.h
+    src/peer_connection_config.cpp
+    src/session_description.h
+    src/session_description.cpp
+    src/ice_candidate.h
+    src/ice_candidate.cpp
+    src/data_channel.h
+    src/data_channel.cpp
+    src/video_encoder.h
+    src/video_encoder.cpp
     src/video_decoder.h
     src/video_decoder.cpp
     src/h264.h
@@ -139,9 +186,9 @@ include_directories("${THIRD_PARTY_DIR}/webrtc/src/third_party/libyuv/include"
                     "${FFMPEG_PREFIX}/include")
 
 # Add third-party library files.
-target_link_directories(rtc PRIVATE 
+target_link_directories(rtc PRIVATE
                         "${THIRD_PARTY_DIR}/webrtc/src/out/${CMAKE_BUILD_TYPE}/obj"
-						"${FFMPEG_PREFIX}/lib")
+                        "${FFMPEG_PREFIX}/lib")
 target_link_libraries(rtc avcodec
                       avutil
                       webrtc)
