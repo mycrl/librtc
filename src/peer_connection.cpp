@@ -24,6 +24,7 @@ void rtc_close(RTCPeerConnection* peer)
 {
     peer->pc->Close();
     rtc::CleanupSSL();
+    rtc::Thread::Current()->Quit();
     delete peer;
 }
 
