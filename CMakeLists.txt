@@ -60,7 +60,7 @@ endif()
 # - Linux (with Android): 16 GB (of which ~8 GB is Android SDK+NDK images).
 # - Mac (with iOS support): 5.6GB
 if (NOT EXISTS "${THIRD_PARTY_DIR}/webrtc")
-    Get webrtc native source code and synchronize third-party dependencies.
+    # Get webrtc native source code and synchronize third-party dependencies.
     if (WIN32)
         execute_process(COMMAND powershell.exe -Command "mkdir ${THIRD_PARTY_DIR}/webrtc")
         execute_process(
