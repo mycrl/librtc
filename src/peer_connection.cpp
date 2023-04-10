@@ -20,11 +20,15 @@ void rtc_run()
     rtc::Thread::Current()->Run();
 }
 
+void rtc_exit()
+{
+    rtc::CleanupSSL();
+    rtc::Thread::Current()->Quit();
+}
+
 void rtc_close(RTCPeerConnection* peer)
 {
     peer->pc->Close();
-    rtc::CleanupSSL();
-    rtc::Thread::Current()->Quit();
     delete peer;
 }
 

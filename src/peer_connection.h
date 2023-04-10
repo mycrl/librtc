@@ -18,6 +18,9 @@
 #include "observer.h"
 #include "base.h"
 
+extern "C" EXPORT void rtc_run();
+extern "C" EXPORT void rtc_exit();
+
 // RTCPeerConnection
 //
 // The RTCPeerConnection interface represents a WebRTC connection between the local
@@ -43,8 +46,6 @@ extern "C" EXPORT RTCPeerConnection* rtc_create_peer_connection(RTCPeerConnectio
 // are considered to be stopped once this returns (they may still be in the process
 // of stopping, but for all intents and purposes, they're stopped).
 extern "C" EXPORT void rtc_close(RTCPeerConnection* peer);
-
-extern "C" EXPORT void rtc_run();
 
 // When a web site or app using RTCPeerConnection receives a new ICE candidate from
 // the remote peer over its signaling channel, it delivers the newly-received
