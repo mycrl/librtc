@@ -164,7 +164,7 @@ int H264Decoder::_ReadFrame(const webrtc::EncodedImage& input_image,
     }
     else
     {
-        _i420_buffer->Copy(_frame->width,
+        _i420_buffer = webrtc::I420Buffer::Copy(_frame->width,
                            _frame->height,
                            _frame->data[0],
                            _frame->linesize[0],
