@@ -41,7 +41,7 @@ endif()
 
 # Compile with native toolchain (only Windows).
 if (WIN32)
-    set(DEPOT_TOOLS_WIN_TOOLCHAIN "0")
+    set(ENV{DEPOT_TOOLS_WIN_TOOLCHAIN} "0")
 endif()
 
 # On Windows operating systems, the PATH environment variable uses a
