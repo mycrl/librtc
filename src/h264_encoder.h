@@ -79,16 +79,18 @@ public:
 private:
     int _ReadPacket(webrtc::VideoFrameType frame_type, const webrtc::VideoFrame& frame);
     int _OnFrame(webrtc::VideoFrameType frame_type);
+    bool _OpenCodec(const webrtc::VideoCodec* codec_settings,
+                    const char* name);
     
     webrtc::H264BitstreamParser _h264_bitstream_parser;
     webrtc::CodecSpecificInfo _codec_specific;
     webrtc::EncodedImageCallback* _callback;
     webrtc::EncodedImage _image;
+    const AVCodec* _codec;
     AVCodecContext* _ctx;
     AVPacket* _packet;
     AVFrame* _frame;
     size_t _frame_num;
-    CodecLayer _layer;
 };
 
 #endif /* librtc_h264_encoder_h */

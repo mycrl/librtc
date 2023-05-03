@@ -21,25 +21,21 @@ std::unique_ptr<H264Decoder> H264Decoder::Create()
 
 bool H264Decoder::Configure(const Settings& settings)
 {
-    _layer = find_codec(CodecKind::kDecoder);
-    if (!_layer.codec)
+    for (auto name : VideoDecoders)
+    {
+        if (_OpenCodec(name.c_str()))
+        {
+            break;
+        }
+    }
+
+    if (avcodec_is_open(_ctx) == 0)
     {
         return false;
     }
-    
-    _parser = av_parser_init(_layer.codec->id);
+
+    _parser = av_parser_init(_codec->id);
     if (!_parser)
-    {
-        return false;
-    }
-    
-    _ctx = avcodec_alloc_context3(_layer.codec);
-    if (_ctx == NULL)
-    {
-        return false;
-    }
-    
-    if (avcodec_open2(_ctx, _layer.codec, NULL) != 0)
     {
         return false;
     }
@@ -58,7 +54,7 @@ int32_t H264Decoder::Decode(const webrtc::EncodedImage& input_image,
                             bool _missing_frames,
                             int64_t render_time_ms)
 {
-    if (!_callback || !_layer.codec)
+    if (!_callback || !_codec)
     {
         return CodecRet::Err;
     }
@@ -115,7 +111,7 @@ int32_t H264Decoder::RegisterDecodeCompleteCallback(webrtc::DecodedImageCallback
 
 int32_t H264Decoder::Release()
 {
-    if (_layer.codec)
+    if (_codec)
     {
         avcodec_send_frame(_ctx, NULL);
         avcodec_free_context(&_ctx);
@@ -181,4 +177,28 @@ int H264Decoder::_ReadFrame(const webrtc::EncodedImage& input_image,
     frame.set_ntp_time_ms(input_image.ntp_time_ms_);
     _callback->Decoded(frame);
     return 0;
+}
+
+bool H264Decoder::_OpenCodec(const char* name)
+{
+    _codec = avcodec_find_decoder_by_name(name);
+    if (!_codec)
+    {
+        return false;
+    }
+
+    _ctx = avcodec_alloc_context3(_codec);
+    if (_ctx == NULL)
+    {
+        return false;
+    }
+
+    if (avcodec_open2(_ctx, _codec, NULL) != 0)
+    {
+        return false;
+    }
+    else
+    {
+        return true;
+    }
 }

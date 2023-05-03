@@ -41,21 +41,3 @@ std::vector<webrtc::SdpVideoFormat> supported_h264_codecs(bool mode)
         create_h264_format(webrtc::H264Profile::kProfileMain, webrtc::H264Level::kLevel3_1, "1", mode),
         create_h264_format(webrtc::H264Profile::kProfileMain, webrtc::H264Level::kLevel3_1, "0", mode)};
 }
-
-CodecLayer find_codec(CodecKind kind)
-{
-    CodecLayer layer;
-    for (auto name: Encoders)
-    {
-        layer.codec = (kind == CodecKind::kEncoder)
-            ? avcodec_find_encoder_by_name(name.c_str())
-            : avcodec_find_decoder_by_name(name.c_str());
-        if (layer.codec)
-        {
-            layer.name = name;
-            break;
-        }
-    }
-    
-    return layer;
-}

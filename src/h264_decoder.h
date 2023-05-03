@@ -36,15 +36,16 @@ public:
     int32_t Release();
 private:
     int _ReadFrame(const webrtc::EncodedImage& input_image, int64_t render_time_ms);
+    bool _OpenCodec(const char* name);
     
     rtc::scoped_refptr<webrtc::I420Buffer> _i420_buffer = nullptr;
     webrtc::DecodedImageCallback* _callback;
     webrtc::EncodedImage _image;
     AVCodecParserContext* _parser;
+    const AVCodec* _codec;
     AVCodecContext* _ctx;
     AVPacket* _packet;
     AVFrame* _frame;
-    CodecLayer _layer;
 };
 
 #endif /* librtc_h264_decoder_h */
