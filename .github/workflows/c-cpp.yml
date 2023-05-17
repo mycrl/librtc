@@ -1,0 +1,37 @@
+name: Multi-platform Build
+on:
+  push:
+    branches:
+      - main
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [windows-latest, ubuntu-latest, macos-latest]
+        build_type: [Debug, Release]
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v2
+      - name: Install CMake
+        run: |
+          if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
+            choco install cmake --installargs 'ADD_CMAKE_TO_PATH=System'
+            choco install ffmpeg --installargs 'ADD_CMAKE_TO_PATH=System'
+          elif [[ "${{ matrix.os }}" == "ubuntu-latest" ]]; then
+            sudo apt-get install -y cmake ffmpeg
+          else
+            brew install cmake ffmpeg
+          fi
+      - name: Build
+        run: |
+          mkdir build
+          cd build
+          cmake -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} ..
+          cmake --build .
+      - name: Publish Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: release
+          path: |
+            build/rtc.*
