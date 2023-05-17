@@ -24,4 +24,4 @@ C bindings for Google Chrome WebRTC Native. Using C++ ABI in other programming l
 ***
 
 ### License
-[GPL](./LICENSE) Copyright (c) 2022 Mr.Panda.
+[MIT](./LICENSE) Copyright (c) 2022 Mr.Panda.
