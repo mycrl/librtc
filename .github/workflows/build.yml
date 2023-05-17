@@ -19,6 +19,7 @@ jobs:
             choco install cmake --installargs 'ADD_CMAKE_TO_PATH=System'
             choco install ffmpeg --installargs 'ADD_CMAKE_TO_PATH=System'
           elif [[ "${{ matrix.os }}" == "ubuntu-latest" ]]; then
+            sudo apt update
             sudo apt-get install -y cmake ffmpeg
           else
             brew install cmake ffmpeg
