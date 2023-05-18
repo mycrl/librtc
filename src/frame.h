@@ -16,44 +16,44 @@
 
 typedef struct
 {
-    bool remote;
-    uint32_t width;
-    uint32_t height;
-    int64_t timestamp;
-    
-    // planar y
-    const uint8_t* data_y;
-    uint32_t stride_y;
-    
-    // planar u
-    const uint8_t* data_u;
-    uint32_t stride_u;
-    
-    // planar v
-    const uint8_t* data_v;
-    uint32_t stride_v;
+	bool remote;
+	uint32_t width;
+	uint32_t height;
+	int64_t timestamp;
+
+	// planar y
+	const uint8_t* data_y;
+	uint32_t stride_y;
+
+	// planar u
+	const uint8_t* data_u;
+	uint32_t stride_u;
+
+	// planar v
+	const uint8_t* data_v;
+	uint32_t stride_v;
 } IVideoFrame;
 
 /* pcm format */
 
 typedef struct
 {
-    bool remote;
-    size_t size;
-    size_t frames;
-    size_t channels;
-    int sample_rate;
-    int64_t timestamp;
-    const int16_t* data;
+	bool remote;
+	size_t size;
+	size_t frames;
+	size_t channels;
+	int sample_rate;
+	int64_t timestamp;
+	const int16_t* data;
 } IAudioFrame;
 
 extern "C" EXPORT void rtc_free_frame(void* frame);
 
 IAudioFrame* into_c(const int16_t* data,
-                    int sample_rate,
-                    size_t channels,
-                    size_t frames,
-                    int64_t timestamp);
+					int sample_rate,
+					size_t channels,
+					size_t frames,
+					int64_t timestamp);
 IVideoFrame* into_c(webrtc::VideoFrame* frame);
 webrtc::VideoFrame from_c(IVideoFrame* frame);
 

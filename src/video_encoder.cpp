@@ -10,33 +10,33 @@
 #include "h264_encoder.h"
 
 IVideoEncoderFactory::IVideoEncoderFactory()
-: _factory(webrtc::CreateBuiltinVideoEncoderFactory())
+	: _factory(webrtc::CreateBuiltinVideoEncoderFactory())
 {
-    for (auto formats: {H264Encoder::GetSupportedFormats()})
-    {
-        for (auto format: formats)
-        {
-            _formats.push_back(format);
-        }
-    }
+	for (auto formats : { H264Encoder::GetSupportedFormats() })
+	{
+		for (auto format : formats)
+		{
+			_formats.push_back(format);
+		}
+	}
 }
 
 std::unique_ptr<IVideoEncoderFactory> IVideoEncoderFactory::Create()
 {
-    return std::make_unique<IVideoEncoderFactory>();
+	return std::make_unique<IVideoEncoderFactory>();
 }
 
 std::vector<webrtc::SdpVideoFormat> IVideoEncoderFactory::GetSupportedFormats() const
 {
-    return _formats;
+	return _formats;
 }
 
 std::unique_ptr<webrtc::VideoEncoder> IVideoEncoderFactory::CreateVideoEncoder(const webrtc::SdpVideoFormat& format)
 {
-    if (format.name == "H264")
-    {
-        return H264Encoder::Create(format);;
-    }
-    
-    return _factory->CreateVideoEncoder(format);
+	if (format.name == "H264")
+	{
+		return H264Encoder::Create(format);;
+	}
+
+	return _factory->CreateVideoEncoder(format);
 }

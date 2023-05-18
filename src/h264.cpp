@@ -8,36 +8,36 @@
 #include "h264.h"
 
 webrtc::SdpVideoFormat create_h264_format(webrtc::H264Profile profile,
-                                          webrtc::H264Level level,
-                                          const std::string& packetization_mode,
-                                          bool add_scalability_modes)
+										  webrtc::H264Level level,
+										  const std::string& packetization_mode,
+										  bool add_scalability_modes)
 {
-    const absl::optional<std::string> profile_string =
-    H264ProfileLevelIdToString(webrtc::H264ProfileLevelId(profile, level));
-    absl::InlinedVector<webrtc::ScalabilityMode, webrtc::kScalabilityModeCount> scalability_modes;
-    
-    if (add_scalability_modes)
-    {
-        for (const auto scalability_mode : IkSupportedScalabilityModes)
-        {
-            scalability_modes.push_back(scalability_mode);
-        }
-    }
-    
-    return webrtc::SdpVideoFormat(
-                                  cricket::kH264CodecName,
-                                  {{cricket::kH264FmtpProfileLevelId, *profile_string},
-                                      {cricket::kH264FmtpLevelAsymmetryAllowed, "1"},
-                                      {cricket::kH264FmtpPacketizationMode, packetization_mode}},
-                                  scalability_modes);
+	const absl::optional<std::string> profile_string =
+		H264ProfileLevelIdToString(webrtc::H264ProfileLevelId(profile, level));
+	absl::InlinedVector<webrtc::ScalabilityMode, webrtc::kScalabilityModeCount> scalability_modes;
+
+	if (add_scalability_modes)
+	{
+		for (const auto scalability_mode : IkSupportedScalabilityModes)
+		{
+			scalability_modes.push_back(scalability_mode);
+		}
+	}
+
+	return webrtc::SdpVideoFormat(
+		cricket::kH264CodecName,
+		{ {cricket::kH264FmtpProfileLevelId, *profile_string},
+			{cricket::kH264FmtpLevelAsymmetryAllowed, "1"},
+			{cricket::kH264FmtpPacketizationMode, packetization_mode} },
+		scalability_modes);
 }
 
 std::vector<webrtc::SdpVideoFormat> supported_h264_codecs(bool mode)
 {
-    return {create_h264_format(webrtc::H264Profile::kProfileBaseline, webrtc::H264Level::kLevel3_1, "1", mode),
-        create_h264_format(webrtc::H264Profile::kProfileBaseline, webrtc::H264Level::kLevel3_1, "0", mode),
-        create_h264_format(webrtc::H264Profile::kProfileConstrainedBaseline, webrtc::H264Level::kLevel3_1, "1", mode),
-        create_h264_format(webrtc::H264Profile::kProfileConstrainedBaseline, webrtc::H264Level::kLevel3_1, "0", mode),
-        create_h264_format(webrtc::H264Profile::kProfileMain, webrtc::H264Level::kLevel3_1, "1", mode),
-        create_h264_format(webrtc::H264Profile::kProfileMain, webrtc::H264Level::kLevel3_1, "0", mode)};
+	return { create_h264_format(webrtc::H264Profile::kProfileBaseline, webrtc::H264Level::kLevel3_1, "1", mode),
+		create_h264_format(webrtc::H264Profile::kProfileBaseline, webrtc::H264Level::kLevel3_1, "0", mode),
+		create_h264_format(webrtc::H264Profile::kProfileConstrainedBaseline, webrtc::H264Level::kLevel3_1, "1", mode),
+		create_h264_format(webrtc::H264Profile::kProfileConstrainedBaseline, webrtc::H264Level::kLevel3_1, "0", mode),
+		create_h264_format(webrtc::H264Profile::kProfileMain, webrtc::H264Level::kLevel3_1, "1", mode),
+		create_h264_format(webrtc::H264Profile::kProfileMain, webrtc::H264Level::kLevel3_1, "0", mode) };
 }
