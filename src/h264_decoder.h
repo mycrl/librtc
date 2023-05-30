@@ -36,7 +36,6 @@ public:
 	int32_t Release();
 private:
 	int _ReadFrame(const webrtc::EncodedImage& input_image, int64_t render_time_ms);
-	bool _OpenCodec(const char* name);
 
 	rtc::scoped_refptr<webrtc::I420Buffer> _i420_buffer = nullptr;
 	webrtc::DecodedImageCallback* _callback;

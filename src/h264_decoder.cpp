@@ -21,12 +21,27 @@ std::unique_ptr<H264Decoder> H264Decoder::Create()
 
 bool H264Decoder::Configure(const Settings& settings)
 {
-	for (auto name : VideoDecoders)
+	auto codec_name = find_codec(VideoDecoders);
+	if (codec_name == NULL)
 	{
-		if (_OpenCodec(name.c_str()))
-		{
-			break;
-		}
+		return false;
+	}
+
+	_codec = avcodec_find_decoder_by_name(codec_name);
+	if (!_codec)
+	{
+		return false;
+	}
+
+	_ctx = avcodec_alloc_context3(_codec);
+	if (_ctx == NULL)
+	{
+		return false;
+	}
+
+	if (avcodec_open2(_ctx, _codec, NULL) != 0)
+	{
+		return false;
 	}
 
 	if (avcodec_is_open(_ctx) == 0)
@@ -177,28 +192,4 @@ int H264Decoder::_ReadFrame(const webrtc::EncodedImage& input_image,
 	frame.set_ntp_time_ms(input_image.ntp_time_ms_);
 	_callback->Decoded(frame);
 	return 0;
-}
-
-bool H264Decoder::_OpenCodec(const char* name)
-{
-	_codec = avcodec_find_decoder_by_name(name);
-	if (!_codec)
-	{
-		return false;
-	}
-
-	_ctx = avcodec_alloc_context3(_codec);
-	if (_ctx == NULL)
-	{
-		return false;
-	}
-
-	if (avcodec_open2(_ctx, _codec, NULL) != 0)
-	{
-		return false;
-	}
-	else
-	{
-		return true;
-	}
 }

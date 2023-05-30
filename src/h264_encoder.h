@@ -79,8 +79,6 @@ public:
 private:
 	int _ReadPacket(webrtc::VideoFrameType frame_type, const webrtc::VideoFrame& frame);
 	int _OnFrame(webrtc::VideoFrameType frame_type);
-	bool _OpenCodec(const webrtc::VideoCodec* codec_settings,
-					const char* name);
 
 	webrtc::H264BitstreamParser _h264_bitstream_parser;
 	webrtc::CodecSpecificInfo _codec_specific;

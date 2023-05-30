@@ -51,12 +51,70 @@ int H264Encoder::InitEncode(const webrtc::VideoCodec* codec_settings,
 		return CodecRet::Err;
 	}
 
-	for (auto name : VideoEncoders)
+	auto codec_name = find_codec(VideoEncoders);
+	if (codec_name == NULL)
 	{
-		if (_OpenCodec(codec_settings, name.c_str()))
-		{
-			break;
-		}
+		return CodecRet::Err;
+	}
+
+	_codec = avcodec_find_encoder_by_name(codec_name);
+	if (!_codec)
+	{
+		return CodecRet::Err;
+	}
+
+	_ctx = avcodec_alloc_context3(_codec);
+	if (_ctx == NULL)
+	{
+		return CodecRet::Err;
+	}
+
+	_ctx->max_b_frames = 0;
+	_ctx->width = codec_settings->width;
+	_ctx->height = codec_settings->height;
+	_ctx->bit_rate = codec_settings->maxBitrate * 1000;
+	_ctx->framerate = av_make_q(codec_settings->maxFramerate, 1);
+	_ctx->time_base = av_make_q(1, codec_settings->maxFramerate);
+	_ctx->pkt_timebase = av_make_q(1, codec_settings->maxFramerate);
+	_ctx->gop_size = codec_settings->H264().keyFrameInterval;
+
+	if (codec_name == "h264_qsv")
+	{
+		_ctx->pix_fmt = AV_PIX_FMT_NV12;
+	}
+	else
+	{
+		_ctx->pix_fmt = AV_PIX_FMT_YUV420P;
+	}
+
+	if (codec_name == "h264_videotoolbox")
+	{
+		av_opt_set_int(_ctx->priv_data, "prio_speed", 1, 0);
+		av_opt_set_int(_ctx->priv_data, "realtime", 1, 0);
+	}
+	else if (codec_name == "h264_qsv")
+	{
+		av_opt_set_int(_ctx->priv_data, "preset", 7, 0);
+		av_opt_set_int(_ctx->priv_data, "profile", 66, 0);
+	}
+	else if (codec_name == "h264_nvenc")
+	{
+		av_opt_set_int(_ctx->priv_data, "zerolatency", 1, 0);
+		av_opt_set_int(_ctx->priv_data, "b_adapt", 0, 0);
+		av_opt_set_int(_ctx->priv_data, "rc", 1, 0);
+		av_opt_set_int(_ctx->priv_data, "preset", 3, 0);
+		av_opt_set_int(_ctx->priv_data, "profile", 0, 0);
+		av_opt_set_int(_ctx->priv_data, "tune", 1, 0);
+		av_opt_set_int(_ctx->priv_data, "cq", 30, 0);
+	}
+	else if (codec_name == "libx264")
+	{
+		av_opt_set(_ctx->priv_data, "tune", "zerolatency", 0);
+	}
+
+	if (avcodec_open2(_ctx, _codec, NULL) != 0)
+	{
+		return CodecRet::Err;
 	}
 
 	if (avcodec_is_open(_ctx) == 0)
@@ -277,72 +335,4 @@ int H264Encoder::_OnFrame(webrtc::VideoFrameType frame_type)
 	}
 
 	return 0;
-}
-
-bool H264Encoder::_OpenCodec(const webrtc::VideoCodec* codec_settings,
-							 const char* name)
-{
-	_codec = avcodec_find_encoder_by_name(name);
-	if (!_codec)
-	{
-		return false;
-	}
-
-	_ctx = avcodec_alloc_context3(_codec);
-	if (_ctx == NULL)
-	{
-		return false;
-	}
-
-	_ctx->max_b_frames = 0;
-	_ctx->width = codec_settings->width;
-	_ctx->height = codec_settings->height;
-	_ctx->bit_rate = codec_settings->maxBitrate * 1000;
-	_ctx->framerate = av_make_q(codec_settings->maxFramerate, 1);
-	_ctx->time_base = av_make_q(1, codec_settings->maxFramerate);
-	_ctx->pkt_timebase = av_make_q(1, codec_settings->maxFramerate);
-	_ctx->gop_size = codec_settings->H264().keyFrameInterval;
-
-	if (name == "h264_qsv")
-	{
-		_ctx->pix_fmt = AV_PIX_FMT_NV12;
-	}
-	else
-	{
-		_ctx->pix_fmt = AV_PIX_FMT_YUV420P;
-	}
-
-	if (name == "h264_videotoolbox")
-	{
-		av_opt_set_int(_ctx->priv_data, "prio_speed", 1, 0);
-		av_opt_set_int(_ctx->priv_data, "realtime", 1, 0);
-	}
-	else if (name == "h264_qsv")
-	{
-		av_opt_set_int(_ctx->priv_data, "preset", 7, 0);
-		av_opt_set_int(_ctx->priv_data, "profile", 66, 0);
-	}
-	else if (name == "h264_nvenc")
-	{
-		av_opt_set_int(_ctx->priv_data, "zerolatency", 1, 0);
-		av_opt_set_int(_ctx->priv_data, "b_adapt", 0, 0);
-		av_opt_set_int(_ctx->priv_data, "rc", 1, 0);
-		av_opt_set_int(_ctx->priv_data, "preset", 3, 0);
-		av_opt_set_int(_ctx->priv_data, "profile", 0, 0);
-		av_opt_set_int(_ctx->priv_data, "tune", 1, 0);
-		av_opt_set_int(_ctx->priv_data, "cq", 30, 0);
-	}
-	else if (name == "libx264")
-	{
-		av_opt_set(_ctx->priv_data, "tune", "zerolatency", 0);
-	}
-
-	if (avcodec_open2(_ctx, _codec, NULL) != 0)
-	{
-		return false;
-	}
-	else
-	{
-		return true;
-	}
 }

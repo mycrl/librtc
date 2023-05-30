@@ -11,25 +11,36 @@
 
 #include "modules/video_coding/codecs/h264/include/h264.h"
 
+extern "C"
+{
+#include "libavutil/hwcontext.h"
+}
+
 enum CodecRet
 {
 	Ok = WEBRTC_VIDEO_CODEC_OK,
 	Err = WEBRTC_VIDEO_CODEC_ERROR,
 };
 
-static std::string VideoDecoders[] = {
-	"h264_cuvid",
-	"h264_qsv",
-	"h264_videotoolbox",
-	"libx264"
+typedef struct
+{
+	const char* name;
+	AVHWDeviceType type;
+} CodecDesc;
+
+static CodecDesc VideoDecoders[] = {
+	{"h264_qsv", AV_HWDEVICE_TYPE_QSV},
+	{"h264_cuvid", AV_HWDEVICE_TYPE_CUDA},
+	{"h264_videotoolbox", AV_HWDEVICE_TYPE_VIDEOTOOLBOX},
+	{"libx264", AV_HWDEVICE_TYPE_NONE},
 };
 
-static std::string VideoEncoders[] = {
-	"h264_nvenc",
-	"h264_qsv",
-	"h264_videotoolbox",
+static CodecDesc VideoEncoders[] = {
+	{"h264_qsv", AV_HWDEVICE_TYPE_QSV},
+	{"h264_nvenc", AV_HWDEVICE_TYPE_CUDA},
+	{"h264_videotoolbox", AV_HWDEVICE_TYPE_VIDEOTOOLBOX},
 #ifdef WEBRTC_IOS
-	"libx264",
+	{"libx264", AV_HWDEVICE_TYPE_NONE},
 #endif
 };
 
@@ -44,5 +55,26 @@ webrtc::SdpVideoFormat create_h264_format(webrtc::H264Profile profile,
 										  const std::string& packetization_mode,
 										  bool add_scalability_modes);
 std::vector<webrtc::SdpVideoFormat> supported_h264_codecs(bool mode /* add_scalability_modes */);
+
+template <size_t S>
+const char* find_codec(CodecDesc(&codecs)[S])
+{
+	AVBufferRef* ctx = NULL;
+	for (auto codec : codecs)
+	{
+		if (av_hwdevice_ctx_create(&ctx, codec.type, NULL, NULL, 0) == 0)
+		{
+			av_buffer_unref(&ctx);
+			return codec.name;
+		}
+	}
+
+	if (ctx != NULL)
+	{
+		av_buffer_unref(&ctx);
+	}
+
+	return NULL;
+}
 
 #endif /* librtc_h264_h */
