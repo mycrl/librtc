@@ -5,6 +5,9 @@ project(rtc)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
+# Enable static library option.
+option(USE_STATIC "Enable static library" OFF)
+
 # Default build target is Debug.
 if (NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE "Debug")
@@ -162,7 +165,7 @@ set(SOURCES
     src/h264_encoder.cpp
     src/h264_decoder.cpp)
 
-if ($ENV{USE_STATIC} STREQUAL "true")
+if (USE_STATIC)
     add_library(rtc STATIC ${SOURCES})
 else()
     add_library(rtc SHARED ${SOURCES})
