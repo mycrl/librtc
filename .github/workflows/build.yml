@@ -3,7 +3,6 @@ on:
   push:
     branches:
       - master
-      - action-test
 jobs:
   build:
     runs-on: ${{ matrix.os }}
@@ -35,8 +34,9 @@ jobs:
           cmake -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} -DUSE_STATIC=${{ matrix.use_static }} ..
           cmake --build . --config ${{ matrix.build_type }}
       - name: Publish Artifacts
+        if: ${{ matrix.os }} == "macos-latest"
         uses: actions/upload-artifact@v3
         with:
-          name: release
+          name: ${{ matrix.os }}-${{ matrix.build_type }}-${{ matrix.use_static }}
           path: |
             build/${{ matrix.build_type }}/rtc.*
