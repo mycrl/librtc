@@ -10,7 +10,6 @@ jobs:
       matrix:
         os: [windows-latest]
         build_type: [Debug, Release]
-        use_static: [ON, OFF]
     steps:
       - name: Checkout Code
         uses: actions/checkout@v2
@@ -18,12 +17,12 @@ jobs:
         run: |
           mkdir build
           cd build
-          cmake -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} -DUSE_STATIC=${{ matrix.use_static }} ..
+          cmake -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} -DUSE_STATIC=ON ..
           cmake --build . --config ${{ matrix.build_type }}
       - name: Publish Artifacts
         if: ${{ matrix.os }} == "macos-latest"
         uses: actions/upload-artifact@v3
         with:
-          name: ${{ matrix.os }}-${{ matrix.build_type }}-${{ matrix.use_static }}
+          name: ${{ matrix.os }}-${{ matrix.build_type }}
           path: |
             build/${{ matrix.build_type }}/rtc.*
