@@ -35,8 +35,8 @@ jobs:
           cmake -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} -DUSE_STATIC=${{ matrix.use_static }} ..
           cmake --build . --config ${{ matrix.build_type }}
       - name: Publish Artifacts
-        if: ${{ matrix.os }} == "windows-latest"
         uses: actions/upload-artifact@v3
+        if: ${{ matrix.os }} == "windows-latest"
         with:
           name: release
           path: |
