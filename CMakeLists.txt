@@ -68,7 +68,7 @@ if (NOT EXISTS "${THIRD_PARTY_DIR}/webrtc")
         execute_process(COMMAND powershell.exe -Command "mkdir ${THIRD_PARTY_DIR}/webrtc")
         execute_process(
             WORKING_DIRECTORY "${THIRD_PARTY_DIR}/webrtc"
-            COMMAND powershell.exe -Command "fetch --nohooks webrtc; \
+            COMMAND powershell.exe -Command "fetch --nohooks --nohistory webrtc; \
                                             cd src; \
                                             git checkout branch-heads/5481; \
                                             gclient sync")
@@ -88,7 +88,7 @@ if (NOT EXISTS "${THIRD_PARTY_DIR}/webrtc")
         execute_process(COMMAND mkdir "${THIRD_PARTY_DIR}/webrtc")
         execute_process(
             WORKING_DIRECTORY "${THIRD_PARTY_DIR}/webrtc"
-            COMMAND bash -c "fetch --nohooks webrtc && \
+            COMMAND bash -c "fetch --nohooks --nohistory webrtc && \
                             cd src && \
                             git checkout branch-heads/5481 && \
                             gclient sync")
