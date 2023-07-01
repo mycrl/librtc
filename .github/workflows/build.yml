@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - master
+      - action-test
 jobs:
   build:
     runs-on: ${{ matrix.os }}
