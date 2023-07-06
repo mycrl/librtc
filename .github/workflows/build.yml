@@ -19,7 +19,7 @@ jobs:
         run: |
           Invoke-WebRequest -Uri https://www.gyan.dev/ffmpeg/builds/packages/ffmpeg-5.1.2-full_build-shared.7z -OutFile ffmpeg.7z
           7z x ffmpeg.7z -aoa
-          echo "::set-output name=path::$pwd.Path"
+          echo "path=$pwd.Path" >> $GITHUB_OUTPUT
       - name: Build
         run: |
           $env:FFMPEG_PREFIX="${{ steps.download_ffmpeg.outputs.path }}"
@@ -44,7 +44,7 @@ jobs:
         path: artifacts
     - name: Get current date
       id: date
-      run: echo "::set-output name=date::$(date +'%Y-%m-%d')"
+      run: echo "date=$(date +'%Y-%m-%d')" >> $GITHUB_OUTPUT
     - name: Publish Release
       id: rtc_release
       uses: softprops/action-gh-release@v1
