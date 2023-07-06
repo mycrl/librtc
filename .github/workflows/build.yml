@@ -20,9 +20,10 @@ jobs:
           Invoke-WebRequest -Uri https://www.gyan.dev/ffmpeg/builds/packages/ffmpeg-5.1.2-full_build-shared.7z -OutFile ffmpeg.7z
           7z x ffmpeg.7z -aoa
           cd ./ffmpeg-5.1.2-full_build-shared
-          echo "path=$pwd.Path" >> $GITHUB_OUTPUT
+          echo "path=$($pwd.Path)" >> $GITHUB_OUTPUT
       - name: Build
         run: |
+          $env:Path += ';%SYSTEMROOT%\System32\WindowsPowerShell\v1.0\'
           $env:FFMPEG_PREFIX="${{ steps.download_ffmpeg.outputs.path }}"
           mkdir build
           cd build
