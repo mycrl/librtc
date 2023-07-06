@@ -141,6 +141,15 @@ if(APPLE)
                     OUTPUT_VARIABLE FFMPEG_PREFIX
                     OUTPUT_STRIP_TRAILING_WHITESPACE)
     set(FFMPEG_PREFIX ${FFMPEG_PREFIX})
+elseif(WIN32)
+    execute_process(
+            WORKING_DIRECTORY "${THIRD_PARTY_DIR}"
+            COMMAND powershell.exe -Command "Invoke-WebRequest \
+                                                -Uri https://www.gyan.dev/ffmpeg/builds/packages/ffmpeg-5.1.2-full_build-shared.7z \
+                                                -OutFile ffmpeg.7z; \
+                                             7z x ffmpeg.7z -aoa; \
+                                             del ffmpeg.7z")
+    set(FFMPEG_PREFIX "${THIRD_PARTY_DIR}/ffmpeg-5.1.2-full_build-shared")
 else()
     set(FFMPEG_PREFIX $ENV{FFMPEG_PREFIX})
 endif()
