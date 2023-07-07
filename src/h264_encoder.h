@@ -5,8 +5,8 @@
 //  Created by Mr.Panda on 2023/3/10.
 //
 
-#ifndef librtc_h264_encoder_h
-#define librtc_h264_encoder_h
+#ifndef LIBRTC_H264_DECODER_H
+#define LIBRTC_H264_DECODER_H
 #pragma once
 
 #include "common_video/h264/h264_bitstream_parser.h"
@@ -91,4 +91,4 @@ private:
 	size_t _frame_num;
 };
 
-#endif /* librtc_h264_encoder_h */
+#endif // LIBRTC_H264_DECODER_H

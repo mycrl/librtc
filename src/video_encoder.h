@@ -5,8 +5,8 @@
 //  Created by Mr.Panda on 2023/2/21.
 //
 
-#ifndef librtc_video_encoder_h
-#define librtc_video_encoder_h
+#ifndef LIBRTC_VIDEO_ENCODER_H
+#define LIBRTC_VIDEO_ENCODER_H
 #pragma once
 
 #include "api/video_codecs/video_encoder_factory.h"
@@ -29,4 +29,4 @@ private:
 	std::vector<webrtc::SdpVideoFormat> _formats;
 };
 
-#endif  // librtc_video_encoder_h
+#endif  // LIBRTC_VIDEO_ENCODER_H

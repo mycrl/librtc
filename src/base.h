@@ -5,8 +5,8 @@
 //  Created by Mr.Panda on 2023/2/21.
 //
 
-#ifndef librtc_base_h
-#define librtc_base_h
+#ifndef LIBRTC_BASE_H
+#define LIBRTC_BASE_H
 #pragma once
 
 #ifdef WIN32
@@ -19,4 +19,4 @@
 
 void free_incomplete_ptr(void* ptr);
 
-#endif  // librtc_base_h
+#endif  // LIBRTC_BASE_H

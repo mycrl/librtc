@@ -5,8 +5,8 @@
 //  Created by Mr.Panda on 2023/3/15.
 //
 
-#ifndef librtc_h264_h
-#define librtc_h264_h
+#ifndef LIBRTC_H264_H
+#define LIBRTC_H264_H
 #pragma once
 
 #include "modules/video_coding/codecs/h264/include/h264.h"
@@ -77,4 +77,4 @@ const char* find_codec(CodecDesc(&codecs)[S])
 	return NULL;
 }
 
-#endif /* librtc_h264_h */
+#endif // LIBRTC_H264_H

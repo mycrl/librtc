@@ -5,8 +5,8 @@
 //  Created by Mr.Panda on 2023/3/16.
 //
 
-#ifndef librtc_h264_decoder_h
-#define librtc_h264_decoder_h
+#ifndef LIBRTC_H264_ENCODER_H
+#define LIBRTC_H264_ENCODER_H
 #pragma once
 
 #include "api/create_peerconnection_factory.h"
@@ -47,4 +47,4 @@ private:
 	AVFrame* _frame;
 };
 
-#endif /* librtc_h264_decoder_h */
+#endif // LIBRTC_H264_ENCODER_H
