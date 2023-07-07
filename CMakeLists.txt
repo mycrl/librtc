@@ -68,7 +68,7 @@ if (NOT EXISTS "${THIRD_PARTY_DIR}/webrtc")
         execute_process(COMMAND powershell.exe -Command "mkdir ${THIRD_PARTY_DIR}/webrtc")
         execute_process(
             WORKING_DIRECTORY "${THIRD_PARTY_DIR}/webrtc"
-            COMMAND powershell.exe -Command "fetch --nohooks webrtc; \
+            COMMAND powershell.exe -Command "fetch --nohooks --nohistory webrtc; \
                                             cd src; \
                                             git checkout branch-heads/5481; \
                                             gclient sync")
@@ -88,7 +88,7 @@ if (NOT EXISTS "${THIRD_PARTY_DIR}/webrtc")
         execute_process(COMMAND mkdir "${THIRD_PARTY_DIR}/webrtc")
         execute_process(
             WORKING_DIRECTORY "${THIRD_PARTY_DIR}/webrtc"
-            COMMAND bash -c "fetch --nohooks webrtc && \
+            COMMAND bash -c "fetch --nohooks --nohistory webrtc && \
                             cd src && \
                             git checkout branch-heads/5481 && \
                             gclient sync")
@@ -141,6 +141,15 @@ if(APPLE)
                     OUTPUT_VARIABLE FFMPEG_PREFIX
                     OUTPUT_STRIP_TRAILING_WHITESPACE)
     set(FFMPEG_PREFIX ${FFMPEG_PREFIX})
+elseif(WIN32)
+    execute_process(
+            WORKING_DIRECTORY "${THIRD_PARTY_DIR}"
+            COMMAND powershell.exe -Command "Invoke-WebRequest \
+                                                -Uri https://www.gyan.dev/ffmpeg/builds/packages/ffmpeg-5.1.2-full_build-shared.7z \
+                                                -OutFile ffmpeg.7z; \
+                                             7z x ffmpeg.7z -aoa; \
+                                             del ffmpeg.7z")
+    set(FFMPEG_PREFIX "${THIRD_PARTY_DIR}/ffmpeg-5.1.2-full_build-shared")
 else()
     set(FFMPEG_PREFIX $ENV{FFMPEG_PREFIX})
 endif()

@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - master
+      - action-test
 jobs:
   build:
     runs-on: ${{ matrix.os }}
@@ -20,9 +21,31 @@ jobs:
           cmake -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} -DUSE_STATIC=ON ..
           cmake --build . --config ${{ matrix.build_type }}
       - name: Publish Artifacts
-        if: ${{ matrix.os }} == "macos-latest"
+        if: ${{ matrix.os }} == "windows-latest"
         uses: actions/upload-artifact@v3
         with:
           name: ${{ matrix.os }}-${{ matrix.build_type }}
           path: |
             build/${{ matrix.build_type }}/rtc.*
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+    - name: Restore All Artifacts
+      uses: actions/download-artifact@v3
+      with:
+        path: artifacts
+    - name: Get current date
+      id: date
+      run: echo "date=$(date +'%Y-%m-%d')" >> $GITHUB_OUTPUT
+    - name: Publish Release
+      id: rtc_release
+      uses: softprops/action-gh-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: 'latest'
+        name: latest-${{ steps.date.outputs.date }}
+        draft: false
+        prerelease: false
+        files: artifacts/**/*
