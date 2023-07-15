@@ -30,14 +30,12 @@ MediaStreamTrack* from(webrtc::VideoTrackInterface* itrack)
 	}
 
 	auto id = itrack->id();
-	track->label = (char*)malloc(sizeof(char) * id.size() + 1);
+	track->label = copy_c_str(id);
 	if (!track->label)
 	{
 		rtc_free_media_stream_track(track);
 		return NULL;
 	}
-
-	strcpy(track->label, id.c_str());
 
 	track->kind = MediaStreamTrackKindVideo;
 	return track;
@@ -60,14 +58,12 @@ MediaStreamTrack* from(webrtc::AudioTrackInterface* itrack)
 	}
 
 	auto id = itrack->id();
-	track->label = (char*)malloc(sizeof(char) * id.size() + 1);
+	track->label = copy_c_str(id);
 	if (!track->label)
 	{
 		rtc_free_media_stream_track(track);
 		return NULL;
 	}
-
-	strcpy(track->label, id.c_str());
 
 	track->kind = MediaStreamTrackKindAudio;
 	return track;

@@ -42,7 +42,7 @@ RTCPeerConnection* rtc_create_peer_connection(RTCPeerConnectionConfigure* c_conf
     rtc->pc_factory = webrtc::CreatePeerConnectionFactory(nullptr,
                                                           nullptr,
                                                           nullptr,
-                                                          AudioCaptureModule::Create(),
+                                                          nullptr, //AudioCaptureModule::Create(),
                                                           webrtc::CreateBuiltinAudioEncoderFactory(),
                                                           webrtc::CreateBuiltinAudioDecoderFactory(),
                                                           IVideoEncoderFactory::Create(),

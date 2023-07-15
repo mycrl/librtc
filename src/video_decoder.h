@@ -25,7 +25,6 @@ public:
 	// Creates a VideoDecoder for the specified format.
 	std::unique_ptr<webrtc::VideoDecoder> CreateVideoDecoder(const webrtc::SdpVideoFormat& format);
 private:
-	std::unique_ptr<webrtc::VideoDecoderFactory> _factory;
 	std::vector<webrtc::SdpVideoFormat> _formats;
 };
 

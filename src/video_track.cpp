@@ -150,6 +150,11 @@ void IVideoTrackSink::OnFrame(const webrtc::VideoFrame& frame)
 void IVideoTrackSink::SetOnFrame(void* ctx,
 								 void(*handler)(void* ctx, IVideoFrame* frame))
 {
+	if (!_track)
+	{
+		return;
+	}
+
 	_track->AddOrUpdateSink(this, _wants);
 	_handler = handler;
 	_ctx = ctx;
@@ -157,6 +162,11 @@ void IVideoTrackSink::SetOnFrame(void* ctx,
 
 void IVideoTrackSink::RemoveOnFrame()
 {
+	if (!_track)
+	{
+		return;
+	}
+
 	_track->RemoveSink(this);
 	_handler = NULL;
 	_ctx = NULL;

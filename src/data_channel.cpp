@@ -110,16 +110,14 @@ RTCDataChannel* create_data_channel(rtc::scoped_refptr<webrtc::DataChannelInterf
 	}
 
 	auto label = data_channel->label();
-	channel->label = (char*)malloc(sizeof(char) * label.size() + 1);
+	channel->label = copy_c_str(label);
 	if (!channel->label)
 	{
 		free_incomplete_ptr(channel);
 		return NULL;
 	}
 
-	strcpy(channel->label, label.c_str());
 	channel->channel = IDataChannel::From(data_channel);
-
 	channel->remote = true;
 	return channel;
 }

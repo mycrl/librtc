@@ -68,29 +68,17 @@ if (NOT EXISTS "${THIRD_PARTY_DIR}/webrtc")
         execute_process(COMMAND powershell.exe -Command "mkdir ${THIRD_PARTY_DIR}/webrtc")
         execute_process(
             WORKING_DIRECTORY "${THIRD_PARTY_DIR}/webrtc"
-            COMMAND powershell.exe -Command "fetch --nohooks --nohistory webrtc; \
+            COMMAND powershell.exe -Command "fetch --nohooks webrtc; \
                                             cd src; \
-                                            git checkout branch-heads/5481; \
+                                            git checkout branch-heads/5735; \
                                             gclient sync")
-
-        # (only windows) In the M110 version, a header file is missing in a file in the webrtc
-        # source code, and there will be a problem that the definition of `std::towupper`
-        # cannot be found. Here, a temporary fix was applied and the `cwctype`
-        # header was added to fix this error.
-        set(FIX_REP_SRC "#include <vector>")
-        set(FIX_REP_DST "#include <vector>`n#include <cwctype>")
-        set(FIX_FILE "src/modules/desktop_capture/win/full_screen_win_application_handler.cc")
-        set(FIX_CMD "(Get-Content ${FIX_FILE}) -replace '${FIX_REP_SRC}', \"${FIX_REP_DST}\" | Set-Content ${FIX_FILE}")
-        execute_process(
-            WORKING_DIRECTORY "${THIRD_PARTY_DIR}/webrtc"
-            COMMAND powershell.exe -Command "${FIX_CMD}")
     else()
         execute_process(COMMAND mkdir "${THIRD_PARTY_DIR}/webrtc")
         execute_process(
             WORKING_DIRECTORY "${THIRD_PARTY_DIR}/webrtc"
-            COMMAND bash -c "fetch --nohooks --nohistory webrtc && \
+            COMMAND bash -c "fetch --nohooks webrtc && \
                             cd src && \
-                            git checkout branch-heads/5481 && \
+                            git checkout branch-heads/5735 && \
                             gclient sync")
     endif()
 endif()
@@ -142,13 +130,16 @@ if(APPLE)
                     OUTPUT_STRIP_TRAILING_WHITESPACE)
     set(FFMPEG_PREFIX ${FFMPEG_PREFIX})
 elseif(WIN32)
-    execute_process(
+    if (NOT EXISTS "${THIRD_PARTY_DIR}/ffmpeg-5.1.2-full_build-shared")
+        execute_process(
             WORKING_DIRECTORY "${THIRD_PARTY_DIR}"
             COMMAND powershell.exe -Command "Invoke-WebRequest \
                                                 -Uri https://www.gyan.dev/ffmpeg/builds/packages/ffmpeg-5.1.2-full_build-shared.7z \
                                                 -OutFile ffmpeg.7z; \
                                              7z x ffmpeg.7z -aoa; \
                                              del ffmpeg.7z")
+    endif()
+    
     set(FFMPEG_PREFIX "${THIRD_PARTY_DIR}/ffmpeg-5.1.2-full_build-shared")
 else()
     set(FFMPEG_PREFIX $ENV{FFMPEG_PREFIX})

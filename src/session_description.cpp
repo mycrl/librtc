@@ -51,15 +51,11 @@ RTCSessionDescription* into_c(webrtc::SessionDescriptionInterface* desc)
 
 	std::string sdp;
 	desc->ToString(&sdp);
-	c_desc->sdp = (char*)malloc(sizeof(char) * (sdp.size() + 1));
+	c_desc->sdp = copy_c_str(sdp);
 	if (!c_desc->sdp)
 	{
 		free_session_description(c_desc);
 		return NULL;
-	}
-	else
-	{
-		strcpy((char*)c_desc->sdp, sdp.c_str());
 	}
 
 	c_desc->type = (RTCSessionDescriptionType)(desc->GetType());

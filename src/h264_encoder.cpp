@@ -264,6 +264,18 @@ void H264Encoder::SetRates(const webrtc::VideoEncoder::RateControlParameters& pa
 	_ctx->pkt_timebase = av_make_q(1, parameters.framerate_fps);
 }
 
+H264Encoder::EncoderInfo H264Encoder::GetEncoderInfo() const
+{
+	EncoderInfo info;
+	info.requested_resolution_alignment = 4;
+	info.supports_native_handle = false;
+	info.implementation_name = std::string(_codec->name);
+	info.has_trusted_rate_controller = false;
+	info.is_hardware_accelerated = true;
+	info.supports_simulcast = false;
+	return info;
+}
+
 int32_t H264Encoder::Release()
 {
 	if (_codec)

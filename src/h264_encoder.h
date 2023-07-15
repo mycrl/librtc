@@ -73,6 +73,12 @@ public:
 	// the next call to SetRates().
 	void SetRates(const webrtc::VideoEncoder::RateControlParameters& parameters);
 
+	// Returns meta-data about the encoder, such as implementation name.
+	// The output of this method may change during runtime. For instance if a
+	// hardware encoder fails, it may fall back to doing software encoding using
+	// an implementation with different characteristics.
+	EncoderInfo GetEncoderInfo() const;
+
 	// Free encoder memory.
 	// Return value                : WEBRTC_VIDEO_CODEC_OK if OK, < 0 otherwise.
 	int32_t Release();
