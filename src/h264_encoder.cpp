@@ -267,9 +267,9 @@ void H264Encoder::SetRates(const webrtc::VideoEncoder::RateControlParameters& pa
 H264Encoder::EncoderInfo H264Encoder::GetEncoderInfo() const
 {
 	EncoderInfo info;
+	info.implementation_name = "h264";
 	info.requested_resolution_alignment = 4;
 	info.supports_native_handle = false;
-	info.implementation_name = std::string(_codec->name);
 	info.has_trusted_rate_controller = false;
 	info.is_hardware_accelerated = true;
 	info.supports_simulcast = false;
