@@ -9,9 +9,9 @@
 #include "rtc_base/time_utils.h"
 #include "frame.h"
 
-void rtc_free_frame(void* frame)
+void rtc_free_frame(IAudioFrame* frame)
 {
-	free_incomplete_ptr(frame);
+	delete frame;
 }
 
 IVideoFrame* into_c(webrtc::VideoFrame* frame)
@@ -70,11 +70,7 @@ IAudioFrame* into_c(const int16_t* data,
 					size_t frames,
 					int64_t timestamp)
 {
-	IAudioFrame* frame = (IAudioFrame*)malloc(sizeof(IAudioFrame));
-	if (!frame)
-	{
-		return nullptr;
-	}
+	IAudioFrame* frame = new IAudioFrame;
 
 	frame->remote = true;
 	frame->data = data;

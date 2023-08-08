@@ -19,7 +19,7 @@
 
 #include <string>
 
-void free_incomplete_ptr(void* ptr);
+// void free_incomplete_ptr(void* ptr);
 char* copy_c_str(std::string& source);
 
 #endif  // LIBRTC_BASE_H

@@ -20,17 +20,12 @@ void free_ice_candidate(RTCIceCandidate* candidate)
 {
 	free_incomplete_ptr(candidate->candidate);
 	free_incomplete_ptr(candidate->sdp_mid);
-	free_incomplete_ptr(candidate);
+	delete candidate;
 }
 
 RTCIceCandidate* into_c(webrtc::IceCandidateInterface* candidate)
 {
-	auto c_candidate = (RTCIceCandidate*)malloc(sizeof(RTCIceCandidate));
-	if (!c_candidate)
-	{
-		free_ice_candidate(c_candidate);
-		return nullptr;
-	}
+	auto c_candidate = new RTCIceCandidate;
 
 	auto sdp_mid = candidate->sdp_mid();
 	c_candidate->sdp_mid = copy_c_str(sdp_mid);

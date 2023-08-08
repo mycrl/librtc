@@ -92,18 +92,13 @@ webrtc::DataChannelInit* from_c(DataChannelOptions* options)
 
 RTCDataChannel* create_data_channel(rtc::scoped_refptr<webrtc::DataChannelInterface> data_channel)
 {
-	RTCDataChannel* channel = (RTCDataChannel*)malloc(sizeof(RTCDataChannel));
-	if (!channel)
-	{
-		free_incomplete_ptr(channel);
-		return nullptr;
-	}
+	RTCDataChannel* channel = new RTCDataChannel;
 
 	auto label = data_channel->label();
 	channel->label = copy_c_str(label);
 	if (!channel->label)
 	{
-		free_incomplete_ptr(channel);
+		delete channel;
 		return nullptr;
 	}
 

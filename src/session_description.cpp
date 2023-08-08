@@ -38,16 +38,12 @@ std::unique_ptr<webrtc::SessionDescriptionInterface> from_c(RTCSessionDescriptio
 void free_session_description(RTCSessionDescription* desc)
 {
 	free_incomplete_ptr((void*)desc->sdp);
-	free_incomplete_ptr(desc);
+	delete desc;
 }
 
 RTCSessionDescription* into_c(webrtc::SessionDescriptionInterface* desc)
 {
-	auto c_desc = (RTCSessionDescription*)malloc(sizeof(RTCSessionDescription));
-	if (!c_desc)
-	{
-		return nullptr;
-	}
+	auto c_desc = new RTCSessionDescription;
 
 	std::string sdp;
 	desc->ToString(&sdp);
