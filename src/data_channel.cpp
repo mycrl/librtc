@@ -16,9 +16,7 @@ void rtc_free_data_channel(RTCDataChannel* channel)
 
 IDataChannel* IDataChannel::From(rtc::scoped_refptr<webrtc::DataChannelInterface> data_channel)
 {
-	auto self = new rtc::RefCountedObject<IDataChannel>(data_channel);
-	self->AddRef();
-	return self;
+	return new rtc::RefCountedObject<IDataChannel>(data_channel);
 }
 
 void IDataChannel::Send(uint8_t* buf, int size)

@@ -126,9 +126,7 @@ IceConnectionState into_c(webrtc::PeerConnectionInterface::IceConnectionState st
 
 Observer* Observer::Create(Events* events, void* ctx)
 {
-	auto self = new rtc::RefCountedObject<Observer>(events, ctx);
-	self->AddRef();
-	return self;
+	return new rtc::RefCountedObject<Observer>(events, ctx);
 }
 
 void Observer::OnSignalingChange(webrtc::PeerConnectionInterface::SignalingState state)
