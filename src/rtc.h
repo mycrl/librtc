@@ -14,6 +14,7 @@
 #include "base.h"
 
 #include <stdint.h>
+#include <memory>
 
 // An enum describing the session description's type.
 typedef enum
@@ -286,12 +287,8 @@ typedef struct
     uint32_t width;
     uint32_t height;
     int64_t timestamp;
-    const uint8_t* data_y;
-    uint32_t stride_y;
-    const uint8_t* data_u;
-    uint32_t stride_u;
-    const uint8_t* data_v;
-    uint32_t stride_v;
+    const uint8_t* planes[4];
+    uint32_t strides[4];
 } IVideoFrame;
 
 // PCM
@@ -417,12 +414,7 @@ typedef struct
     void (*on_connection_change)(void* ctx, PeerConnectionState state);
 } Events;
 
-typedef struct
-{
-    std::unique_ptr<rtc::Thread> work_thread;
-    std::unique_ptr<rtc::Thread> network_thread;
-    std::unique_ptr<rtc::Thread> signaling_thread;
-} RtcThreads;
+class RtcThreads;
 
 // RTCPeerConnection
 //
@@ -434,7 +426,7 @@ typedef struct
 {
     rtc::scoped_refptr<webrtc::PeerConnectionInterface> pc;
     rtc::scoped_refptr<webrtc::PeerConnectionFactoryInterface> pc_factory;
-    RtcThreads* threads;
+    std::unique_ptr<RtcThreads> threads;
 } RTCPeerConnection;
 
 // Returns a newly-created RTCPeerConnection, which represents a

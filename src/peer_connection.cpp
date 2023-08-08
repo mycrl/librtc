@@ -20,7 +20,6 @@
 void rtc_close(RTCPeerConnection* rtc)
 {
     rtc->pc->Close();
-    close_threads(rtc->threads);
     delete rtc;
 
     rtc::CleanupSSL();
@@ -34,10 +33,10 @@ RTCPeerConnection* rtc_create_peer_connection(RTCPeerConnectionConfigure* c_conf
 
     RTCPeerConnection* rtc = new RTCPeerConnection();
 
-    rtc->threads = create_threads();
-    rtc->pc_factory = webrtc::CreatePeerConnectionFactory(rtc->threads->network_thread.get(), // network_thread,
-                                                          rtc->threads->work_thread.get(), // worker_thread,
-                                                          rtc->threads->signaling_thread.get(), // signaling_thread,
+    rtc->threads = RtcThreads::Create();
+    rtc->pc_factory = webrtc::CreatePeerConnectionFactory(rtc->threads->GetWorkThread(), // network_thread,
+                                                          rtc->threads->GetNetworkThread(), // worker_thread,
+                                                          rtc->threads->GetSignalingThread(), // signaling_thread,
                                                           nullptr, // AudioCaptureModule::Create(),
                                                           webrtc::CreateBuiltinAudioEncoderFactory(),
                                                           webrtc::CreateBuiltinAudioDecoderFactory(),
@@ -47,6 +46,7 @@ RTCPeerConnection* rtc_create_peer_connection(RTCPeerConnectionConfigure* c_conf
                                                           nullptr);
     if (!rtc->pc_factory)
     {
+        delete rtc;
         return nullptr;
     }
 
@@ -59,6 +59,7 @@ RTCPeerConnection* rtc_create_peer_connection(RTCPeerConnectionConfigure* c_conf
     }
     else
     {
+        delete rtc;
         return nullptr;
     }
 

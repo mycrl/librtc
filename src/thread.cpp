@@ -7,22 +7,39 @@
 
 #include "thread.h"
 
-RtcThreads* create_threads()
+RtcThreads::RtcThreads()
+    : _work_thread(rtc::Thread::Create())
+    , _network_thread(rtc::Thread::CreateWithSocketServer())
+    , _signaling_thread(rtc::Thread::CreateWithSocketServer())
 {
-    auto threads = new RtcThreads;
-    threads->work_thread = rtc::Thread::Create();
-    threads->network_thread = rtc::Thread::CreateWithSocketServer();
-    threads->signaling_thread = rtc::Thread::CreateWithSocketServer();
-    threads->work_thread->Start();
-    threads->network_thread->Start();
-    threads->signaling_thread->Start();
-    return threads;
+    _work_thread->Start();
+    _network_thread->Start();
+    _signaling_thread->Start();
 }
 
-void close_threads(RtcThreads* threads)
+RtcThreads::~RtcThreads()
 {
-    threads->work_thread->Stop();
-    threads->network_thread->Stop();
-    threads->signaling_thread->Stop();
-    delete threads;
+    _work_thread->Stop();
+    _network_thread->Stop();
+    _signaling_thread->Stop();
+}
+
+std::unique_ptr<RtcThreads> RtcThreads::Create()
+{
+    return std::make_unique<RtcThreads>();
+}
+
+rtc::Thread* RtcThreads::GetWorkThread()
+{
+    return _work_thread.get();
+}
+
+rtc::Thread* RtcThreads::GetNetworkThread()
+{
+    return _network_thread.get();
+}
+
+rtc::Thread* RtcThreads::GetSignalingThread()
+{
+    return _signaling_thread.get();
 }

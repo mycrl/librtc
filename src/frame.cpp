@@ -38,12 +38,12 @@ IVideoFrame* into_c(webrtc::VideoFrame* frame)
 	i420_frame->remote = true;
 	i420_frame->width = i420_buf->width();
 	i420_frame->height = i420_buf->height();
-	i420_frame->data_y = i420_buf->DataY();
-	i420_frame->stride_y = i420_buf->StrideY();
-	i420_frame->data_u = i420_buf->DataU();
-	i420_frame->stride_u = i420_buf->StrideU();
-	i420_frame->data_v = i420_buf->DataV();
-	i420_frame->stride_v = i420_buf->StrideV();
+	i420_frame->planes[0] = i420_buf->DataY();
+	i420_frame->strides[0] = i420_buf->StrideY();
+	i420_frame->planes[1] = i420_buf->DataU();
+	i420_frame->strides[1] = i420_buf->StrideU();
+	i420_frame->planes[2] = i420_buf->DataV();
+	i420_frame->strides[2] = i420_buf->StrideV();
 	i420_frame->timestamp = frame->timestamp();
 
 	return i420_frame;
@@ -53,12 +53,12 @@ webrtc::VideoFrame from_c(IVideoFrame* frame)
 {
 	auto i420_buf = webrtc::I420Buffer::Copy(frame->width,
 											 frame->height,
-											 frame->data_y,
-											 frame->stride_y,
-											 frame->data_u,
-											 frame->stride_u,
-											 frame->data_v,
-											 frame->stride_v);
+											 frame->planes[0],
+											 frame->strides[0],
+											 frame->planes[1],
+											 frame->strides[1],
+											 frame->planes[2],
+											 frame->strides[2]);
 	return webrtc::VideoFrame(i420_buf,
 							  webrtc::kVideoRotation_0,
 							  frame->timestamp * rtc::kNumMicrosecsPerMillisec);
