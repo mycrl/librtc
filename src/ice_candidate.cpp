@@ -29,7 +29,7 @@ RTCIceCandidate* into_c(webrtc::IceCandidateInterface* candidate)
 	if (!c_candidate)
 	{
 		free_ice_candidate(c_candidate);
-		return NULL;
+		return nullptr;
 	}
 
 	auto sdp_mid = candidate->sdp_mid();
@@ -37,7 +37,7 @@ RTCIceCandidate* into_c(webrtc::IceCandidateInterface* candidate)
 	if (!c_candidate->sdp_mid)
 	{
 		free_ice_candidate(c_candidate);
-		return NULL;
+		return nullptr;
 	}
 
 	std::string _candidate;
@@ -46,7 +46,7 @@ RTCIceCandidate* into_c(webrtc::IceCandidateInterface* candidate)
 	if (!c_candidate->candidate)
 	{
 		free_ice_candidate(c_candidate);
-		return NULL;
+		return nullptr;
 	}
 
 	c_candidate->sdp_mline_index = candidate->sdp_mline_index();

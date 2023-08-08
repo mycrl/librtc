@@ -17,6 +17,8 @@
 #include "frame.h"
 #include "base.h"
 
+#include <optional>
+
 /* video source */
 
 struct AdaptFrameResult
@@ -82,10 +84,10 @@ public:
     void SetOnFrame(void* ctx, void(*handler)(void* ctx, IVideoFrame* frame));
     void RemoveOnFrame();
 private:
-    void(*_handler)(void* ctx, IVideoFrame* frame) = NULL;
-    webrtc::VideoTrackInterface* _track;
+    std::optional<void(*)(void* ctx, IVideoFrame* frame)> _handler = std::nullopt;
+    webrtc::VideoTrackInterface* _track = nullptr;
     rtc::VideoSinkWants _wants;
-    void* _ctx;
+    void* _ctx = nullptr;
 };
 
 #endif // LIBRTC_VIDEO_TRACK_H

@@ -19,7 +19,7 @@ IVideoFrame* into_c(webrtc::VideoFrame* frame)
 	IVideoFrame* i420_frame = (IVideoFrame*)malloc(sizeof(IVideoFrame));
 	if (!i420_frame)
 	{
-		return NULL;
+		return nullptr;
 	}
 
 	auto video_frame_buf = frame->video_frame_buffer();
@@ -32,7 +32,7 @@ IVideoFrame* into_c(webrtc::VideoFrame* frame)
 	if (!i420_buf)
 	{
 		rtc_free_frame(i420_frame);
-		return NULL;
+		return nullptr;
 	}
 
 	i420_frame->remote = true;
@@ -73,7 +73,7 @@ IAudioFrame* into_c(const int16_t* data,
 	IAudioFrame* frame = (IAudioFrame*)malloc(sizeof(IAudioFrame));
 	if (!frame)
 	{
-		return NULL;
+		return nullptr;
 	}
 
 	frame->remote = true;

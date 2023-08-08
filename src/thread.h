@@ -2,24 +2,16 @@
 //  thread.h
 //  rtc
 //
-//  Created by Mr.Panda on 2023/2/21.
+//  Created by Mr.Panda on 2023/8/8.
 //
 
 #ifndef LIBRTC_THREAD_H
 #define LIBRTC_THREAD_H
 #pragma once
 
-#include "base.h"
-#include "rtc_base/thread.h"
+#include "rtc.h"
 
-class IThread : public rtc::Thread
-{
-
-};
-
-rtc::Thread* create_thread()
-{
-    
-}
+RtcThreads* create_threads();
+void close_threads(RtcThreads* threads);
 
 #endif // LIBRTC_THREAD_H

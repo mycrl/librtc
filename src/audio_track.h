@@ -13,7 +13,9 @@
 #include "frame.h"
 #include "base.h"
 #include "rtc.h"
+
 #include <set>
+#include <optional>
 
 /* audio source */
 
@@ -55,9 +57,10 @@ public:
                 size_t number_of_frames,
                 absl::optional<int64_t> capture_timestamp_ms);
 private:
-    void(*_handler)(void* ctx, IAudioFrame* frame) = NULL;
-    webrtc::AudioTrackInterface* _track = NULL;
-    void* _ctx = NULL;
+    std::optional<void(*)(void* ctx, IAudioFrame* frame)> _handler = std::nullopt;
+
+    void* _ctx = nullptr;
+    webrtc::AudioTrackInterface* _track;
 };
 
 #endif // LIBRTC_AUDIO_TRACK_H

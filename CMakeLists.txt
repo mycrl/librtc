@@ -147,6 +147,8 @@ endif()
 
 # Add source files.
 set(SOURCES
+    src/thread.h
+    src/thread.cpp
     src/rtc.h
     src/base.h
     src/base.cpp

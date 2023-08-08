@@ -46,7 +46,7 @@ RTCSessionDescription* into_c(webrtc::SessionDescriptionInterface* desc)
 	auto c_desc = (RTCSessionDescription*)malloc(sizeof(RTCSessionDescription));
 	if (!c_desc)
 	{
-		return NULL;
+		return nullptr;
 	}
 
 	std::string sdp;
@@ -55,7 +55,7 @@ RTCSessionDescription* into_c(webrtc::SessionDescriptionInterface* desc)
 	if (!c_desc->sdp)
 	{
 		free_session_description(c_desc);
-		return NULL;
+		return nullptr;
 	}
 
 	c_desc->type = (RTCSessionDescriptionType)(desc->GetType());

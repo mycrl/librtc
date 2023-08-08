@@ -14,35 +14,31 @@
 #include "video_encoder.h"
 #include "video_decoder.h"
 #include "observer.h"
+#include "thread.h"
 #include "rtc.h"
-
-void rtc_run()
-{
-    rtc::InitializeSSL();
-    rtc::Thread::Current()->Run();
-}
-
-void rtc_exit()
-{
-    rtc::CleanupSSL();
-    rtc::Thread::Current()->Quit();
-}
 
 void rtc_close(RTCPeerConnection* rtc)
 {
     rtc->pc->Close();
+    close_threads(rtc->threads);
     delete rtc;
+
+    rtc::CleanupSSL();
 }
 
 RTCPeerConnection* rtc_create_peer_connection(RTCPeerConnectionConfigure* c_config,
                                               Events* events,
                                               void* ctx)
 {
+    rtc::InitializeSSL();
+
     RTCPeerConnection* rtc = new RTCPeerConnection();
-    rtc->pc_factory = webrtc::CreatePeerConnectionFactory(nullptr,
-                                                          nullptr,
-                                                          nullptr,
-                                                          nullptr, //AudioCaptureModule::Create(),
+
+    rtc->threads = create_threads();
+    rtc->pc_factory = webrtc::CreatePeerConnectionFactory(rtc->threads->network_thread.get(), // network_thread,
+                                                          rtc->threads->work_thread.get(), // worker_thread,
+                                                          rtc->threads->signaling_thread.get(), // signaling_thread,
+                                                          nullptr, // AudioCaptureModule::Create(),
                                                           webrtc::CreateBuiltinAudioEncoderFactory(),
                                                           webrtc::CreateBuiltinAudioDecoderFactory(),
                                                           IVideoEncoderFactory::Create(),
@@ -51,19 +47,19 @@ RTCPeerConnection* rtc_create_peer_connection(RTCPeerConnectionConfigure* c_conf
                                                           nullptr);
     if (!rtc->pc_factory)
     {
-        return NULL;
+        return nullptr;
     }
 
     webrtc::PeerConnectionDependencies pc_dependencies(Observer::Create(events, ctx));
-    auto error_or_pc = rtc->pc_factory->CreatePeerConnectionOrError(from_c(c_config),
-                                                                    std::move(pc_dependencies));
-    if (error_or_pc.ok())
+    auto ret = rtc->pc_factory->CreatePeerConnectionOrError(from_c(c_config),
+                                                            std::move(pc_dependencies));
+    if (ret.ok())
     {
-        rtc->pc = std::move(error_or_pc.value());
+        rtc->pc = std::move(ret.value());
     }
     else
     {
-        return NULL;
+        return nullptr;
     }
 
     return rtc;
@@ -132,6 +128,6 @@ RTCDataChannel* rtc_create_data_channel(RTCPeerConnection* rtc,
     }
     else
     {
-        return NULL;
+        return nullptr;
     }
 }
