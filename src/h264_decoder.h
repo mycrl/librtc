@@ -13,6 +13,8 @@
 #include "api/video/i420_buffer.h"
 #include "h264.h"
 
+#include <optional>
+
 extern "C"
 {
 #include "libavcodec/avcodec.h"
@@ -37,14 +39,15 @@ public:
 private:
 	int _ReadFrame(const webrtc::EncodedImage& input_image, int64_t render_time_ms);
 
-	rtc::scoped_refptr<webrtc::I420Buffer> _i420_buffer = nullptr;
-	webrtc::DecodedImageCallback* _callback;
-	webrtc::EncodedImage _image;
-	AVCodecParserContext* _parser;
-	const AVCodec* _codec;
-	AVCodecContext* _ctx;
-	AVPacket* _packet;
-	AVFrame* _frame;
+	std::optional<rtc::scoped_refptr<webrtc::I420Buffer>> _i420_buffer = std::nullopt;
+	std::optional<webrtc::DecodedImageCallback*> _callback = std::nullopt;
+	std::optional<webrtc::EncodedImage> _image = std::nullopt;
+
+	AVCodecParserContext* _parser = nullptr;
+	const AVCodec* _codec = nullptr;
+	AVCodecContext* _ctx = nullptr;
+	AVPacket* _packet = nullptr;
+	AVFrame* _frame = nullptr;
 };
 
 #endif // LIBRTC_H264_ENCODER_H

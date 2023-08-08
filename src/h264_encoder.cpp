@@ -28,6 +28,13 @@ H264Encoder::H264Encoder(const webrtc::SdpVideoFormat& format)
 		? webrtc::H264PacketizationMode::NonInterleaved
 		: webrtc::H264PacketizationMode::SingleNalUnit;
 	_codec_specific.codecType = webrtc::kVideoCodecH264;
+
+
+	auto codec_name = find_codec(VideoEncoders);
+	if (codec_name != nullptr)
+	{
+		_codec_name = codec_name;
+	}
 }
 
 std::unique_ptr<H264Encoder> H264Encoder::Create(const webrtc::SdpVideoFormat& format)
@@ -44,15 +51,15 @@ int32_t H264Encoder::RegisterEncodeCompleteCallback(webrtc::EncodedImageCallback
 int H264Encoder::InitEncode(const webrtc::VideoCodec* codec_settings,
 							const Settings& settings)
 {
-	int ret = 0;
-	int number_of_streams = codec_settings->numberOfSimulcastStreams;
-	if (number_of_streams > 1)
+	if (!_codec_name.has_value())
 	{
 		return CodecRet::Err;
 	}
 
-	auto codec_name = find_codec(VideoEncoders);
-	if (codec_name == NULL)
+	int ret = 0;
+	auto codec_name = _codec_name.value();
+	int number_of_streams = codec_settings->numberOfSimulcastStreams;
+	if (number_of_streams > 1)
 	{
 		return CodecRet::Err;
 	}
@@ -64,7 +71,7 @@ int H264Encoder::InitEncode(const webrtc::VideoCodec* codec_settings,
 	}
 
 	_ctx = avcodec_alloc_context3(_codec);
-	if (_ctx == NULL)
+	if (_ctx == nullptr)
 	{
 		return CodecRet::Err;
 	}
@@ -112,7 +119,7 @@ int H264Encoder::InitEncode(const webrtc::VideoCodec* codec_settings,
 		av_opt_set(_ctx->priv_data, "tune", "zerolatency", 0);
 	}
 
-	if (avcodec_open2(_ctx, _codec, NULL) != 0)
+	if (avcodec_open2(_ctx, _codec, nullptr) != 0)
 	{
 		return CodecRet::Err;
 	}
@@ -123,13 +130,13 @@ int H264Encoder::InitEncode(const webrtc::VideoCodec* codec_settings,
 	}
 
 	_packet = av_packet_alloc();
-	if (_packet == NULL)
+	if (_packet == nullptr)
 	{
 		return CodecRet::Err;
 	}
 
 	_frame = av_frame_alloc();
-	if (_frame == NULL)
+	if (_frame == nullptr)
 	{
 		return -1;
 	}
@@ -264,11 +271,28 @@ void H264Encoder::SetRates(const webrtc::VideoEncoder::RateControlParameters& pa
 	_ctx->pkt_timebase = av_make_q(1, parameters.framerate_fps);
 }
 
+H264Encoder::EncoderInfo H264Encoder::GetEncoderInfo() const
+{
+	EncoderInfo info;
+	info.requested_resolution_alignment = 4;
+	info.supports_native_handle = false;
+	info.has_trusted_rate_controller = false;
+	info.is_hardware_accelerated = true;
+	info.supports_simulcast = false;
+
+	if (_codec_name.has_value())
+	{
+		info.implementation_name = std::string(_codec_name.value());
+	}
+
+	return info;
+}
+
 int32_t H264Encoder::Release()
 {
 	if (_codec)
 	{
-		avcodec_send_frame(_ctx, NULL);
+		avcodec_send_frame(_ctx, nullptr);
 		avcodec_free_context(&_ctx);
 		av_packet_free(&_packet);
 		av_frame_free(&_frame);
@@ -280,6 +304,11 @@ int32_t H264Encoder::Release()
 int H264Encoder::_ReadPacket(webrtc::VideoFrameType frame_type,
 							 const webrtc::VideoFrame& frame)
 {
+	if (!_callback.has_value())
+	{
+		return -1;
+	}
+
 	int ret = avcodec_receive_packet(_ctx, _packet);
 	if (ret != 0)
 	{
@@ -306,7 +335,7 @@ int H264Encoder::_ReadPacket(webrtc::VideoFrameType frame_type,
 	_image.rotation_ = frame.rotation();
 	_image.qp_ = qp.value_or(-1);
 
-	_callback->OnEncodedImage(_image, &_codec_specific);
+	_callback.value()->OnEncodedImage(_image, &_codec_specific);
 	av_packet_unref(_packet);
 	return 0;
 }

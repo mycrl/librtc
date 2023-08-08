@@ -12,8 +12,9 @@
 #include "common_video/h264/h264_bitstream_parser.h"
 #include "api/create_peerconnection_factory.h"
 #include "common_video/h264/h264_common.h"
-#include <optional>
 #include "h264.h"
+
+#include <optional>
 
 extern "C"
 {
@@ -73,6 +74,12 @@ public:
 	// the next call to SetRates().
 	void SetRates(const webrtc::VideoEncoder::RateControlParameters& parameters);
 
+	// Returns meta-data about the encoder, such as implementation name.
+	// The output of this method may change during runtime. For instance if a
+	// hardware encoder fails, it may fall back to doing software encoding using
+	// an implementation with different characteristics.
+	EncoderInfo GetEncoderInfo() const;
+
 	// Free encoder memory.
 	// Return value                : WEBRTC_VIDEO_CODEC_OK if OK, < 0 otherwise.
 	int32_t Release();
@@ -80,15 +87,17 @@ private:
 	int _ReadPacket(webrtc::VideoFrameType frame_type, const webrtc::VideoFrame& frame);
 	int _OnFrame(webrtc::VideoFrameType frame_type);
 
+	std::optional<webrtc::EncodedImageCallback*> _callback = std::nullopt;
+	std::optional<const char*> _codec_name = std::nullopt;
+
 	webrtc::H264BitstreamParser _h264_bitstream_parser;
 	webrtc::CodecSpecificInfo _codec_specific;
-	webrtc::EncodedImageCallback* _callback;
 	webrtc::EncodedImage _image;
-	const AVCodec* _codec;
-	AVCodecContext* _ctx;
-	AVPacket* _packet;
-	AVFrame* _frame;
-	size_t _frame_num;
+	const AVCodec* _codec = nullptr;
+	AVCodecContext* _ctx = nullptr;
+	AVPacket* _packet = nullptr;
+	AVFrame* _frame = nullptr;
+	size_t _frame_num = 0;
 };
 
 #endif // LIBRTC_H264_DECODER_H

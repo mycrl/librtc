@@ -10,7 +10,6 @@
 #include "h264_encoder.h"
 
 IVideoEncoderFactory::IVideoEncoderFactory()
-	: _factory(webrtc::CreateBuiltinVideoEncoderFactory())
 {
 	for (auto formats : { H264Encoder::GetSupportedFormats() })
 	{
@@ -37,6 +36,4 @@ std::unique_ptr<webrtc::VideoEncoder> IVideoEncoderFactory::CreateVideoEncoder(c
 	{
 		return H264Encoder::Create(format);;
 	}
-
-	return _factory->CreateVideoEncoder(format);
 }

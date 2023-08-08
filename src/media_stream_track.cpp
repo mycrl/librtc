@@ -19,25 +19,23 @@ MediaStreamTrack* from(webrtc::VideoTrackInterface* itrack)
 	MediaStreamTrack* track = (MediaStreamTrack*)malloc(sizeof(MediaStreamTrack));
 	if (!track)
 	{
-		return NULL;
+		return nullptr;
 	}
 
 	track->video_sink = IVideoTrackSink::Create(itrack);
 	if (!track->video_sink)
 	{
 		rtc_free_media_stream_track(track);
-		return NULL;
+		return nullptr;
 	}
 
 	auto id = itrack->id();
-	track->label = (char*)malloc(sizeof(char) * id.size() + 1);
+	track->label = copy_c_str(id);
 	if (!track->label)
 	{
 		rtc_free_media_stream_track(track);
-		return NULL;
+		return nullptr;
 	}
-
-	strcpy(track->label, id.c_str());
 
 	track->kind = MediaStreamTrackKindVideo;
 	return track;
@@ -49,25 +47,23 @@ MediaStreamTrack* from(webrtc::AudioTrackInterface* itrack)
 	if (!track)
 	{
 		rtc_free_media_stream_track(track);
-		return NULL;
+		return nullptr;
 	}
 
 	track->audio_sink = IAudioTrackSink::Create(itrack);
 	if (!track->audio_sink)
 	{
 		rtc_free_media_stream_track(track);
-		return NULL;
+		return nullptr;
 	}
 
 	auto id = itrack->id();
-	track->label = (char*)malloc(sizeof(char) * id.size() + 1);
+	track->label = copy_c_str(id);
 	if (!track->label)
 	{
 		rtc_free_media_stream_track(track);
-		return NULL;
+		return nullptr;
 	}
-
-	strcpy(track->label, id.c_str());
 
 	track->kind = MediaStreamTrackKindAudio;
 	return track;
@@ -101,21 +97,21 @@ MediaStreamTrack* rtc_create_video_track(char* label)
 	if (!track)
 	{
 		rtc_free_media_stream_track(track);
-		return NULL;
+		return nullptr;
 	}
 
 	track->video_source = IVideoTrackSource::Create();
 	if (!track->video_source)
 	{
 		rtc_free_media_stream_track(track);
-		return NULL;
+		return nullptr;
 	}
 
 	track->label = (char*)malloc(sizeof(char) * (strlen(label) + 1));
 	if (!track->label)
 	{
 		rtc_free_media_stream_track(track);
-		return NULL;
+		return nullptr;
 	}
 	else
 	{
@@ -132,21 +128,21 @@ MediaStreamTrack* rtc_create_audio_track(char* label)
 	if (!track)
 	{
 		rtc_free_media_stream_track(track);
-		return NULL;
+		return nullptr;
 	}
 
 	track->audio_source = IAudioTrackSource::Create();
 	if (!track->audio_source)
 	{
 		rtc_free_media_stream_track(track);
-		return NULL;
+		return nullptr;
 	}
 
 	track->label = (char*)malloc(sizeof(char) * (strlen(label) + 1));
 	if (!track->label)
 	{
 		rtc_free_media_stream_track(track);
-		return NULL;
+		return nullptr;
 	}
 	else
 	{

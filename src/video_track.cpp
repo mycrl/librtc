@@ -119,7 +119,7 @@ rtc::VideoSourceInterface<webrtc::VideoFrame>* IVideoTrackSource::source()
 
 IVideoTrackSink::IVideoTrackSink(webrtc::VideoTrackInterface* track)
 {
-	_ctx = NULL;
+	_ctx = nullptr;
 	_track = track;
 	_track->AddRef();
 }
@@ -133,7 +133,7 @@ IVideoTrackSink* IVideoTrackSink::Create(webrtc::VideoTrackInterface* track)
 
 void IVideoTrackSink::OnFrame(const webrtc::VideoFrame& frame)
 {
-	if (!_handler)
+	if (!_handler.has_value())
 	{
 		return;
 	}
@@ -144,12 +144,17 @@ void IVideoTrackSink::OnFrame(const webrtc::VideoFrame& frame)
 		return;
 	}
 
-	_handler(_ctx, i420_frame);
+	_handler.value()(_ctx, i420_frame);
 }
 
 void IVideoTrackSink::SetOnFrame(void* ctx,
 								 void(*handler)(void* ctx, IVideoFrame* frame))
 {
+	if (!_track)
+	{
+		return;
+	}
+
 	_track->AddOrUpdateSink(this, _wants);
 	_handler = handler;
 	_ctx = ctx;
@@ -157,7 +162,12 @@ void IVideoTrackSink::SetOnFrame(void* ctx,
 
 void IVideoTrackSink::RemoveOnFrame()
 {
+	if (!_track)
+	{
+		return;
+	}
+
 	_track->RemoveSink(this);
-	_handler = NULL;
-	_ctx = NULL;
+	_handler = std::nullopt;
+	_ctx = nullptr;
 }

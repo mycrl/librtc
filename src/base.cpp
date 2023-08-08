@@ -15,3 +15,9 @@ void free_incomplete_ptr(void* ptr)
 		free(ptr);
 	}
 }
+
+char* copy_c_str(std::string& source)
+{
+	char* c_str = (char*)malloc(sizeof(char) * source.size() + 1);
+	return strcpy(c_str, source.c_str());
+}

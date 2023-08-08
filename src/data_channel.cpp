@@ -14,14 +14,6 @@ void rtc_free_data_channel(RTCDataChannel* channel)
 	free_incomplete_ptr(channel);
 }
 
-IDataChannel::IDataChannel(rtc::scoped_refptr<webrtc::DataChannelInterface> data_channel)
-{
-	_ctx = NULL;
-	_handler = NULL;
-	_channel = data_channel;
-	state = DataState::DataStateConnecting;
-}
-
 IDataChannel* IDataChannel::From(rtc::scoped_refptr<webrtc::DataChannelInterface> data_channel)
 {
 	auto self = new rtc::RefCountedObject<IDataChannel>(data_channel);
@@ -46,7 +38,7 @@ void IDataChannel::OnStateChange()
 
 void IDataChannel::OnMessage(const webrtc::DataBuffer& buffer)
 {
-	if (!_handler)
+	if (!_handler.has_value())
 	{
 		return;
 	}
@@ -58,7 +50,7 @@ void IDataChannel::OnMessage(const webrtc::DataBuffer& buffer)
 		return;
 	}
 
-	_handler(_ctx, (uint8_t*)data, size);
+	_handler.value()(_ctx, (uint8_t*)data, size);
 }
 
 void IDataChannel::OnDataMessage(void* ctx,
@@ -72,8 +64,8 @@ void IDataChannel::OnDataMessage(void* ctx,
 void IDataChannel::RemoveOnMessage()
 {
 	_channel->UnregisterObserver();
-	_handler = NULL;
-	_ctx = NULL;
+	_handler = std::nullopt;
+	_ctx = nullptr;
 }
 
 webrtc::DataChannelInit* from_c(DataChannelOptions* options)
@@ -106,20 +98,18 @@ RTCDataChannel* create_data_channel(rtc::scoped_refptr<webrtc::DataChannelInterf
 	if (!channel)
 	{
 		free_incomplete_ptr(channel);
-		return NULL;
+		return nullptr;
 	}
 
 	auto label = data_channel->label();
-	channel->label = (char*)malloc(sizeof(char) * label.size() + 1);
+	channel->label = copy_c_str(label);
 	if (!channel->label)
 	{
 		free_incomplete_ptr(channel);
-		return NULL;
+		return nullptr;
 	}
 
-	strcpy(channel->label, label.c_str());
 	channel->channel = IDataChannel::From(data_channel);
-
 	channel->remote = true;
 	return channel;
 }

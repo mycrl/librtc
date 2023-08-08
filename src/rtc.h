@@ -9,10 +9,11 @@
 #define LIBRTC_RTC_H
 #pragma once
 
-#include <stdint.h>
 #include "api/scoped_refptr.h"
 #include "api/peer_connection_interface.h"
 #include "base.h"
+
+#include <stdint.h>
 
 // An enum describing the session description's type.
 typedef enum
@@ -416,6 +417,13 @@ typedef struct
     void (*on_connection_change)(void* ctx, PeerConnectionState state);
 } Events;
 
+typedef struct
+{
+    std::unique_ptr<rtc::Thread> work_thread;
+    std::unique_ptr<rtc::Thread> network_thread;
+    std::unique_ptr<rtc::Thread> signaling_thread;
+} RtcThreads;
+
 // RTCPeerConnection
 //
 // The RTCPeerConnection interface represents a WebRTC connection between the local
@@ -426,10 +434,8 @@ typedef struct
 {
     rtc::scoped_refptr<webrtc::PeerConnectionInterface> pc;
     rtc::scoped_refptr<webrtc::PeerConnectionFactoryInterface> pc_factory;
+    RtcThreads* threads;
 } RTCPeerConnection;
-
-extern "C" EXPORT void rtc_run();
-extern "C" EXPORT void rtc_exit();
 
 // Returns a newly-created RTCPeerConnection, which represents a
 // connection between the local device and a remote peer.

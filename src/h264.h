@@ -59,22 +59,22 @@ std::vector<webrtc::SdpVideoFormat> supported_h264_codecs(bool mode /* add_scala
 template <size_t S>
 const char* find_codec(CodecDesc(&codecs)[S])
 {
-	AVBufferRef* ctx = NULL;
+	AVBufferRef* ctx = nullptr;
 	for (auto codec : codecs)
 	{
-		if (av_hwdevice_ctx_create(&ctx, codec.type, NULL, NULL, 0) == 0)
+		if (av_hwdevice_ctx_create(&ctx, codec.type, nullptr, nullptr, 0) == 0)
 		{
 			av_buffer_unref(&ctx);
 			return codec.name;
 		}
 	}
 
-	if (ctx != NULL)
+	if (ctx != nullptr)
 	{
 		av_buffer_unref(&ctx);
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 #endif // LIBRTC_H264_H

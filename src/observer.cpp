@@ -124,12 +124,6 @@ IceConnectionState into_c(webrtc::PeerConnectionInterface::IceConnectionState st
 	}
 }
 
-Observer::Observer(Events* events, void* ctx)
-{
-	_events = events;
-	_ctx = ctx;
-}
-
 Observer* Observer::Create(Events* events, void* ctx)
 {
 	auto self = new rtc::RefCountedObject<Observer>(events, ctx);
@@ -233,12 +227,6 @@ void Observer::OnTrack(rtc::scoped_refptr<webrtc::RtpTransceiverInterface> trans
 	}
 }
 
-CreateDescObserver::CreateDescObserver(CreateDescCallback callback, void* ctx)
-{
-	_callback = callback;
-	_ctx = ctx;
-}
-
 CreateDescObserver* CreateDescObserver::Create(CreateDescCallback callback, void* ctx)
 {
 	return new rtc::RefCountedObject<CreateDescObserver>(callback, ctx);
@@ -249,24 +237,18 @@ void CreateDescObserver::OnSuccess(webrtc::SessionDescriptionInterface* desc)
 	auto res = into_c(desc);
 	if (!res)
 	{
-		_callback("malloc failed", NULL, _ctx);
+		_callback("malloc failed", nullptr, _ctx);
 	}
 	else
 	{
-		_callback(NULL, res, _ctx);
+		_callback(nullptr, res, _ctx);
 		free_session_description(res);
 	}
 }
 
 void CreateDescObserver::OnFailure(webrtc::RTCError error)
 {
-	_callback(error.message(), NULL, _ctx);
-}
-
-SetDescObserver::SetDescObserver(SetDescCallback callback, void* ctx)
-{
-	_callback = callback;
-	_ctx = ctx;
+	_callback(error.message(), nullptr, _ctx);
 }
 
 SetDescObserver* SetDescObserver::Create(SetDescCallback callback, void* ctx)
@@ -276,7 +258,7 @@ SetDescObserver* SetDescObserver::Create(SetDescCallback callback, void* ctx)
 
 void SetDescObserver::OnSuccess()
 {
-	_callback(NULL, _ctx);
+	_callback(nullptr, _ctx);
 }
 
 void SetDescObserver::OnFailure(webrtc::RTCError error)
