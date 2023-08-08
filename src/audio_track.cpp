@@ -15,9 +15,7 @@ IAudioTrackSink::IAudioTrackSink(webrtc::AudioTrackInterface* track) : _track(tr
 
 IAudioTrackSink* IAudioTrackSink::Create(webrtc::AudioTrackInterface* track)
 {
-    auto self = new rtc::RefCountedObject<IAudioTrackSink>(track);
-    self->AddRef();
-    return self;
+    return new rtc::RefCountedObject<IAudioTrackSink>(track);
 }
 
 void IAudioTrackSink::OnData(const void* audio_data,
@@ -59,9 +57,7 @@ void IAudioTrackSink::RemoveOnFrame()
 
 IAudioTrackSource* IAudioTrackSource::Create()
 {
-    auto self = new rtc::RefCountedObject<IAudioTrackSource>();
-    self->AddRef();
-    return self;
+    return new rtc::RefCountedObject<IAudioTrackSource>();
 }
 
 void IAudioTrackSource::RegisterObserver(webrtc::ObserverInterface* observer)

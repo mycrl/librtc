@@ -100,9 +100,7 @@ AdaptFrameResult IVideoSource::_AdaptFrameResolution(const webrtc::VideoFrame& f
 
 IVideoTrackSource* IVideoTrackSource::Create()
 {
-	auto self = new rtc::RefCountedObject<IVideoTrackSource>();
-	self->AddRef();
-	return self;
+	return new rtc::RefCountedObject<IVideoTrackSource>();
 }
 
 void IVideoTrackSource::AddFrame(const webrtc::VideoFrame& frame)
@@ -126,9 +124,7 @@ IVideoTrackSink::IVideoTrackSink(webrtc::VideoTrackInterface* track)
 
 IVideoTrackSink* IVideoTrackSink::Create(webrtc::VideoTrackInterface* track)
 {
-	auto self = new rtc::RefCountedObject<IVideoTrackSink>(track);
-	self->AddRef();
-	return self;
+	return new rtc::RefCountedObject<IVideoTrackSink>(track);
 }
 
 void IVideoTrackSink::OnFrame(const webrtc::VideoFrame& frame)
