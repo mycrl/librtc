@@ -13,19 +13,14 @@ void rtc_free_media_stream_track(MediaStreamTrack* track)
 	assert(track);
 
 	free_incomplete_ptr(track->label);
-	free_incomplete_ptr(track);
+	delete track;
 }
 
 MediaStreamTrack* from(webrtc::VideoTrackInterface* itrack)
 {
 	assert(itrack);
 
-	MediaStreamTrack* track = (MediaStreamTrack*)malloc(sizeof(MediaStreamTrack));
-	if (!track)
-	{
-		return nullptr;
-	}
-
+	MediaStreamTrack* track = new MediaStreamTrack;
 	track->video_sink = IVideoTrackSink::Create(itrack);
 	if (!track->video_sink)
 	{
@@ -49,13 +44,7 @@ MediaStreamTrack* from(webrtc::AudioTrackInterface* itrack)
 {
 	assert(itrack);
 
-	MediaStreamTrack* track = (MediaStreamTrack*)malloc(sizeof(MediaStreamTrack));
-	if (!track)
-	{
-		rtc_free_media_stream_track(track);
-		return nullptr;
-	}
-
+	MediaStreamTrack* track = new MediaStreamTrack;
 	track->audio_sink = IAudioTrackSink::Create(itrack);
 	if (!track->audio_sink)
 	{

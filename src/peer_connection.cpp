@@ -9,7 +9,7 @@
 #include "api/audio_codecs/builtin_audio_encoder_factory.h"
 #include "api/create_peerconnection_factory.h"
 #include "rtc_base/ssl_adapter.h"
-#include "audio_capture_module.h"
+#include "audio_device_module.h"
 #include "peer_connection_config.h"
 #include "video_encoder.h"
 #include "video_decoder.h"
@@ -34,13 +34,13 @@ RTCPeerConnection* rtc_create_peer_connection(RTCPeerConnectionConfigure* c_conf
     assert(events);
 
     rtc::InitializeSSL();
-    RTCPeerConnection* rtc = new RTCPeerConnection();
 
+    RTCPeerConnection* rtc = new RTCPeerConnection();
     rtc->threads = RtcThreads::Create();
-    rtc->pc_factory = webrtc::CreatePeerConnectionFactory(rtc->threads->network_thread.get(), // network_thread,
-                                                          rtc->threads->work_thread.get(), // worker_thread,
-                                                          rtc->threads->signaling_thread.get(), // signaling_thread,
-                                                          AudioCaptureModule::Create(),
+    rtc->pc_factory = webrtc::CreatePeerConnectionFactory(rtc->threads->network_thread.get(),
+                                                          rtc->threads->worker_thread.get(),
+                                                          rtc->threads->signaling_thread.get(),
+                                                          IAudioDeviceModule::Create(),
                                                           webrtc::CreateBuiltinAudioEncoderFactory(),
                                                           webrtc::CreateBuiltinAudioDecoderFactory(),
                                                           IVideoEncoderFactory::Create(),
