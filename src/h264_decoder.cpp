@@ -22,12 +22,12 @@ std::unique_ptr<H264Decoder> H264Decoder::Create()
 bool H264Decoder::Configure(const Settings& settings)
 {
 	auto codec_name = find_codec(VideoDecoders);
-	if (codec_name == nullptr)
+	if (!codec_name.has_value())
 	{
 		return false;
 	}
 
-	_codec = avcodec_find_decoder_by_name(codec_name);
+	_codec = avcodec_find_decoder_by_name(codec_name.value().c_str());
 	if (!_codec)
 	{
 		return false;
@@ -120,6 +120,8 @@ int32_t H264Decoder::Decode(const webrtc::EncodedImage& input_image,
 
 int32_t H264Decoder::RegisterDecodeCompleteCallback(webrtc::DecodedImageCallback* callback)
 {
+	assert(callback);
+
 	_callback = callback;
 	return CodecRet::Ok;
 }

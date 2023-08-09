@@ -10,6 +10,8 @@
 
 const webrtc::IceCandidateInterface* from_c(RTCIceCandidate* ice_candidate)
 {
+	assert(ice_candidate);
+
 	int index = ice_candidate->sdp_mline_index;
 	const std::string mid = std::string(ice_candidate->sdp_mid);
 	const std::string candidate = std::string(ice_candidate->candidate);
@@ -25,6 +27,8 @@ void free_ice_candidate(RTCIceCandidate* candidate)
 
 RTCIceCandidate* into_c(webrtc::IceCandidateInterface* candidate)
 {
+	assert(candidate);
+
 	auto c_candidate = new RTCIceCandidate;
 
 	auto sdp_mid = candidate->sdp_mid();

@@ -11,6 +11,9 @@
 
 #include "modules/video_coding/codecs/h264/include/h264.h"
 
+#include <string>
+#include <optional>
+
 extern "C"
 {
 #include "libavutil/hwcontext.h"
@@ -24,7 +27,7 @@ enum CodecRet
 
 typedef struct
 {
-	const char* name;
+	const std::string name;
 	AVHWDeviceType type;
 } CodecDesc;
 
@@ -57,7 +60,7 @@ webrtc::SdpVideoFormat create_h264_format(webrtc::H264Profile profile,
 std::vector<webrtc::SdpVideoFormat> supported_h264_codecs(bool mode /* add_scalability_modes */);
 
 template <size_t S>
-const char* find_codec(CodecDesc(&codecs)[S])
+std::optional<const std::string> find_codec(CodecDesc(&codecs)[S])
 {
 	AVBufferRef* ctx = nullptr;
 	for (auto codec : codecs)
@@ -65,7 +68,7 @@ const char* find_codec(CodecDesc(&codecs)[S])
 		if (av_hwdevice_ctx_create(&ctx, codec.type, nullptr, nullptr, 0) == 0)
 		{
 			av_buffer_unref(&ctx);
-			return codec.name;
+			return std::optional(codec.name);
 		}
 	}
 
@@ -74,7 +77,7 @@ const char* find_codec(CodecDesc(&codecs)[S])
 		av_buffer_unref(&ctx);
 	}
 
-	return nullptr;
+	return std::nullopt;
 }
 
 #endif // LIBRTC_H264_H

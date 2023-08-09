@@ -30,6 +30,8 @@ webrtc::SdpType from_c(RTCSessionDescriptionType type)
 
 std::unique_ptr<webrtc::SessionDescriptionInterface> from_c(RTCSessionDescription* desc)
 {
+	assert(desc);
+
 	webrtc::SdpType type = from_c(desc->type);
 	const std::string sdp = std::string((char*)desc->sdp);
 	return webrtc::CreateSessionDescription(type, sdp);
@@ -37,12 +39,16 @@ std::unique_ptr<webrtc::SessionDescriptionInterface> from_c(RTCSessionDescriptio
 
 void free_session_description(RTCSessionDescription* desc)
 {
+	assert(desc);
+
 	free_incomplete_ptr((void*)desc->sdp);
 	delete desc;
 }
 
 RTCSessionDescription* into_c(webrtc::SessionDescriptionInterface* desc)
 {
+	assert(desc);
+
 	auto c_desc = new RTCSessionDescription;
 
 	std::string sdp;

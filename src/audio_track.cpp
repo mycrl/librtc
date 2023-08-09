@@ -11,10 +11,13 @@
 
 IAudioTrackSink::IAudioTrackSink(webrtc::AudioTrackInterface* track) : _track(track)
 {
+    assert(track);
 }
 
 IAudioTrackSink* IAudioTrackSink::Create(webrtc::AudioTrackInterface* track)
 {
+    assert(track);
+
     return new rtc::RefCountedObject<IAudioTrackSink>(track);
 }
 
@@ -41,6 +44,8 @@ void IAudioTrackSink::OnData(const void* audio_data,
 void IAudioTrackSink::SetOnFrame(void* ctx,
                                  void(*handler)(void* ctx, IAudioFrame* frame))
 {
+    assert(handler);
+
     _track->AddSink(this);
     _handler = handler;
     _ctx = ctx;
@@ -62,16 +67,22 @@ IAudioTrackSource* IAudioTrackSource::Create()
 
 void IAudioTrackSource::RegisterObserver(webrtc::ObserverInterface* observer)
 {
+    assert(observer);
+
     observer->OnChanged();
 }
 
 void IAudioTrackSource::AddSink(webrtc::AudioTrackSinkInterface* sink)
 {
+    assert(sink);
+
     _sinks.insert(sink);
 }
 
 void IAudioTrackSource::RemoveSink(webrtc::AudioTrackSinkInterface* sink)
 {
+    assert(sink);
+
     _sinks.erase(sink);
 }
 
@@ -99,6 +110,8 @@ bool IAudioTrackSource::remote() const
 
 void IAudioTrackSource::OnData(IAudioFrame* frame)
 {
+    assert(frame);
+
     for (auto& sink : _sinks)
     {
         sink->OnData(frame->data,

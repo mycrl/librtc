@@ -21,13 +21,10 @@ public:
     ~RtcThreads();
 
     static std::unique_ptr<RtcThreads> Create();
-    rtc::Thread* GetWorkThread();
-    rtc::Thread* GetNetworkThread();
-    rtc::Thread* GetSignalingThread();
-private:
-    std::unique_ptr<rtc::Thread> _work_thread;
-    std::unique_ptr<rtc::Thread> _network_thread;
-    std::unique_ptr<rtc::Thread> _signaling_thread;
+
+    std::unique_ptr<rtc::Thread> work_thread;
+    std::unique_ptr<rtc::Thread> network_thread;
+    std::unique_ptr<rtc::Thread> signaling_thread;
 };
 
 #endif // LIBRTC_THREAD_H

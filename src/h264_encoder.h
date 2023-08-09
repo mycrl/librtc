@@ -15,6 +15,7 @@
 #include "h264.h"
 
 #include <optional>
+#include <string>
 
 extern "C"
 {
@@ -88,11 +89,12 @@ private:
 	int _OnFrame(webrtc::VideoFrameType frame_type);
 
 	std::optional<webrtc::EncodedImageCallback*> _callback = std::nullopt;
-	std::optional<const char*> _codec_name = std::nullopt;
-
+	
 	webrtc::H264BitstreamParser _h264_bitstream_parser;
 	webrtc::CodecSpecificInfo _codec_specific;
 	webrtc::EncodedImage _image;
+	std::string _codec_name = "";
+
 	const AVCodec* _codec = nullptr;
 	AVCodecContext* _ctx = nullptr;
 	AVPacket* _packet = nullptr;

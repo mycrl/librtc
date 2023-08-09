@@ -29,11 +29,14 @@ H264Encoder::H264Encoder(const webrtc::SdpVideoFormat& format)
 		: webrtc::H264PacketizationMode::SingleNalUnit;
 	_codec_specific.codecType = webrtc::kVideoCodecH264;
 
-
 	auto codec_name = find_codec(VideoEncoders);
-	if (codec_name != nullptr)
+	if (codec_name.has_value())
 	{
-		_codec_name = codec_name;
+		_codec_name = codec_name.value();
+	}
+	else
+	{
+		PANIC("no support codec found!");
 	}
 }
 
@@ -44,6 +47,8 @@ std::unique_ptr<H264Encoder> H264Encoder::Create(const webrtc::SdpVideoFormat& f
 
 int32_t H264Encoder::RegisterEncodeCompleteCallback(webrtc::EncodedImageCallback* callback)
 {
+	assert(callback);
+
 	_callback = callback;
 	return CodecRet::Ok;
 }
@@ -51,20 +56,16 @@ int32_t H264Encoder::RegisterEncodeCompleteCallback(webrtc::EncodedImageCallback
 int H264Encoder::InitEncode(const webrtc::VideoCodec* codec_settings,
 							const Settings& settings)
 {
-	if (!_codec_name.has_value())
-	{
-		return CodecRet::Err;
-	}
+	assert(codec_settings);
 
 	int ret = 0;
-	auto codec_name = _codec_name.value();
 	int number_of_streams = codec_settings->numberOfSimulcastStreams;
 	if (number_of_streams > 1)
 	{
 		return CodecRet::Err;
 	}
 
-	_codec = avcodec_find_encoder_by_name(codec_name);
+	_codec = avcodec_find_encoder_by_name(_codec_name.c_str());
 	if (!_codec)
 	{
 		return CodecRet::Err;
@@ -85,7 +86,7 @@ int H264Encoder::InitEncode(const webrtc::VideoCodec* codec_settings,
 	_ctx->pkt_timebase = av_make_q(1, codec_settings->maxFramerate);
 	_ctx->gop_size = codec_settings->H264().keyFrameInterval;
 
-	if (codec_name == "h264_qsv")
+	if (_codec_name == "h264_qsv")
 	{
 		_ctx->pix_fmt = AV_PIX_FMT_NV12;
 	}
@@ -94,17 +95,17 @@ int H264Encoder::InitEncode(const webrtc::VideoCodec* codec_settings,
 		_ctx->pix_fmt = AV_PIX_FMT_YUV420P;
 	}
 
-	if (codec_name == "h264_videotoolbox")
+	if (_codec_name == "h264_videotoolbox")
 	{
 		av_opt_set_int(_ctx->priv_data, "prio_speed", 1, 0);
 		av_opt_set_int(_ctx->priv_data, "realtime", 1, 0);
 	}
-	else if (codec_name == "h264_qsv")
+	else if (_codec_name == "h264_qsv")
 	{
 		av_opt_set_int(_ctx->priv_data, "preset", 7, 0);
 		av_opt_set_int(_ctx->priv_data, "profile", 66, 0);
 	}
-	else if (codec_name == "h264_nvenc")
+	else if (_codec_name == "h264_nvenc")
 	{
 		av_opt_set_int(_ctx->priv_data, "zerolatency", 1, 0);
 		av_opt_set_int(_ctx->priv_data, "b_adapt", 0, 0);
@@ -114,7 +115,7 @@ int H264Encoder::InitEncode(const webrtc::VideoCodec* codec_settings,
 		av_opt_set_int(_ctx->priv_data, "tune", 1, 0);
 		av_opt_set_int(_ctx->priv_data, "cq", 30, 0);
 	}
-	else if (codec_name == "libx264")
+	else if (_codec_name == "libx264")
 	{
 		av_opt_set(_ctx->priv_data, "tune", "zerolatency", 0);
 	}
@@ -146,7 +147,7 @@ int H264Encoder::InitEncode(const webrtc::VideoCodec* codec_settings,
 	_frame->height = _ctx->height;
 	_frame->format = _ctx->pix_fmt;
 
-	if (_codec->name == "h264_qsv" || _codec->name == "libx264")
+	if (_codec_name == "h264_qsv" || _codec_name == "libx264")
 	{
 		ret = av_image_alloc(_frame->data,
 							 _frame->linesize,
@@ -155,7 +156,7 @@ int H264Encoder::InitEncode(const webrtc::VideoCodec* codec_settings,
 							 _ctx->pix_fmt,
 							 32);
 	}
-	else if (_codec->name == "libx264")
+	else if (_codec_name == "libx264")
 	{
 		ret = av_frame_get_buffer(_frame, 32);
 	}
@@ -171,6 +172,8 @@ int H264Encoder::InitEncode(const webrtc::VideoCodec* codec_settings,
 int32_t H264Encoder::Encode(const webrtc::VideoFrame& frame,
 							const std::vector<webrtc::VideoFrameType>* frame_types)
 {
+	assert(frame_types);
+
 	if (!_callback || !_ctx)
 	{
 		return CodecRet::Err;
@@ -188,7 +191,7 @@ int32_t H264Encoder::Encode(const webrtc::VideoFrame& frame,
 		return CodecRet::Err;
 	}
 
-	if (_codec->name == "h264_qsv")
+	if (_codec_name == "h264_qsv")
 	{
 		int ret = libyuv::I420ToNV12(i420_buffer->DataY(),
 									 i420_buffer->StrideY(),
@@ -207,7 +210,7 @@ int32_t H264Encoder::Encode(const webrtc::VideoFrame& frame,
 			return CodecRet::Err;
 		}
 	}
-	else if (_codec->name == "libx264")
+	else if (_codec_name == "libx264")
 	{
 		int ret = av_frame_make_writable(_frame);
 		if (ret != 0)
@@ -274,17 +277,12 @@ void H264Encoder::SetRates(const webrtc::VideoEncoder::RateControlParameters& pa
 H264Encoder::EncoderInfo H264Encoder::GetEncoderInfo() const
 {
 	EncoderInfo info;
+	info.implementation_name = _codec_name;
 	info.requested_resolution_alignment = 4;
 	info.supports_native_handle = false;
 	info.has_trusted_rate_controller = false;
 	info.is_hardware_accelerated = true;
 	info.supports_simulcast = false;
-
-	if (_codec_name.has_value())
-	{
-		info.implementation_name = std::string(_codec_name.value());
-	}
-
 	return info;
 }
 

@@ -19,25 +19,28 @@
 
 void rtc_close(RTCPeerConnection* rtc)
 {
-    rtc->pc->Close();
-    delete rtc;
+    assert(rtc);
 
+    rtc->pc->Close();
     rtc::CleanupSSL();
+    delete rtc;
 }
 
 RTCPeerConnection* rtc_create_peer_connection(RTCPeerConnectionConfigure* c_config,
                                               Events* events,
                                               void* ctx)
 {
-    rtc::InitializeSSL();
+    assert(c_config);
+    assert(events);
 
+    rtc::InitializeSSL();
     RTCPeerConnection* rtc = new RTCPeerConnection();
 
     rtc->threads = RtcThreads::Create();
-    rtc->pc_factory = webrtc::CreatePeerConnectionFactory(rtc->threads->GetWorkThread(), // network_thread,
-                                                          rtc->threads->GetNetworkThread(), // worker_thread,
-                                                          rtc->threads->GetSignalingThread(), // signaling_thread,
-                                                          nullptr, // AudioCaptureModule::Create(),
+    rtc->pc_factory = webrtc::CreatePeerConnectionFactory(rtc->threads->network_thread.get(), // network_thread,
+                                                          rtc->threads->work_thread.get(), // worker_thread,
+                                                          rtc->threads->signaling_thread.get(), // signaling_thread,
+                                                          AudioCaptureModule::Create(),
                                                           webrtc::CreateBuiltinAudioEncoderFactory(),
                                                           webrtc::CreateBuiltinAudioDecoderFactory(),
                                                           IVideoEncoderFactory::Create(),
@@ -68,17 +71,26 @@ RTCPeerConnection* rtc_create_peer_connection(RTCPeerConnectionConfigure* c_conf
 
 bool rtc_add_ice_candidate(RTCPeerConnection* rtc, RTCIceCandidate* icecandidate)
 {
+    assert(rtc);
+    assert(icecandidate);
+
     return rtc->pc->AddIceCandidate(from_c(icecandidate));
 }
 
 void rtc_create_answer(RTCPeerConnection* rtc, CreateDescCallback callback, void* ctx)
 {
+    assert(rtc);
+    assert(callback);
+
     auto opt = webrtc::PeerConnectionInterface::RTCOfferAnswerOptions();
     rtc->pc->CreateAnswer(CreateDescObserver::Create(callback, ctx), opt);
 }
 
 void rtc_create_offer(RTCPeerConnection* rtc, CreateDescCallback callback, void* ctx)
 {
+    assert(rtc);
+    assert(callback);
+
     auto opt = webrtc::PeerConnectionInterface::RTCOfferAnswerOptions();
     rtc->pc->CreateOffer(CreateDescObserver::Create(callback, ctx), opt);
 }
@@ -88,6 +100,10 @@ void rtc_set_local_description(RTCPeerConnection* rtc,
                                SetDescCallback callback,
                                void* ctx)
 {
+    assert(rtc);
+    assert(c_desc);
+    assert(callback);
+
     auto observer = SetDescObserver::Create(callback, ctx);
     rtc->pc->SetLocalDescription(std::move(observer), from_c(c_desc).release());
 }
@@ -97,6 +113,10 @@ void rtc_set_remote_description(RTCPeerConnection* rtc,
                                 SetDescCallback callback,
                                 void* ctx)
 {
+    assert(rtc);
+    assert(c_desc);
+    assert(callback);
+
     auto observer = SetDescObserver::Create(callback, ctx);
     rtc->pc->SetRemoteDescription(std::move(observer), from_c(c_desc).release());
 }
@@ -105,6 +125,10 @@ void rtc_add_media_stream_track(RTCPeerConnection* rtc,
                                 MediaStreamTrack* target,
                                 char* stream_id)
 {
+    assert(rtc);
+    assert(target);
+    assert(stream_id);
+
     if (target->kind == MediaStreamTrackKind::MediaStreamTrackKindVideo)
     {
         auto track = rtc->pc_factory->CreateVideoTrack(target->label, target->video_source);
@@ -121,6 +145,10 @@ RTCDataChannel* rtc_create_data_channel(RTCPeerConnection* rtc,
                                         char* label,
                                         DataChannelOptions* options)
 {
+    assert(rtc);
+    assert(label);
+    assert(options);
+
     auto init = from_c(options);
     auto ret = rtc->pc->CreateDataChannelOrError(std::string(label), std::move(init));
     if (ret.ok())

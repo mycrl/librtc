@@ -10,8 +10,10 @@
 
 void rtc_free_data_channel(RTCDataChannel* channel)
 {
+	assert(channel);
+
 	free_incomplete_ptr(channel->label);
-	free_incomplete_ptr(channel);
+	delete channel;
 }
 
 IDataChannel* IDataChannel::From(rtc::scoped_refptr<webrtc::DataChannelInterface> data_channel)
@@ -21,6 +23,8 @@ IDataChannel* IDataChannel::From(rtc::scoped_refptr<webrtc::DataChannelInterface
 
 void IDataChannel::Send(uint8_t* buf, int size)
 {
+	assert(buf);
+
 	if (state != DataState::DataStateOpen)
 	{
 		return;
@@ -54,6 +58,8 @@ void IDataChannel::OnMessage(const webrtc::DataBuffer& buffer)
 void IDataChannel::OnDataMessage(void* ctx,
 								 void(*handler)(void* _ctx, uint8_t* buf, uint64_t size))
 {
+	assert(handler);
+
 	_channel->RegisterObserver(this);
 	_handler = handler;
 	_ctx = ctx;
@@ -68,6 +74,8 @@ void IDataChannel::RemoveOnMessage()
 
 webrtc::DataChannelInit* from_c(DataChannelOptions* options)
 {
+	assert(options);
+
 	webrtc::DataChannelInit* init = new webrtc::DataChannelInit();
 	init->protocol = std::string(options->protocol);
 	init->reliable = options->reliable;
@@ -93,22 +101,25 @@ webrtc::DataChannelInit* from_c(DataChannelOptions* options)
 RTCDataChannel* create_data_channel(rtc::scoped_refptr<webrtc::DataChannelInterface> data_channel)
 {
 	RTCDataChannel* channel = new RTCDataChannel;
+	channel->channel = IDataChannel::From(data_channel);
+	channel->remote = true;
 
 	auto label = data_channel->label();
 	channel->label = copy_c_str(label);
 	if (!channel->label)
 	{
-		delete channel;
+		rtc_free_data_channel(channel);
 		return nullptr;
 	}
 
-	channel->channel = IDataChannel::From(data_channel);
-	channel->remote = true;
 	return channel;
 }
 
 void rtc_send_data_channel_msg(RTCDataChannel* channel, uint8_t* buf, int size)
 {
+	assert(channel);
+	assert(buf);
+
 	channel->channel->Send(buf, size);
 }
 
@@ -116,15 +127,22 @@ void rtc_set_data_channel_msg_h(RTCDataChannel* channel,
 								void(*handler)(void* ctx, uint8_t* buf, uint64_t size),
 								void* ctx)
 {
+	assert(channel);
+	assert(handler);
+
 	channel->channel->OnDataMessage(ctx, handler);
 }
 
 void rtc_remove_data_channel_msg_h(RTCDataChannel* channel)
 {
+	assert(channel);
+
 	channel->channel->RemoveOnMessage();
 }
 
 DataState rtc_get_data_channel_state(RTCDataChannel* channel)
 {
+	assert(channel);
+
 	return channel->channel->state;
 }

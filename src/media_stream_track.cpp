@@ -10,12 +10,16 @@
 
 void rtc_free_media_stream_track(MediaStreamTrack* track)
 {
+	assert(track);
+
 	free_incomplete_ptr(track->label);
 	free_incomplete_ptr(track);
 }
 
 MediaStreamTrack* from(webrtc::VideoTrackInterface* itrack)
 {
+	assert(itrack);
+
 	MediaStreamTrack* track = (MediaStreamTrack*)malloc(sizeof(MediaStreamTrack));
 	if (!track)
 	{
@@ -43,6 +47,8 @@ MediaStreamTrack* from(webrtc::VideoTrackInterface* itrack)
 
 MediaStreamTrack* from(webrtc::AudioTrackInterface* itrack)
 {
+	assert(itrack);
+
 	MediaStreamTrack* track = (MediaStreamTrack*)malloc(sizeof(MediaStreamTrack));
 	if (!track)
 	{
@@ -71,6 +77,9 @@ MediaStreamTrack* from(webrtc::AudioTrackInterface* itrack)
 
 void rtc_add_video_track_frame(MediaStreamTrack* track, IVideoFrame* frame)
 {
+	assert(track);
+	assert(frame);
+
 	if (!track->video_source)
 	{
 		return;
@@ -83,6 +92,9 @@ void rtc_set_video_track_frame_h(MediaStreamTrack* track,
 								 void(handler)(void* ctx, IVideoFrame* frame),
 								 void* ctx)
 {
+	assert(track);
+	assert(handler);
+
 	if (!track->video_sink)
 	{
 		return;
@@ -93,6 +105,8 @@ void rtc_set_video_track_frame_h(MediaStreamTrack* track,
 
 MediaStreamTrack* rtc_create_video_track(char* label)
 {
+	assert(label);
+
 	MediaStreamTrack* track = (MediaStreamTrack*)malloc(sizeof(MediaStreamTrack));
 	if (!track)
 	{
@@ -124,6 +138,8 @@ MediaStreamTrack* rtc_create_video_track(char* label)
 
 MediaStreamTrack* rtc_create_audio_track(char* label)
 {
+	assert(label);
+
 	MediaStreamTrack* track = (MediaStreamTrack*)malloc(sizeof(MediaStreamTrack));
 	if (!track)
 	{
@@ -155,6 +171,9 @@ MediaStreamTrack* rtc_create_audio_track(char* label)
 
 void rtc_add_audio_track_frame(MediaStreamTrack* track, IAudioFrame* frame)
 {
+	assert(track);
+	assert(frame);
+
 	if (!track->audio_source)
 	{
 		return;
@@ -167,11 +186,16 @@ void rtc_set_audio_track_frame_h(MediaStreamTrack* track,
 								 void(handler)(void* ctx, IAudioFrame* frame),
 								 void* ctx)
 {
+	assert(track);
+	assert(handler);
+
 	track->audio_sink->SetOnFrame(ctx, handler);
 }
 
 void rtc_remove_media_stream_track_frame_h(MediaStreamTrack* track)
 {
+	assert(track);
+
 	if (track->video_sink)
 	{
 		track->video_sink->RemoveOnFrame();

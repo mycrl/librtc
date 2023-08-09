@@ -10,14 +10,20 @@
 
 void free_incomplete_ptr(void* ptr)
 {
-	if (ptr)
-	{
-		free(ptr);
-	}
+    if (ptr != nullptr)
+    {
+        free(ptr);
+    }
 }
 
 char* copy_c_str(std::string& source)
 {
-	char* c_str = (char*)malloc(sizeof(char) * source.size() + 1);
-	return strcpy(c_str, source.c_str());
+    char* dst = (char*)malloc(sizeof(char) * source.size() + 1);
+    if (dst == nullptr)
+    {
+        return nullptr;
+    }
+
+    strcpy(dst, source.c_str());
+    return dst;
 }

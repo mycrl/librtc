@@ -13,11 +13,15 @@
 void IVideoSource::AddOrUpdateSink(rtc::VideoSinkInterface<webrtc::VideoFrame>* sink,
 								   const rtc::VideoSinkWants& wants)
 {
+	assert(sink);
+
 	_broadcaster.AddOrUpdateSink(sink, wants);
 }
 
 void IVideoSource::RemoveSink(rtc::VideoSinkInterface<webrtc::VideoFrame>* sink)
 {
+	assert(sink);
+
 	_broadcaster.RemoveSink(sink);
 }
 
@@ -117,13 +121,16 @@ rtc::VideoSourceInterface<webrtc::VideoFrame>* IVideoTrackSource::source()
 
 IVideoTrackSink::IVideoTrackSink(webrtc::VideoTrackInterface* track)
 {
+	assert(track);
+
 	_ctx = nullptr;
 	_track = track;
-	_track->AddRef();
 }
 
 IVideoTrackSink* IVideoTrackSink::Create(webrtc::VideoTrackInterface* track)
 {
+	assert(track);
+
 	return new rtc::RefCountedObject<IVideoTrackSink>(track);
 }
 
@@ -146,6 +153,8 @@ void IVideoTrackSink::OnFrame(const webrtc::VideoFrame& frame)
 void IVideoTrackSink::SetOnFrame(void* ctx,
 								 void(*handler)(void* ctx, IVideoFrame* frame))
 {
+	assert(handler);
+
 	if (!_track)
 	{
 		return;

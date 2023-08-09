@@ -126,6 +126,8 @@ IceConnectionState into_c(webrtc::PeerConnectionInterface::IceConnectionState st
 
 Observer* Observer::Create(Events* events, void* ctx)
 {
+	assert(events);
+
 	return new rtc::RefCountedObject<Observer>(events, ctx);
 }
 
@@ -227,6 +229,8 @@ void Observer::OnTrack(rtc::scoped_refptr<webrtc::RtpTransceiverInterface> trans
 
 CreateDescObserver* CreateDescObserver::Create(CreateDescCallback callback, void* ctx)
 {
+	assert(callback);
+
 	return new rtc::RefCountedObject<CreateDescObserver>(callback, ctx);
 }
 
@@ -237,11 +241,9 @@ void CreateDescObserver::OnSuccess(webrtc::SessionDescriptionInterface* desc)
 	{
 		_callback("malloc failed", nullptr, _ctx);
 	}
-	else
-	{
-		_callback(nullptr, res, _ctx);
-		free_session_description(res);
-	}
+
+	_callback(nullptr, res, _ctx);
+	free_session_description(res);
 }
 
 void CreateDescObserver::OnFailure(webrtc::RTCError error)
@@ -251,6 +253,8 @@ void CreateDescObserver::OnFailure(webrtc::RTCError error)
 
 SetDescObserver* SetDescObserver::Create(SetDescCallback callback, void* ctx)
 {
+	assert(callback);
+
 	return new rtc::RefCountedObject<SetDescObserver>(callback, ctx);
 }
 
