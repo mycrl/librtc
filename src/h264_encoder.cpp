@@ -28,16 +28,7 @@ H264Encoder::H264Encoder(const webrtc::SdpVideoFormat& format)
 		? webrtc::H264PacketizationMode::NonInterleaved
 		: webrtc::H264PacketizationMode::SingleNalUnit;
 	_codec_specific.codecType = webrtc::kVideoCodecH264;
-
-	auto codec_name = find_codec(VideoEncoders);
-	if (codec_name.has_value())
-	{
-		_codec_name = codec_name.value();
-	}
-	else
-	{
-		PANIC("no support codec found!");
-	}
+	_codec_name = find_codec(VideoEncoders);
 }
 
 std::unique_ptr<H264Encoder> H264Encoder::Create(const webrtc::SdpVideoFormat& format)

@@ -22,12 +22,7 @@ std::unique_ptr<H264Decoder> H264Decoder::Create()
 bool H264Decoder::Configure(const Settings& settings)
 {
 	auto codec_name = find_codec(VideoDecoders);
-	if (!codec_name.has_value())
-	{
-		return false;
-	}
-
-	_codec = avcodec_find_decoder_by_name(codec_name.value().c_str());
+	_codec = avcodec_find_decoder_by_name(codec_name.c_str());
 	if (!_codec)
 	{
 		return false;
