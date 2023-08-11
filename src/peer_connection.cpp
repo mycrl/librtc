@@ -121,24 +121,54 @@ void rtc_set_remote_description(RTCPeerConnection* rtc,
     rtc->pc->SetRemoteDescription(std::move(observer), from_c(c_desc).release());
 }
 
-void rtc_add_media_stream_track(RTCPeerConnection* rtc,
-                                MediaStreamTrack* target,
-                                char* stream_id)
+int rtc_add_media_stream_track(RTCPeerConnection* rtc,
+                               MediaStreamTrack* track,
+                               char* stream_id)
 {
     assert(rtc);
-    assert(target);
+    assert(track);
     assert(stream_id);
 
-    if (target->kind == MediaStreamTrackKind::MediaStreamTrackKindVideo)
+    webrtc::RTCErrorOr<rtc::scoped_refptr<webrtc::RtpSenderInterface>> ret;
+    if (track->kind == MediaStreamTrackKind::MediaStreamTrackKindVideo)
     {
-        auto track = rtc->pc_factory->CreateVideoTrack(target->label, target->video_source);
-        rtc->pc->AddTrack(std::move(track), { stream_id });
+        ret = rtc->pc->AddTrack(
+            std::move(rtc->pc_factory->CreateVideoTrack(track->label,
+                                                        track->video_source)),
+            { stream_id });
     }
     else
     {
-        auto track = rtc->pc_factory->CreateAudioTrack(target->label, target->audio_source);
-        rtc->pc->AddTrack(std::move(track), { stream_id });
+        ret = rtc->pc->AddTrack(
+            std::move(rtc->pc_factory->CreateAudioTrack(track->label,
+                                                        track->audio_source)),
+            { stream_id });
     }
+
+    if (ret.ok())
+    {
+        track->sender = std::optional(std::move(ret.value()));
+        return 0;
+    }
+    else
+    {
+        return -1;
+    }
+}
+
+int rtc_remove_media_stream_track(RTCPeerConnection* rtc, MediaStreamTrack* track)
+{
+    assert(rtc);
+    assert(track);
+
+    if (!track->sender.has_value())
+    {
+        return -1;
+    }
+
+    auto sender = track->sender.value();
+    auto ret = rtc->pc->RemoveTrackOrError(sender);
+    return ret.ok() ? 0 : -2;
 }
 
 RTCDataChannel* rtc_create_data_channel(RTCPeerConnection* rtc,

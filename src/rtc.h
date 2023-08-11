@@ -15,6 +15,7 @@
 
 #include <stdint.h>
 #include <memory>
+#include <optional>
 
 // An enum describing the session description's type.
 typedef enum
@@ -235,6 +236,7 @@ typedef struct
     // is empty as long as no source has been connected. When the track is
     // disassociated from its source, the label is not changed.
     char* label;
+    std::optional<rtc::scoped_refptr<webrtc::RtpSenderInterface>> sender = std::nullopt;
 
     /* --------------- video --------------- */
     IVideoTrackSource* video_source;
@@ -536,9 +538,18 @@ extern "C" EXPORT void rtc_set_remote_description(RTCPeerConnection * peer,
 
 // The RTCPeerConnection method addTrack() adds a new media track to the set of
 // tracks which will be transmitted to the other peer.
-extern "C" EXPORT void rtc_add_media_stream_track(RTCPeerConnection * rtc,
-                                                  MediaStreamTrack * track,
-                                                  char* stream_id);
+extern "C" EXPORT int rtc_add_media_stream_track(RTCPeerConnection * rtc,
+                                                 MediaStreamTrack * track,
+                                                 char* stream_id);
+
+// The `rtc_remove_media_stream_track` method tells the local end of the connection 
+// to stop sending media from the specified track, without actually removing the 
+// corresponding RTCRtpSender from the list of senders as reported by `senders`. 
+// 
+// If the track is already stopped, or is not in the connection's senders list, 
+// this method has no effect.
+extern "C" EXPORT int rtc_remove_media_stream_track(RTCPeerConnection * rtc,
+                                                    MediaStreamTrack * track);
 
 extern "C" EXPORT RTCDataChannel * rtc_create_data_channel(RTCPeerConnection * rtc,
                                                            char* label,
