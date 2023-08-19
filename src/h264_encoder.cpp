@@ -31,6 +31,11 @@ H264Encoder::H264Encoder(const webrtc::SdpVideoFormat& format)
 	_codec_name = find_codec(VideoEncoders);
 }
 
+H264Encoder::~H264Encoder()
+{
+	Release();
+}
+
 std::unique_ptr<H264Encoder> H264Encoder::Create(const webrtc::SdpVideoFormat& format)
 {
 	return std::make_unique<H264Encoder>(format);
@@ -279,13 +284,19 @@ H264Encoder::EncoderInfo H264Encoder::GetEncoderInfo() const
 
 int32_t H264Encoder::Release()
 {
-	if (_codec)
+	if (_codec == nullptr)
 	{
-		avcodec_send_frame(_ctx, nullptr);
-		avcodec_free_context(&_ctx);
-		av_packet_free(&_packet);
-		av_frame_free(&_frame);
+		return CodecRet::Ok;
 	}
+	else
+	{
+		_codec = nullptr;
+	}
+
+	avcodec_send_frame(_ctx, nullptr);
+	avcodec_free_context(&_ctx);
+	av_packet_free(&_packet);
+	av_frame_free(&_frame);
 
 	return CodecRet::Ok;
 }

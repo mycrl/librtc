@@ -12,8 +12,19 @@ void rtc_free_data_channel(RTCDataChannel* channel)
 {
 	assert(channel);
 
-	free_incomplete_ptr(channel->label);
-	delete channel;
+	channel->channel->Close();
+	free_ptr(channel->label);
+	free_ptr(channel);
+}
+
+IDataChannel::IDataChannel(rtc::scoped_refptr<webrtc::DataChannelInterface> data_channel) 
+	: _channel(data_channel)
+{
+}
+
+IDataChannel::~IDataChannel()
+{
+	Close();
 }
 
 IDataChannel* IDataChannel::From(rtc::scoped_refptr<webrtc::DataChannelInterface> data_channel)
@@ -24,6 +35,11 @@ IDataChannel* IDataChannel::From(rtc::scoped_refptr<webrtc::DataChannelInterface
 void IDataChannel::Send(uint8_t* buf, int size)
 {
 	assert(buf);
+
+	if (_is_closed)
+	{
+		return;
+	}
 
 	if (state != DataState::DataStateOpen)
 	{
@@ -60,6 +76,11 @@ void IDataChannel::OnDataMessage(void* ctx,
 {
 	assert(handler);
 
+	if (_is_closed)
+	{
+		return;
+	}
+
 	_channel->RegisterObserver(this);
 	_handler = handler;
 	_ctx = ctx;
@@ -67,9 +88,26 @@ void IDataChannel::OnDataMessage(void* ctx,
 
 void IDataChannel::RemoveOnMessage()
 {
+	if (_ctx == nullptr)
+	{
+		return;
+	}
+
 	_channel->UnregisterObserver();
 	_handler = std::nullopt;
 	_ctx = nullptr;
+}
+
+void IDataChannel::Close()
+{
+	
+	if (_is_closed)
+	{
+		return;
+	}
+
+	_is_closed = true;
+	_channel->Close();
 }
 
 webrtc::DataChannelInit* from_c(DataChannelOptions* options)

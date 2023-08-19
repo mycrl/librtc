@@ -12,8 +12,8 @@ void rtc_free_media_stream_track(MediaStreamTrack* track)
 {
 	assert(track);
 
-	free_incomplete_ptr(track->label);
-	delete track;
+	free_ptr(track->label);
+	free_ptr(track);
 }
 
 MediaStreamTrack* from(webrtc::VideoTrackInterface* itrack)
@@ -37,6 +37,7 @@ MediaStreamTrack* from(webrtc::VideoTrackInterface* itrack)
 	}
 
 	track->kind = MediaStreamTrackKindVideo;
+	track->sender = std::nullopt;
 	return track;
 }
 
@@ -61,6 +62,7 @@ MediaStreamTrack* from(webrtc::AudioTrackInterface* itrack)
 	}
 
 	track->kind = MediaStreamTrackKindAudio;
+	track->sender = std::nullopt;
 	return track;
 }
 
@@ -96,13 +98,7 @@ MediaStreamTrack* rtc_create_video_track(char* label)
 {
 	assert(label);
 
-	MediaStreamTrack* track = (MediaStreamTrack*)malloc(sizeof(MediaStreamTrack));
-	if (!track)
-	{
-		rtc_free_media_stream_track(track);
-		return nullptr;
-	}
-
+	MediaStreamTrack* track = new MediaStreamTrack;
 	track->video_source = IVideoTrackSource::Create();
 	if (!track->video_source)
 	{
@@ -110,18 +106,11 @@ MediaStreamTrack* rtc_create_video_track(char* label)
 		return nullptr;
 	}
 
-	track->label = (char*)malloc(sizeof(char) * (strlen(label) + 1));
-	if (!track->label)
-	{
-		rtc_free_media_stream_track(track);
-		return nullptr;
-	}
-	else
-	{
-		strcpy(track->label, label);
-	}
+	track->label = new char[strlen(label) + 1];
+	strcpy(track->label, label);
 
 	track->kind = MediaStreamTrackKindVideo;
+	track->sender = std::nullopt;
 	return track;
 }
 
@@ -129,13 +118,7 @@ MediaStreamTrack* rtc_create_audio_track(char* label)
 {
 	assert(label);
 
-	MediaStreamTrack* track = (MediaStreamTrack*)malloc(sizeof(MediaStreamTrack));
-	if (!track)
-	{
-		rtc_free_media_stream_track(track);
-		return nullptr;
-	}
-
+	MediaStreamTrack* track = new MediaStreamTrack;
 	track->audio_source = IAudioTrackSource::Create();
 	if (!track->audio_source)
 	{
@@ -143,18 +126,11 @@ MediaStreamTrack* rtc_create_audio_track(char* label)
 		return nullptr;
 	}
 
-	track->label = (char*)malloc(sizeof(char) * (strlen(label) + 1));
-	if (!track->label)
-	{
-		rtc_free_media_stream_track(track);
-		return nullptr;
-	}
-	else
-	{
-		strcpy(track->label, label);
-	}
+	track->label = new char[strlen(label) + 1];
+	strcpy(track->label, label);
 
 	track->kind = MediaStreamTrackKindAudio;
+	track->sender = std::nullopt;
 	return track;
 }
 

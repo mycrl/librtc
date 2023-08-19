@@ -72,6 +72,10 @@ void IAudioTrackSource::RegisterObserver(webrtc::ObserverInterface* observer)
     observer->OnChanged();
 }
 
+void IAudioTrackSource::UnregisterObserver(webrtc::ObserverInterface* observer)
+{
+}
+
 void IAudioTrackSource::AddSink(webrtc::AudioTrackSinkInterface* sink)
 {
     assert(sink);

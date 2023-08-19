@@ -13,7 +13,7 @@ void rtc_free_frame(void* frame)
 {
 	assert(frame);
 
-	delete frame;
+	free_ptr(frame);
 }
 
 IVideoFrame* into_c(webrtc::VideoFrame* frame)

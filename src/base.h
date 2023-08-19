@@ -19,7 +19,15 @@
 
 #include <string>
 
-void free_incomplete_ptr(void* ptr);
+template <typename T>
+inline void free_ptr(T* ptr)
+{
+    if (ptr != nullptr)
+    {
+        delete ptr;
+    }
+}
+
 char* copy_c_str(std::string& source);
 
 #define PANIC(...) { \

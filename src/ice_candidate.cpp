@@ -20,8 +20,8 @@ const webrtc::IceCandidateInterface* from_c(RTCIceCandidate* ice_candidate)
 
 void free_ice_candidate(RTCIceCandidate* candidate)
 {
-	free_incomplete_ptr(candidate->candidate);
-	free_incomplete_ptr(candidate->sdp_mid);
+	free_ptr(candidate->candidate);
+	free_ptr(candidate->sdp_mid);
 	delete candidate;
 }
 

@@ -224,8 +224,7 @@ class IAudioTrackSink;
 // The MediaStreamTrack interface represents a single media track within a stream;
 // typically, these are audio or video tracks, but other track types may exist as
 // well.
-typedef struct
-{
+typedef struct {
     // Returns a string set to "audio" if the track is an audio track and to
     // "video", if it is a video track. It doesn't change if the track is
     // disassociated from its source.
@@ -236,7 +235,6 @@ typedef struct
     // is empty as long as no source has been connected. When the track is
     // disassociated from its source, the label is not changed.
     char* label;
-    std::optional<rtc::scoped_refptr<webrtc::RtpSenderInterface>> sender = std::nullopt;
 
     /* --------------- video --------------- */
     IVideoTrackSource* video_source;
@@ -245,6 +243,8 @@ typedef struct
     /* --------------- audio --------------- */
     IAudioTrackSource* audio_source;
     IAudioTrackSink* audio_sink;
+
+    std::optional<rtc::scoped_refptr<webrtc::RtpSenderInterface>> sender;
 } MediaStreamTrack;
 
 // RTCIceCandidate
@@ -551,6 +551,13 @@ extern "C" EXPORT int rtc_add_media_stream_track(RTCPeerConnection * rtc,
 extern "C" EXPORT int rtc_remove_media_stream_track(RTCPeerConnection * rtc,
                                                     MediaStreamTrack * track);
 
+// The `rtc_create_data_channel` method on the RTCPeerConnection interface creates 
+// a new channel linked with the remote peer, over which any kind of data may be 
+// transmitted. This can be useful for back-channel content, such as images, 
+// file transfer, text chat, game update packets, and so forth.
+//
+// If the new data channel is the first one added to the connection, renegotiation 
+// is started by delivering a negotiationneeded event.
 extern "C" EXPORT RTCDataChannel * rtc_create_data_channel(RTCPeerConnection * rtc,
                                                            char* label,
                                                            DataChannelOptions * options);

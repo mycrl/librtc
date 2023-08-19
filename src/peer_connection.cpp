@@ -58,7 +58,7 @@ RTCPeerConnection* rtc_create_peer_connection(RTCPeerConnectionConfigure* c_conf
                                                             std::move(pc_dependencies));
     if (ret.ok())
     {
-        rtc->pc = std::move(ret.value());
+        rtc->pc = ret.MoveValue();
     }
     else
     {
@@ -132,22 +132,18 @@ int rtc_add_media_stream_track(RTCPeerConnection* rtc,
     webrtc::RTCErrorOr<rtc::scoped_refptr<webrtc::RtpSenderInterface>> ret;
     if (track->kind == MediaStreamTrackKind::MediaStreamTrackKindVideo)
     {
-        ret = rtc->pc->AddTrack(
-            std::move(rtc->pc_factory->CreateVideoTrack(track->label,
-                                                        track->video_source)),
-            { stream_id });
+        auto tk = rtc->pc_factory->CreateVideoTrack(track->label, track->video_source);
+        ret = rtc->pc->AddTrack(std::move(tk), { stream_id });
     }
     else
     {
-        ret = rtc->pc->AddTrack(
-            std::move(rtc->pc_factory->CreateAudioTrack(track->label,
-                                                        track->audio_source)),
-            { stream_id });
+        auto tk = rtc->pc_factory->CreateAudioTrack(track->label, track->audio_source);
+        ret = rtc->pc->AddTrack(std::move(tk), { stream_id });
     }
 
     if (ret.ok())
     {
-        track->sender = std::optional(std::move(ret.value()));
+        track->sender = ret.MoveValue();
         return 0;
     }
     else

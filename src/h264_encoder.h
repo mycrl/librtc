@@ -27,6 +27,8 @@ class H264Encoder
 {
 public:
 	H264Encoder(const webrtc::SdpVideoFormat& format);
+	~H264Encoder();
+
 	static std::vector<webrtc::SdpVideoFormat> GetSupportedFormats();
 	static std::unique_ptr<H264Encoder> Create(const webrtc::SdpVideoFormat& format);
 
@@ -93,7 +95,7 @@ private:
 	webrtc::H264BitstreamParser _h264_bitstream_parser;
 	webrtc::CodecSpecificInfo _codec_specific;
 	webrtc::EncodedImage _image;
-	std::string _codec_name = "";
+	std::string _codec_name;
 
 	const AVCodec* _codec = nullptr;
 	AVCodecContext* _ctx = nullptr;

@@ -9,6 +9,11 @@
 #include "libyuv.h"
 #include "frame.h"
 
+H264Decoder::~H264Decoder()
+{
+	Release();
+}
+
 std::vector<webrtc::SdpVideoFormat> H264Decoder::GetSupportedFormats()
 {
 	return supported_h264_codecs(true);
@@ -123,15 +128,21 @@ int32_t H264Decoder::RegisterDecodeCompleteCallback(webrtc::DecodedImageCallback
 
 int32_t H264Decoder::Release()
 {
-	if (_codec)
+	if (_codec == nullptr)
 	{
-		avcodec_send_frame(_ctx, nullptr);
-		avcodec_free_context(&_ctx);
-		av_parser_close(_parser);
-		av_packet_free(&_packet);
-		av_frame_free(&_frame);
+		return CodecRet::Ok;
+	}
+	else
+	{
+		_codec = nullptr;
 	}
 
+	avcodec_send_frame(_ctx, nullptr);
+	avcodec_free_context(&_ctx);
+	av_parser_close(_parser);
+	av_packet_free(&_packet);
+	av_frame_free(&_frame);
+	
 	return CodecRet::Ok;
 }
 

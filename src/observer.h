@@ -21,9 +21,7 @@ class Observer
     , public rtc::RefCountInterface
 {
 public:
-    Observer(Events* events, void* ctx) : _events(events), _ctx(ctx)
-    {
-    }
+    Observer(Events* events, void* ctx);
 
     static Observer* Create(Events* events, void* ctx);
     void OnSignalingChange(webrtc::PeerConnectionInterface::SignalingState state);
@@ -43,9 +41,7 @@ class CreateDescObserver
     : public webrtc::CreateSessionDescriptionObserver
 {
 public:
-    CreateDescObserver(CreateDescCallback callback, void* ctx) : _callback(callback), _ctx(ctx)
-    {
-    }
+    CreateDescObserver(CreateDescCallback callback, void* ctx);
 
     static CreateDescObserver* Create(CreateDescCallback callback, void* ctx);
 
@@ -70,9 +66,7 @@ class SetDescObserver
     : public webrtc::SetSessionDescriptionObserver
 {
 public:
-    SetDescObserver(SetDescCallback callback, void* ctx) : _callback(callback), _ctx(ctx)
-    {
-    }
+    SetDescObserver(SetDescCallback callback, void* ctx);
 
     static SetDescObserver* Create(SetDescCallback callback, void* ctx);
     virtual void OnSuccess();

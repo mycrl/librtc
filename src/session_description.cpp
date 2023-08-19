@@ -41,8 +41,8 @@ void free_session_description(RTCSessionDescription* desc)
 {
 	assert(desc);
 
-	free_incomplete_ptr((void*)desc->sdp);
-	delete desc;
+	free_ptr(desc->sdp);
+	free_ptr(desc);
 }
 
 RTCSessionDescription* into_c(webrtc::SessionDescriptionInterface* desc)
