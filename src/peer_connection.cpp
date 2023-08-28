@@ -9,7 +9,7 @@
 #include "api/audio_codecs/builtin_audio_encoder_factory.h"
 #include "api/create_peerconnection_factory.h"
 #include "rtc_base/ssl_adapter.h"
-#include "audio_capture_module.h"
+#include "audio_device_module.h"
 #include "peer_connection_config.h"
 #include "video_encoder.h"
 #include "video_decoder.h"
@@ -19,25 +19,28 @@
 
 void rtc_close(RTCPeerConnection* rtc)
 {
-    rtc->pc->Close();
-    delete rtc;
+    assert(rtc);
 
+    rtc->pc->Close();
     rtc::CleanupSSL();
+    delete rtc;
 }
 
 RTCPeerConnection* rtc_create_peer_connection(RTCPeerConnectionConfigure* c_config,
                                               Events* events,
                                               void* ctx)
 {
+    assert(c_config);
+    assert(events);
+
     rtc::InitializeSSL();
 
     RTCPeerConnection* rtc = new RTCPeerConnection();
-
     rtc->threads = RtcThreads::Create();
-    rtc->pc_factory = webrtc::CreatePeerConnectionFactory(rtc->threads->GetWorkThread(), // network_thread,
-                                                          rtc->threads->GetNetworkThread(), // worker_thread,
-                                                          rtc->threads->GetSignalingThread(), // signaling_thread,
-                                                          nullptr, // AudioCaptureModule::Create(),
+    rtc->pc_factory = webrtc::CreatePeerConnectionFactory(rtc->threads->network_thread.get(),
+                                                          rtc->threads->worker_thread.get(),
+                                                          rtc->threads->signaling_thread.get(),
+                                                          nullptr, // IAudioDeviceModule::Create(),
                                                           webrtc::CreateBuiltinAudioEncoderFactory(),
                                                           webrtc::CreateBuiltinAudioDecoderFactory(),
                                                           IVideoEncoderFactory::Create(),
@@ -55,7 +58,7 @@ RTCPeerConnection* rtc_create_peer_connection(RTCPeerConnectionConfigure* c_conf
                                                             std::move(pc_dependencies));
     if (ret.ok())
     {
-        rtc->pc = std::move(ret.value());
+        rtc->pc = ret.MoveValue();
     }
     else
     {
@@ -68,17 +71,26 @@ RTCPeerConnection* rtc_create_peer_connection(RTCPeerConnectionConfigure* c_conf
 
 bool rtc_add_ice_candidate(RTCPeerConnection* rtc, RTCIceCandidate* icecandidate)
 {
+    assert(rtc);
+    assert(icecandidate);
+
     return rtc->pc->AddIceCandidate(from_c(icecandidate));
 }
 
 void rtc_create_answer(RTCPeerConnection* rtc, CreateDescCallback callback, void* ctx)
 {
+    assert(rtc);
+    assert(callback);
+
     auto opt = webrtc::PeerConnectionInterface::RTCOfferAnswerOptions();
     rtc->pc->CreateAnswer(CreateDescObserver::Create(callback, ctx), opt);
 }
 
 void rtc_create_offer(RTCPeerConnection* rtc, CreateDescCallback callback, void* ctx)
 {
+    assert(rtc);
+    assert(callback);
+
     auto opt = webrtc::PeerConnectionInterface::RTCOfferAnswerOptions();
     rtc->pc->CreateOffer(CreateDescObserver::Create(callback, ctx), opt);
 }
@@ -88,6 +100,10 @@ void rtc_set_local_description(RTCPeerConnection* rtc,
                                SetDescCallback callback,
                                void* ctx)
 {
+    assert(rtc);
+    assert(c_desc);
+    assert(callback);
+
     auto observer = SetDescObserver::Create(callback, ctx);
     rtc->pc->SetLocalDescription(std::move(observer), from_c(c_desc).release());
 }
@@ -97,30 +113,68 @@ void rtc_set_remote_description(RTCPeerConnection* rtc,
                                 SetDescCallback callback,
                                 void* ctx)
 {
+    assert(rtc);
+    assert(c_desc);
+    assert(callback);
+
     auto observer = SetDescObserver::Create(callback, ctx);
     rtc->pc->SetRemoteDescription(std::move(observer), from_c(c_desc).release());
 }
 
-void rtc_add_media_stream_track(RTCPeerConnection* rtc,
-                                MediaStreamTrack* target,
-                                char* stream_id)
+int rtc_add_media_stream_track(RTCPeerConnection* rtc,
+                               MediaStreamTrack* track,
+                               char* stream_id)
 {
-    if (target->kind == MediaStreamTrackKind::MediaStreamTrackKindVideo)
+    assert(rtc);
+    assert(track);
+    assert(stream_id);
+
+    webrtc::RTCErrorOr<rtc::scoped_refptr<webrtc::RtpSenderInterface>> ret;
+    if (track->kind == MediaStreamTrackKind::MediaStreamTrackKindVideo)
     {
-        auto track = rtc->pc_factory->CreateVideoTrack(target->label, target->video_source);
-        rtc->pc->AddTrack(std::move(track), { stream_id });
+        auto tk = rtc->pc_factory->CreateVideoTrack(track->label, track->video_source);
+        ret = rtc->pc->AddTrack(std::move(tk), { stream_id });
     }
     else
     {
-        auto track = rtc->pc_factory->CreateAudioTrack(target->label, target->audio_source);
-        rtc->pc->AddTrack(std::move(track), { stream_id });
+        auto tk = rtc->pc_factory->CreateAudioTrack(track->label, track->audio_source);
+        ret = rtc->pc->AddTrack(std::move(tk), { stream_id });
     }
+
+    if (ret.ok())
+    {
+        track->sender = ret.MoveValue();
+        return 0;
+    }
+    else
+    {
+        return -1;
+    }
+}
+
+int rtc_remove_media_stream_track(RTCPeerConnection* rtc, MediaStreamTrack* track)
+{
+    assert(rtc);
+    assert(track);
+
+    if (!track->sender.has_value())
+    {
+        return -1;
+    }
+
+    auto sender = track->sender.value();
+    auto ret = rtc->pc->RemoveTrackOrError(sender);
+    return ret.ok() ? 0 : -2;
 }
 
 RTCDataChannel* rtc_create_data_channel(RTCPeerConnection* rtc,
                                         char* label,
                                         DataChannelOptions* options)
 {
+    assert(rtc);
+    assert(label);
+    assert(options);
+
     auto init = from_c(options);
     auto ret = rtc->pc->CreateDataChannelOrError(std::string(label), std::move(init));
     if (ret.ok())

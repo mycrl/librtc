@@ -160,8 +160,8 @@ set(SOURCES
     src/video_track.cpp
     src/audio_track.h
     src/audio_track.cpp
-    src/audio_capture_module.h
-    src/audio_capture_module.cpp
+    src/audio_device_module.h
+    src/audio_device_module.cpp
     src/observer.cpp
     src/observer.h
     src/peer_connection.cpp

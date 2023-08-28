@@ -25,10 +25,7 @@ class IAudioTrackSource
 public:
     static IAudioTrackSource* Create();
     void RegisterObserver(webrtc::ObserverInterface* observer);
-    void UnregisterObserver(webrtc::ObserverInterface* observer)
-    {
-    }
-
+    void UnregisterObserver(webrtc::ObserverInterface* observer);
     void AddSink(webrtc::AudioTrackSinkInterface* sink);
     void RemoveSink(webrtc::AudioTrackSinkInterface* sink);
     const cricket::AudioOptions options() const;

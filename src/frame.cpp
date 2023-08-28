@@ -11,17 +11,16 @@
 
 void rtc_free_frame(void* frame)
 {
-	free_incomplete_ptr(frame);
+	assert(frame);
+
+	free_ptr(frame);
 }
 
 IVideoFrame* into_c(webrtc::VideoFrame* frame)
 {
-	IVideoFrame* i420_frame = (IVideoFrame*)malloc(sizeof(IVideoFrame));
-	if (!i420_frame)
-	{
-		return nullptr;
-	}
+	assert(frame);
 
+	IVideoFrame* i420_frame = new IVideoFrame;
 	auto video_frame_buf = frame->video_frame_buffer();
 	auto i420_buf = video_frame_buf->GetI420();
 	if (!i420_buf)
@@ -51,6 +50,8 @@ IVideoFrame* into_c(webrtc::VideoFrame* frame)
 
 webrtc::VideoFrame from_c(IVideoFrame* frame)
 {
+	assert(frame);
+
 	auto i420_buf = webrtc::I420Buffer::Copy(frame->width,
 											 frame->height,
 											 frame->planes[0],
@@ -70,11 +71,9 @@ IAudioFrame* into_c(const int16_t* data,
 					size_t frames,
 					int64_t timestamp)
 {
-	IAudioFrame* frame = (IAudioFrame*)malloc(sizeof(IAudioFrame));
-	if (!frame)
-	{
-		return nullptr;
-	}
+	assert(data);
+
+	IAudioFrame* frame = new IAudioFrame;
 
 	frame->remote = true;
 	frame->data = data;
@@ -88,6 +87,8 @@ IAudioFrame* into_c(const int16_t* data,
 
 size_t get_i420_buffer_size(webrtc::I420BufferInterface* data)
 {
+	assert(data);
+
 	size_t sizey = data->StrideY() * data->height();
 	size_t sizeu = data->StrideU() * (data->height() / 2);
 	return sizey + (sizeu * 2);
@@ -95,5 +96,7 @@ size_t get_i420_buffer_size(webrtc::I420BufferInterface* data)
 
 size_t get_i420_buffer_size(const webrtc::I420BufferInterface* data)
 {
+	assert(data);
+
 	return get_i420_buffer_size((webrtc::I420BufferInterface*)data);
 }

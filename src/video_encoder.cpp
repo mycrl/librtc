@@ -32,8 +32,5 @@ std::vector<webrtc::SdpVideoFormat> IVideoEncoderFactory::GetSupportedFormats() 
 
 std::unique_ptr<webrtc::VideoEncoder> IVideoEncoderFactory::CreateVideoEncoder(const webrtc::SdpVideoFormat& format)
 {
-	if (format.name == "H264")
-	{
-		return H264Encoder::Create(format);;
-	}
+	return H264Encoder::Create(format);
 }

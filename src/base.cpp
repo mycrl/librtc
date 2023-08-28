@@ -8,16 +8,18 @@
 #include <cstdlib>
 #include "base.h"
 
-void free_incomplete_ptr(void* ptr)
+void free_incomplete_ptr(void*& ptr)
 {
-	if (ptr)
-	{
-		free(ptr);
-	}
+    if (ptr != nullptr)
+    {
+        delete ptr;
+        ptr = nullptr;
+    }
 }
 
 char* copy_c_str(std::string& source)
 {
-	char* c_str = (char*)malloc(sizeof(char) * source.size() + 1);
-	return strcpy(c_str, source.c_str());
+    char* dst = new char[source.size() + 1];
+    strcpy(dst, source.c_str());
+    return dst;
 }

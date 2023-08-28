@@ -9,6 +9,11 @@
 #include "libyuv.h"
 #include "frame.h"
 
+H264Decoder::~H264Decoder()
+{
+	Release();
+}
+
 std::vector<webrtc::SdpVideoFormat> H264Decoder::GetSupportedFormats()
 {
 	return supported_h264_codecs(true);
@@ -22,12 +27,7 @@ std::unique_ptr<H264Decoder> H264Decoder::Create()
 bool H264Decoder::Configure(const Settings& settings)
 {
 	auto codec_name = find_codec(VideoDecoders);
-	if (codec_name == nullptr)
-	{
-		return false;
-	}
-
-	_codec = avcodec_find_decoder_by_name(codec_name);
+	_codec = avcodec_find_decoder_by_name(codec_name.c_str());
 	if (!_codec)
 	{
 		return false;
@@ -120,21 +120,29 @@ int32_t H264Decoder::Decode(const webrtc::EncodedImage& input_image,
 
 int32_t H264Decoder::RegisterDecodeCompleteCallback(webrtc::DecodedImageCallback* callback)
 {
+	assert(callback);
+
 	_callback = callback;
 	return CodecRet::Ok;
 }
 
 int32_t H264Decoder::Release()
 {
-	if (_codec)
+	if (_codec == nullptr)
 	{
-		avcodec_send_frame(_ctx, nullptr);
-		avcodec_free_context(&_ctx);
-		av_parser_close(_parser);
-		av_packet_free(&_packet);
-		av_frame_free(&_frame);
+		return CodecRet::Ok;
+	}
+	else
+	{
+		_codec = nullptr;
 	}
 
+	avcodec_send_frame(_ctx, nullptr);
+	avcodec_free_context(&_ctx);
+	av_parser_close(_parser);
+	av_packet_free(&_packet);
+	av_frame_free(&_frame);
+	
 	return CodecRet::Ok;
 }
 

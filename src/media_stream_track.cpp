@@ -10,18 +10,17 @@
 
 void rtc_free_media_stream_track(MediaStreamTrack* track)
 {
-	free_incomplete_ptr(track->label);
-	free_incomplete_ptr(track);
+	assert(track);
+
+	free_ptr(track->label);
+	free_ptr(track);
 }
 
 MediaStreamTrack* from(webrtc::VideoTrackInterface* itrack)
 {
-	MediaStreamTrack* track = (MediaStreamTrack*)malloc(sizeof(MediaStreamTrack));
-	if (!track)
-	{
-		return nullptr;
-	}
+	assert(itrack);
 
+	MediaStreamTrack* track = new MediaStreamTrack;
 	track->video_sink = IVideoTrackSink::Create(itrack);
 	if (!track->video_sink)
 	{
@@ -38,18 +37,15 @@ MediaStreamTrack* from(webrtc::VideoTrackInterface* itrack)
 	}
 
 	track->kind = MediaStreamTrackKindVideo;
+	track->sender = std::nullopt;
 	return track;
 }
 
 MediaStreamTrack* from(webrtc::AudioTrackInterface* itrack)
 {
-	MediaStreamTrack* track = (MediaStreamTrack*)malloc(sizeof(MediaStreamTrack));
-	if (!track)
-	{
-		rtc_free_media_stream_track(track);
-		return nullptr;
-	}
+	assert(itrack);
 
+	MediaStreamTrack* track = new MediaStreamTrack;
 	track->audio_sink = IAudioTrackSink::Create(itrack);
 	if (!track->audio_sink)
 	{
@@ -66,11 +62,15 @@ MediaStreamTrack* from(webrtc::AudioTrackInterface* itrack)
 	}
 
 	track->kind = MediaStreamTrackKindAudio;
+	track->sender = std::nullopt;
 	return track;
 }
 
 void rtc_add_video_track_frame(MediaStreamTrack* track, IVideoFrame* frame)
 {
+	assert(track);
+	assert(frame);
+
 	if (!track->video_source)
 	{
 		return;
@@ -83,6 +83,9 @@ void rtc_set_video_track_frame_h(MediaStreamTrack* track,
 								 void(handler)(void* ctx, IVideoFrame* frame),
 								 void* ctx)
 {
+	assert(track);
+	assert(handler);
+
 	if (!track->video_sink)
 	{
 		return;
@@ -93,13 +96,9 @@ void rtc_set_video_track_frame_h(MediaStreamTrack* track,
 
 MediaStreamTrack* rtc_create_video_track(char* label)
 {
-	MediaStreamTrack* track = (MediaStreamTrack*)malloc(sizeof(MediaStreamTrack));
-	if (!track)
-	{
-		rtc_free_media_stream_track(track);
-		return nullptr;
-	}
+	assert(label);
 
+	MediaStreamTrack* track = new MediaStreamTrack;
 	track->video_source = IVideoTrackSource::Create();
 	if (!track->video_source)
 	{
@@ -107,30 +106,19 @@ MediaStreamTrack* rtc_create_video_track(char* label)
 		return nullptr;
 	}
 
-	track->label = (char*)malloc(sizeof(char) * (strlen(label) + 1));
-	if (!track->label)
-	{
-		rtc_free_media_stream_track(track);
-		return nullptr;
-	}
-	else
-	{
-		strcpy(track->label, label);
-	}
+	track->label = new char[strlen(label) + 1];
+	strcpy(track->label, label);
 
 	track->kind = MediaStreamTrackKindVideo;
+	track->sender = std::nullopt;
 	return track;
 }
 
 MediaStreamTrack* rtc_create_audio_track(char* label)
 {
-	MediaStreamTrack* track = (MediaStreamTrack*)malloc(sizeof(MediaStreamTrack));
-	if (!track)
-	{
-		rtc_free_media_stream_track(track);
-		return nullptr;
-	}
+	assert(label);
 
+	MediaStreamTrack* track = new MediaStreamTrack;
 	track->audio_source = IAudioTrackSource::Create();
 	if (!track->audio_source)
 	{
@@ -138,23 +126,19 @@ MediaStreamTrack* rtc_create_audio_track(char* label)
 		return nullptr;
 	}
 
-	track->label = (char*)malloc(sizeof(char) * (strlen(label) + 1));
-	if (!track->label)
-	{
-		rtc_free_media_stream_track(track);
-		return nullptr;
-	}
-	else
-	{
-		strcpy(track->label, label);
-	}
+	track->label = new char[strlen(label) + 1];
+	strcpy(track->label, label);
 
 	track->kind = MediaStreamTrackKindAudio;
+	track->sender = std::nullopt;
 	return track;
 }
 
 void rtc_add_audio_track_frame(MediaStreamTrack* track, IAudioFrame* frame)
 {
+	assert(track);
+	assert(frame);
+
 	if (!track->audio_source)
 	{
 		return;
@@ -167,11 +151,16 @@ void rtc_set_audio_track_frame_h(MediaStreamTrack* track,
 								 void(handler)(void* ctx, IAudioFrame* frame),
 								 void* ctx)
 {
+	assert(track);
+	assert(handler);
+
 	track->audio_sink->SetOnFrame(ctx, handler);
 }
 
 void rtc_remove_media_stream_track_frame_h(MediaStreamTrack* track)
 {
+	assert(track);
+
 	if (track->video_sink)
 	{
 		track->video_sink->RemoveOnFrame();

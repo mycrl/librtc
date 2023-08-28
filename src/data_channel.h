@@ -20,9 +20,8 @@ class IDataChannel
     , public rtc::RefCountInterface
 {
 public:
-    IDataChannel(rtc::scoped_refptr<webrtc::DataChannelInterface> data_channel) : _channel(data_channel)
-    {
-    }
+    IDataChannel(rtc::scoped_refptr<webrtc::DataChannelInterface> data_channel);
+    ~IDataChannel();
 
     static IDataChannel* From(rtc::scoped_refptr<webrtc::DataChannelInterface> data_channel);
     void Send(uint8_t* buf, int size);
@@ -30,12 +29,14 @@ public:
     void OnMessage(const webrtc::DataBuffer& buffer);
     void OnDataMessage(void* ctx, void(*handler)(void* _ctx, uint8_t* buf, uint64_t size));
     void RemoveOnMessage();
+    void Close();
 
     DataState state = DataState::DataStateConnecting;
 private:
     std::optional<void(*)(void* ctx, uint8_t* buf, uint64_t size)> _handler = std::nullopt;
 
     rtc::scoped_refptr<webrtc::DataChannelInterface> _channel;
+    bool _is_closed = false;
     void* _ctx = nullptr;
 };
 

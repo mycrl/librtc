@@ -9,6 +9,7 @@
 #define LIBRTC_THREAD_H
 #pragma once
 
+#include "api/task_queue/default_task_queue_factory.h"
 #include "rtc_base/thread.h"
 #include "rtc.h"
 
@@ -21,13 +22,11 @@ public:
     ~RtcThreads();
 
     static std::unique_ptr<RtcThreads> Create();
-    rtc::Thread* GetWorkThread();
-    rtc::Thread* GetNetworkThread();
-    rtc::Thread* GetSignalingThread();
-private:
-    std::unique_ptr<rtc::Thread> _work_thread;
-    std::unique_ptr<rtc::Thread> _network_thread;
-    std::unique_ptr<rtc::Thread> _signaling_thread;
+
+    std::unique_ptr<rtc::Thread> worker_thread;
+    std::unique_ptr<rtc::Thread> network_thread;
+    std::unique_ptr<rtc::Thread> signaling_thread;
+    std::unique_ptr<webrtc::TaskQueueFactory> task_queue_factory;
 };
 
 #endif // LIBRTC_THREAD_H

@@ -15,6 +15,7 @@
 
 #include <stdint.h>
 #include <memory>
+#include <optional>
 
 // An enum describing the session description's type.
 typedef enum
@@ -223,8 +224,7 @@ class IAudioTrackSink;
 // The MediaStreamTrack interface represents a single media track within a stream;
 // typically, these are audio or video tracks, but other track types may exist as
 // well.
-typedef struct
-{
+typedef struct {
     // Returns a string set to "audio" if the track is an audio track and to
     // "video", if it is a video track. It doesn't change if the track is
     // disassociated from its source.
@@ -243,6 +243,8 @@ typedef struct
     /* --------------- audio --------------- */
     IAudioTrackSource* audio_source;
     IAudioTrackSink* audio_sink;
+
+    std::optional<rtc::scoped_refptr<webrtc::RtpSenderInterface>> sender;
 } MediaStreamTrack;
 
 // RTCIceCandidate
@@ -536,10 +538,26 @@ extern "C" EXPORT void rtc_set_remote_description(RTCPeerConnection * peer,
 
 // The RTCPeerConnection method addTrack() adds a new media track to the set of
 // tracks which will be transmitted to the other peer.
-extern "C" EXPORT void rtc_add_media_stream_track(RTCPeerConnection * rtc,
-                                                  MediaStreamTrack * track,
-                                                  char* stream_id);
+extern "C" EXPORT int rtc_add_media_stream_track(RTCPeerConnection * rtc,
+                                                 MediaStreamTrack * track,
+                                                 char* stream_id);
 
+// The `rtc_remove_media_stream_track` method tells the local end of the connection 
+// to stop sending media from the specified track, without actually removing the 
+// corresponding RTCRtpSender from the list of senders as reported by `senders`. 
+// 
+// If the track is already stopped, or is not in the connection's senders list, 
+// this method has no effect.
+extern "C" EXPORT int rtc_remove_media_stream_track(RTCPeerConnection * rtc,
+                                                    MediaStreamTrack * track);
+
+// The `rtc_create_data_channel` method on the RTCPeerConnection interface creates 
+// a new channel linked with the remote peer, over which any kind of data may be 
+// transmitted. This can be useful for back-channel content, such as images, 
+// file transfer, text chat, game update packets, and so forth.
+//
+// If the new data channel is the first one added to the connection, renegotiation 
+// is started by delivering a negotiationneeded event.
 extern "C" EXPORT RTCDataChannel * rtc_create_data_channel(RTCPeerConnection * rtc,
                                                            char* label,
                                                            DataChannelOptions * options);

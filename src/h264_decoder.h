@@ -24,6 +24,8 @@ class H264Decoder
 	: public webrtc::VideoDecoder
 {
 public:
+	~H264Decoder();
+
 	static std::vector<webrtc::SdpVideoFormat> GetSupportedFormats();
 	static std::unique_ptr<H264Decoder> Create();
 
