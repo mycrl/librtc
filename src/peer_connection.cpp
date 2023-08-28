@@ -40,7 +40,7 @@ RTCPeerConnection* rtc_create_peer_connection(RTCPeerConnectionConfigure* c_conf
     rtc->pc_factory = webrtc::CreatePeerConnectionFactory(rtc->threads->network_thread.get(),
                                                           rtc->threads->worker_thread.get(),
                                                           rtc->threads->signaling_thread.get(),
-                                                          IAudioDeviceModule::Create(),
+                                                          nullptr, // IAudioDeviceModule::Create(),
                                                           webrtc::CreateBuiltinAudioEncoderFactory(),
                                                           webrtc::CreateBuiltinAudioDecoderFactory(),
                                                           IVideoEncoderFactory::Create(),
